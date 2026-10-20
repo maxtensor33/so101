@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- sim:=none : mock 硬件, 无仿真后端 -->
+  <xacro:macro name="so101_ros2_control_mock" params="name">
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>mock_components/GenericSystem</plugin>
+        <param name="calculate_dynamics">true</param>
+      </hardware>
+      <xacro:so101_joint_interfaces/>
+    </ros2_control>
+  </xacro:macro>
+
+  <!-- sim:=gazebo : gz_ros2_control -->
+  <xacro:macro name="so101_ros2_control_gazebo" params="name">
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </hardware>
+      <xacro:so101_joint_interfaces/>
+    </ros2_control>
+    <gazebo>
+      <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>$(find so101_sim)/config/controllers.yaml</parameters>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- sim:=mujoco : mujoco_ros2_control, mujoco_model_path 指向 MJCF -->
+  <xacro:macro name="so101_ros2_control_mujoco" params="name mujoco_model_path">
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+        <param name="mujoco_model">${mujoco_model_path}</param>
+      </hardware>
+      <xacro:so101_joint_interfaces/>
+    </ros2_control>
+  </xacro:macro>
+
+  <!-- 6 个关节的 command/state 接口 -->
+  <xacro:macro name="so101_joint_interfaces">
+    <xacro:macro name="joint_if" params="jname">
+      <joint name="${jname}">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </xacro:macro>
+    <xacro:joint_if jname="shoulder_pan"/>
+    <xacro:joint_if jname="shoulder_lift"/>
+    <xacro:joint_if jname="elbow_flex"/>
+    <xacro:joint_if jname="wrist_flex"/>
+    <xacro:joint_if jname="wrist_roll"/>
+    <xacro:joint_if jname="gripper"/>
+  </xacro:macro>
+
+</robot>
