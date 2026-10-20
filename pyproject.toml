@@ -1,0 +1,19 @@
+[project]
+name = "so101"
+version = "0.1.0"
+description = "SO-ARM101 ROS2 + MuJoCo/Gazebo + MoveIt2 + Pinocchio workspace tooling"
+requires-python = ">=3.12"
+dependencies = [
+    "mujoco>=3.2",
+    "numpy>=1.26,<2",
+    "pytest>=8.0",
+    "pyyaml>=6.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.uv]
+# pinocchio 来自 ros-jazzy-pinocchio（系统 site-packages），venv 需可见
+package = false
