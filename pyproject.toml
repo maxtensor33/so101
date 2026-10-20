@@ -7,12 +7,13 @@ dependencies = [
     "mujoco>=3.2",
     "numpy>=1.26,<2",
     "pytest>=8.0",
+    "pytest-cov>=7.1.0",
     "pyyaml>=6.0",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q -p no:launch_testing -p no:launch_pytest"
+addopts = "-q -p no:launch_testing -p no:launch_pytest -p no:launch_ros"
 
 [tool.uv]
 # pinocchio 来自 ros-jazzy-pinocchio（系统 site-packages），venv 需可见
