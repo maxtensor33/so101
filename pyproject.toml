@@ -12,7 +12,7 @@ dependencies = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -p no:launch_testing -p no:launch_pytest"
 
 [tool.uv]
 # pinocchio 来自 ros-jazzy-pinocchio（系统 site-packages），venv 需可见
