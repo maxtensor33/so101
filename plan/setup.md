@@ -1,7 +1,7 @@
 # Plan: SO-ARM101 ROS2 + MuJoCo/Gazebo + MoveIt2 + Pinocchio 项目搭建
 
 **日期**: 2026-10-20
-**状态**: 待确认
+**状态**: 已完成（2026-10-20，证据见 .claude/tdd/setup.tdd.md）
 **复杂度**: Medium（约 4~6 小时）
 
 ## 需求重述
