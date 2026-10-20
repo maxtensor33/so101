@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="so101">
   <!-- sim: none | gazebo | mujoco -->
   <xacro:arg name="sim" default="none"/>
-  <xacro:arg name="mujoco_model_path" default="$(find so101_sim)/mujoco/so101_new_calib.xml"/>
+  <xacro:arg name="mujoco_model_path" default="$(find so101_sim)/mujoco/scene.xml"/>
 
   <xacro:include filename="$(find so101_description)/urdf/so101.urdf"/>
   <xacro:include filename="$(find so101_sim)/urdf/so101.ros2_control.xacro"/>

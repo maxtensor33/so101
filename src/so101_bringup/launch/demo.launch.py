@@ -52,6 +52,7 @@ def _setup(context, *args, **kwargs):
     actions = []
 
     # robot_state_publisher (gazebo 的 gz_ros2_control 从其参数读取控制器配置)
+    # URDF 内含 world->base_link 固定关节, rsp 会发布该静态 TF
     actions.append(
         Node(
             package="robot_state_publisher",
@@ -113,6 +114,15 @@ def _setup(context, *args, **kwargs):
                 output="screen",
             )
         )
+        # /clock 桥接: gz 内嵌 controller_manager (use_sim_time=true) 需要 ROS 侧 /clock
+        actions.append(
+            Node(
+                package="ros_gz_bridge",
+                executable="parameter_bridge",
+                arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
+                output="screen",
+            )
+        )
 
     # 控制器 spawner (等 controller_manager 就绪)
     actions.append(
@@ -142,19 +152,27 @@ def _setup(context, *args, **kwargs):
     )
 
     # RViz (moveit:=true 时由 move_group.launch.py 提供带 MotionPlanning 的 RViz)
+    # 延迟启动: 等控制器/TF 就绪, 避免 Fixed Frame 检查失败
     if use_rviz == "true" and moveit != "true":
         actions.append(
-            Node(
-                package="rviz2",
-                executable="rviz2",
-                output="screen",
-                arguments=[
-                    "-d",
-                    os.path.join(
-                        get_package_share_directory("so101_description"), "rviz", "view.rviz"
-                    ),
+            TimerAction(
+                period=8.0,
+                actions=[
+                    Node(
+                        package="rviz2",
+                        executable="rviz2",
+                        output="screen",
+                        arguments=[
+                            "-d",
+                            os.path.join(
+                                get_package_share_directory("so101_description"),
+                                "rviz",
+                                "view.rviz",
+                            ),
+                        ],
+                        parameters=[robot_description],
+                    )
                 ],
-                parameters=[robot_description],
             )
         )
 

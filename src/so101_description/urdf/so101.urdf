@@ -11,6 +11,14 @@
     <color rgba="0.1 0.1 0.1 1.0"/>
   </material>
 
+  <!-- world dummy link: URDF->SDF 转换后 base_link 固定到 world (否则 gz 中整机自由浮动倾倒) -->
+  <link name="world"/>
+  <joint name="world_joint" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
   <!-- Link base -->
   <link name="base_link">
     <inertial>

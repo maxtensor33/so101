@@ -20,7 +20,6 @@
   <group_state name="closed" group="gripper">
     <joint name="gripper" value="1.5"/>
   </group_state>
-  <virtual_joint name="world_joint" type="fixed" parent_frame="world" child_link="base_link"/>
   <disable_collisions link1="base_link" link2="shoulder_link" reason="Adjacent"/>
   <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent"/>
   <disable_collisions link1="upper_arm_link" link2="lower_arm_link" reason="Adjacent"/>
