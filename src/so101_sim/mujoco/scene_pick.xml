@@ -1,0 +1,46 @@
+<mujoco model="scene_pick">
+    <!-- pick 场景: 位置控制版 (MTC 经 JTC 执行) + 可抓取 cube。
+         weld equality 默认 inactive —— 夹取时由 mujoco_ros2_control plugin
+         (so101_grasp_weld_plugin) 依 gripper 命令阈值激活 ("磁吸"兜底,
+         Phase 0 物理夹持 spike 结论: 单动爪物理夹持不可靠)。 -->
+    <include file="so101_new_calib.xml" />
+
+    <visual>
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0" />
+        <rgba haze="0.15 0.25 0.35 1" />
+        <global azimuth="160" elevation="-20" />
+    </visual>
+
+    <asset>
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512"
+            height="3072" />
+        <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4"
+            rgb2="0.1 0.2 0.3"
+            markrgb="0.8 0.8 0.8" width="300" height="300" />
+        <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5"
+            reflectance="0.2" />
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 3.5" dir="0 0 -1" directional="true" />
+        <geom name="floor" size="0 0 0.05" pos="0 0 0" type="plane" material="groundplane" />
+
+        <!-- 可抓取 cube (摆位来自 scripts/probe_pick_poses.py 探测输出)
+             R2 (plan/mtc_fix.md): 4cm -> 2cm, 底面贴地 z=0.01 -->
+        <body name="cube" pos="0.117 -0.077 0.01">
+            <freejoint/>
+            <geom name="cube_geom" type="box" size="0.01 0.0101 0.01" mass="0.05"
+                  friction="1.5 0.005 0.0001" rgba="0.9 0.25 0.2 1"/>
+        </body>
+
+        <!-- place 区域标记 (visual only, 摆位来自探测输出) -->
+        <site name="place_marker" pos="0.125 0.063 0.0" size="0.03 0.03 0.001"
+              type="box" rgba="0.2 0.6 0.9 0.4" group="4"/>
+    </worldbody>
+
+    <!-- 抓取语义: kinematic attach —— 夹取时 plugin (so101_grasp_weld_plugin)
+         依 gripper 命令阈值触发, 每步把 cube 的 qpos/qvel 写为跟随 moving_jaw
+         (运动学携带, robosuite 同款做法)。释放时停止覆盖, cube 落回物理仿真。
+         (Phase 0/1 实测: 单动爪物理夹持与 weld equality 均不可靠, 详见
+         .claude/tdd/mtc.tdd.md) -->
+</mujoco>

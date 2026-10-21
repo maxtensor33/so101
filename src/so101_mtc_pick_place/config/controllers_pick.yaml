@@ -1,0 +1,63 @@
+# pick 场景控制器配置 (plan/mtc.md Phase 3)
+# 位置控制 (MTC 经 JTC 执行) + mujoco_plugins (GraspAttachPlugin: kinematic attach)
+# gz 侧的 DetachableJoint 由 world 文件与 ros_gz_bridge 处理, 不在此配置。
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    use_sim_time: false
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    mujoco_plugins:
+      - grasp_attach
+    mujoco_plugins.grasp_attach.type: so101_mtc_pick_place/GraspAttachPlugin
+    mujoco_plugins.grasp_attach.cube_body: cube
+    mujoco_plugins.grasp_attach.jaw_body: moving_jaw_so101_v1
+    mujoco_plugins.grasp_attach.command_topic: /gripper_controller/commands
+    mujoco_plugins.grasp_attach.close_threshold: 0.1
+    mujoco_plugins.grasp_attach.attach_radius: 0.08
+
+arm_controller:
+  ros__parameters:
+    joints: [shoulder_pan, shoulder_lift, elbow_flex, wrist_flex, wrist_roll]
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+    allow_partial_joints_goal: false
+
+gripper_controller:
+  ros__parameters:
+    joints: [gripper]
+    command_interfaces: [position]
+    state_interfaces: [position, velocity]
+
+# mujoco_ros2_control 从 **节点自身参数** (mujoco_plugins.<实例名>.*) 读取插件,
+# 必须用通配节点名 + 嵌套映射 (demo 同款格式)。写成 controller_manager 下的
+# 字符串列表/点号 key 会被驱动忽略 ("No 'mujoco_plugins' parameter found!")。
+/**:
+  ros__parameters:
+    mujoco_plugins:
+      grasp_attach:
+        type: so101_mtc_pick_place/GraspAttachPlugin
+        cube_body: cube
+        jaw_body: moving_jaw_so101_v1
+        command_topic: /gripper_controller/commands
+        close_threshold: 0.1
+        release_threshold: 0.6
+        attach_radius: 0.15
+        cube_x: 0.117
+        cube_y: -0.077
+        cube_z: 0.01
+        # R1 实测理想夹持位姿 (cube 相对动爪, 7 维 [x,y,z,qw,qx,qy,qz]),
+        # 来自 scripts/probe_grasp_geometry.py calibrate(cube=2cm)
+        ideal_rel_pose: [-0.019618, -0.048269, 0.0188,
+                         0.707071, -0.707071, -0.007071, 0.007071]
+      free_joint_state_publisher:
+        type: mujoco_ros2_control_plugins/FreeJointStatePublisherPlugin
+        topic: free_joint_states
+        publish_rate: 50.0
+        body_names: [cube]

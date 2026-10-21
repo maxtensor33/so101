@@ -1,0 +1,11 @@
+<library path="grasp_attach_plugin">
+  <class name="so101_mtc_pick_place/GraspAttachPlugin"
+         type="so101_mtc_pick_place::GraspAttachPlugin"
+         base_class_type="mujoco_ros2_control_plugins::MuJoCoROS2ControlPluginBase">
+    <description>
+      Kinematic-attach grasp: on gripper close command, rigidly carry the cube
+      with the moving jaw by writing its freejoint qpos each step (Phase 0/1
+      spike concluded physical grasp and weld equality are unreliable).
+    </description>
+  </class>
+</library>

@@ -14,11 +14,14 @@
     <joint name="wrist_flex" value="0"/>
     <joint name="wrist_roll" value="0"/>
   </group_state>
+  <!-- R3 (plan/mtc_fix.md) 纠正方向: mujoco/URDF 实测 qpos 大 = 张开
+       (span 56mm @ 1.0), 小 = 闭合 (close_angle -0.02, R1 实测)。
+       旧值 open=0/closed=1.5 与物理方向相反, 爪从未物理闭合。 -->
   <group_state name="open" group="gripper">
-    <joint name="gripper" value="0"/>
+    <joint name="gripper" value="1.0"/>
   </group_state>
   <group_state name="closed" group="gripper">
-    <joint name="gripper" value="1.5"/>
+    <joint name="gripper" value="-0.02"/>
   </group_state>
   <disable_collisions link1="base_link" link2="shoulder_link" reason="Adjacent"/>
   <disable_collisions link1="shoulder_link" link2="upper_arm_link" reason="Adjacent"/>

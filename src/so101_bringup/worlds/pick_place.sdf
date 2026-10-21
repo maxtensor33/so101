@@ -1,0 +1,86 @@
+<?xml version="1.0" ?>
+<!-- pick 场景 (gz Harmonic): floor + cube + DetachableJoint system。
+     夹取时经 gz topic "detachable_joint" attach ("磁吸"兜底, 与 mujoco weld 等价)。
+     robot 本体由 demo launch 的 create 节点以模型名 so101 spawn。 -->
+<sdf version="1.9">
+  <world name="pick_place">
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+    </physics>
+
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="link">
+        <collision name="floor_collision">
+          <geometry><plane><normal>0 0 1</normal><size>4 4</size></plane></geometry>
+          <friction><ode><mu>1.5</mu></ode></friction>
+        </collision>
+        <visual name="floor_visual">
+          <geometry><plane><normal>0 0 1</normal><size>4 4</size></plane></geometry>
+          <material>
+            <ambient>0.35 0.45 0.55 1</ambient>
+            <diffuse>0.35 0.45 0.55 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <light type="directional" name="sun">
+      <pose>0 0 3 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <direction>0 0 -1</direction>
+    </light>
+
+    <!-- 可抓取 cube (摆位来自 probe_pick_poses.py 探测输出) -->
+    <model name="cube">
+      <pose>0.117 -0.077 0.01 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>3.3e-6</ixx><iyy>3.3e-6</iyy><izz>3.3e-6</izz>
+                   <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry><box><size>0.02 0.02 0.02</size></box></geometry>
+          <friction><ode><mu>1.5</mu></ode></friction>
+        </collision>
+        <visual name="visual">
+          <geometry><box><size>0.02 0.02 0.02</size></box></geometry>
+          <material>
+            <ambient>0.9 0.25 0.2 1</ambient>
+            <diffuse>0.9 0.25 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <!-- DetachableJoint: attach 时把 cube link 连到 so101 的动爪 link。
+           child_link 名以 gz spawn 后实际 link 名为准 (Phase 3 联调确认)。 -->
+      <plugin filename="gz-sim-detachable-joint-system"
+              name="gz::sim::systems::DetachableJoint">
+        <parent_link>link</parent_link>
+        <child_model>so101</child_model>
+        <child_link>moving_jaw_so101_v1_link</child_link>
+        <topic>detachable_joint</topic>
+      </plugin>
+    </model>
+
+    <!-- place 标记 (visual only) -->
+    <model name="place_marker">
+      <static>true</static>
+      <pose>0.125 0.063 0.001 0 0 0</pose>
+      <link name="link">
+        <visual name="visual">
+          <geometry><box><size>0.06 0.06 0.002</size></box></geometry>
+          <material>
+            <ambient>0.2 0.6 0.9 0.4</ambient>
+            <diffuse>0.2 0.6 0.9 0.4</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>
