@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- 力矩模式 robot_description: 描述层 torque URDF + effort ros2_control 接口
+     (plan/robotics.md Phase 4)。仅用于 mujoco 仿真 (ctrl_mode:=torque)。 -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="so101_torque">
+  <xacro:arg name="mujoco_model_path" default="$(find so101_sim)/mujoco/scene_torque.xml"/>
+
+  <xacro:include filename="$(find so101_description)/urdf/so101_torque.urdf"/>
+  <xacro:include filename="$(find so101_sim)/urdf/so101.ros2_control.xacro"/>
+
+  <xacro:so101_ros2_control_mujoco_torque
+      name="so101_torque"
+      mujoco_model_path="$(arg mujoco_model_path)"/>
+</robot>

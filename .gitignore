@@ -16,3 +16,7 @@ reports/*.png
 # IDE
 .idea/
 .vscode/
+
+# 本地产物
+.coverage
+MUJOCO_LOG.TXT

@@ -210,7 +210,7 @@ quintic 轨迹 RMS < 阈值）；matplotlib 出对比图（生成物放 `reports
 
 | 风险 | 等级 | 缓解 |
 |---|---|---|
-| **mujoco_ros2_control 是否支持 effort command interface 未验证** | HIGH | Phase 0 结尾先做 spike：mock 先行，mujoco effort 用最小 xacro 实测；若不支持 → fallback A：库内 sim.py 独立跑 mujoco 力矩仿真（lab 模式），ROS 侧仅 mock + RViz 可视化；fallback B：自写极简 hardware interface。`ctrl_mode:=position` 链路不受影响，保底可验收 |
+| **mujoco_ros2_control 是否支持 effort command interface 未验证** | ~~HIGH~~ → **已消解（2026-10-20 静态 spike）**：`/opt/ros/jazzy/include/mujoco_ros2_control/data.hpp:97` 存在 `effort_interface` + `is_effort_control_enabled`，`.so` 符号含 `joint_command_to_actuator_command`；line 427 "effort not supported" 仅指 JointState override API。运行时联调（Phase 4）仍需实测确认 ctrl 映射正确 |
 | so101 舵机力矩小（3.35Nm）+ armature/damping 大，阻抗/OSC 易不稳定 | MEDIUM | 学习梯度从 PD+g → computed torque 起步（模型基座补偿后对参数误差鲁棒）；OSC 标记可选 |
 | mujoco 更新率 100Hz 对力矩控制偏低（舵机动力学瞬态） | MEDIUM | controllers_torque.yaml 调 update_rate 至 200~500 实测；仍不足则调小 mjcf timestep |
 | 数值 IK 在 so101 小工作空间内陷入局部解/越限 | LOW | 先采样可达位姿再求解；限位钳位 + 多起点重试 |
