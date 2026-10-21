@@ -19,6 +19,9 @@ import pinocchio as pin
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_URDF = REPO_ROOT / "models" / "so101_new_calib.urdf"
 DEFAULT_XML = REPO_ROOT / "models" / "so101_new_calib.xml"
+# 力矩控制版本 (plan/robotics.md Phase 0): 仅 actuator 不同, 运动学一致
+DEFAULT_URDF_TORQUE = REPO_ROOT / "models" / "so101_torque.urdf"
+DEFAULT_XML_TORQUE = REPO_ROOT / "models" / "so101_new_calib_torque.xml"
 
 # URDF link 名 ↔ MuJoCo body 名
 LINK_BODY_MAP = {
@@ -212,13 +215,24 @@ def write_report(results, out_path):
 
 def main():
     parser = argparse.ArgumentParser(description="URDF ↔ MuJoCo 对齐验证")
-    parser.add_argument("--urdf", type=Path, default=DEFAULT_URDF)
-    parser.add_argument("--xml", type=Path, default=DEFAULT_XML)
+    parser.add_argument(
+        "--torque",
+        action="store_true",
+        help="验证力矩控制版本 (so101_torque.urdf ↔ so101_new_calib_torque.xml)",
+    )
+    parser.add_argument("--urdf", type=Path, default=None)
+    parser.add_argument("--xml", type=Path, default=None)
     parser.add_argument("--n-samples", type=int, default=N_SAMPLES)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--out", type=Path, default=REPO_ROOT / "reports" / "alignment_report.md")
     args = parser.parse_args()
-    results = run_verification(args.urdf, args.xml, n_samples=args.n_samples, seed=args.seed)
+    if args.torque:
+        urdf = args.urdf or DEFAULT_URDF_TORQUE
+        xml = args.xml or DEFAULT_XML_TORQUE
+    else:
+        urdf = args.urdf or DEFAULT_URDF
+        xml = args.xml or DEFAULT_XML
+    results = run_verification(urdf, xml, n_samples=args.n_samples, seed=args.seed)
     out = write_report(results, args.out)
     for r in results:
         print(f"[{'PASS' if r.passed else 'FAIL'}] {r.name}: {r.detail}")

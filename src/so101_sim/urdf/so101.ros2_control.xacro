@@ -55,4 +55,50 @@
     <xacro:joint_if jname="gripper"/>
   </xacro:macro>
 
+  <!-- torque 模式: 6 个关节的 effort command + position/velocity state 接口
+       (plan/robotics.md Phase 0, 力矩控制学习版) -->
+  <xacro:macro name="so101_joint_interfaces_effort">
+    <joint name="shoulder_pan">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="shoulder_lift">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="elbow_flex">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist_flex">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist_roll">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="gripper">
+      <command_interface name="effort"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- sim:=mujoco + ctrl_mode:=torque : 加载 scene_torque.xml (motor actuator) -->
+  <xacro:macro name="so101_ros2_control_mujoco_torque" params="name mujoco_model_path">
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+        <param name="mujoco_model">${mujoco_model_path}</param>
+      </hardware>
+      <xacro:so101_joint_interfaces_effort/>
+    </ros2_control>
+  </xacro:macro>
+
 </robot>
