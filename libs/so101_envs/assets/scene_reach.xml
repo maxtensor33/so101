@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<!-- SO101 reach 场景（plan/envs.md Phase 0）：桌面 + cube + goal site（mocap）。
+     桌面顶面 z=0，机器人基座在桌面边缘（原点），物体出生域 x∈[0.15,0.35], y∈[-0.1,0.1]。 -->
+<mujoco model="so101_env_reach">
+  <include file="so101_env.xml"/>
+  <option timestep="0.002"/>
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.35 0.35 0.35" specular="0 0 0"/>
+    <global azimuth="160" elevation="-20"/>
+  </visual>
+  <asset>
+    <texture type="2d" name="desk" builtin="checker" rgb1="0.72 0.60 0.45" rgb2="0.68 0.56 0.42" width="300" height="300"/>
+    <material name="desk" texture="desk" texuniform="true"/>
+  </asset>
+  <worldbody>
+    <light pos="0.4 0 1.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="0 0 0.05" pos="0 0 -0.75" rgba="0.2 0.3 0.4 1"/>
+    <geom name="table_top" type="box" material="desk" size="0.45 0.4 0.015" pos="0.3 0 -0.015"/>
+    <geom name="table_body" type="box" material="desk" size="0.35 0.36 0.345" pos="0.3 0 -0.375"/>
+    <!-- 任务物体: cube -->
+    <body name="item" pos="0.25 0 0.024">
+      <freejoint name="item_free"/>
+      <geom name="item_geom" type="box" size="0.024 0.024 0.024" mass="0.03" friction="1.0 0.005 0.0001" condim="3" rgba="0.85 0.15 0.15 1"/>
+    </body>
+    <!-- goal site (mocap, 由 env 代码定位) -->
+    <body name="goal_site" mocap="true" pos="0.25 0 0.068">
+      <site name="goal_site" type="sphere" size="0.012" rgba="0 1 0 0.4" group="4"/>
+    </body>
+    <!-- 固定第三人称相机 -->
+    <camera name="fixed_cam" pos="0.75 -0.65 0.75" xyaxes="0.792 0.610 0 -0.379 0.492 0.783" fovy="60"/>
+  </worldbody>
+</mujoco>
