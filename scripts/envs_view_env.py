@@ -4,9 +4,9 @@
 脚本只附加视角选择与实时节流。
 
 用法:
-    uv run python scripts/view_env.py --id SO101Reach-v1
-    uv run python scripts/view_env.py --id SO101Lift-v1 --cam wrist
-    uv run python scripts/view_env.py --id SO101Place-v1 --random
+    uv run python scripts/envs_view_env.py --id SO101Reach-v1
+    uv run python scripts/envs_view_env.py --id SO101Lift-v1 --cam wrist
+    uv run python scripts/envs_view_env.py --id SO101Place-v1 --random
 """
 
 from __future__ import annotations

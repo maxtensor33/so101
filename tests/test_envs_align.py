@@ -1,6 +1,6 @@
 """envs MJCF ↔ URDF 对齐验证（plan/envs.md Phase 0, TDD）。
 
-镜像 scripts/verify_model_alignment.py 的模式，但针对 libs/so101_envs/assets/ 的
+镜像 scripts/setup_verify_model_alignment.py 的模式，但针对 libs/so101_envs/assets/ 的
 场景版 MJCF（机器人 + 桌面 + 任务物体）：
 - 六关节名与顺序、限位与 models/so101_new_calib.urdf 对齐
 - pinocchio(URDF) ↔ mujoco(scene XML) FK 随机采样对齐
@@ -30,7 +30,7 @@ ROBOT_JOINTS = [
     "gripper",
 ]
 
-# URDF link 名 ↔ MJCF body 名（同 verify_model_alignment.py）
+# URDF link 名 ↔ MJCF body 名（同 setup_verify_model_alignment.py）
 LINK_BODY_MAP = {
     "base_link": "base",
     "shoulder_link": "shoulder",

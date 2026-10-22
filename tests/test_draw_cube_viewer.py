@@ -1,7 +1,7 @@
-"""draw_cube_viewer 脚本的 TDD 测试 (plan/robotics.md Phase 4/5)。
+"""robotics_draw_cube_viewer 脚本的 TDD 测试 (plan/robotics.md Phase 4/5)。
 
 对标 lab-2 c3_draw_cube.py: 立方体几何 → 边列表 → 连续描线路径。
-脚本本体: scripts/draw_cube_viewer.py (纯函数部分可测, viewer 部分为集成)。
+脚本本体: scripts/robotics_draw_cube_viewer.py (纯函数部分可测, viewer 部分为集成)。
 """
 
 import importlib.util
@@ -11,14 +11,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "draw_cube_viewer.py"
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "robotics_draw_cube_viewer.py"
 
 
 @pytest.fixture(scope="module")
 def mod():
-    spec = importlib.util.spec_from_file_location("draw_cube_viewer", SCRIPT)
+    spec = importlib.util.spec_from_file_location("robotics_draw_cube_viewer", SCRIPT)
     m = importlib.util.module_from_spec(spec)
-    sys.modules["draw_cube_viewer"] = m
+    sys.modules["robotics_draw_cube_viewer"] = m
     spec.loader.exec_module(m)
     return m
 

@@ -26,7 +26,7 @@ from conftest import (
     XML_TORQUE_PATH,
 )
 
-import verify_model_alignment as vma
+import setup_verify_model_alignment as vma
 
 ARM_JOINTS = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll"]
 ALL_JOINTS = ARM_JOINTS + ["gripper"]

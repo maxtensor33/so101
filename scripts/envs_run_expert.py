@@ -2,7 +2,7 @@
 
 pinocchio IK + 状态机驱动 4 个 env 端到端，输出 success rate。
 用法:
-    uv run python scripts/run_expert.py --env all --episodes 10
+    uv run python scripts/envs_run_expert.py --env all --episodes 10
 """
 
 from __future__ import annotations

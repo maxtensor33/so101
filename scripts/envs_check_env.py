@@ -1,8 +1,8 @@
 """单环境快速验证（plan/envs.md 日常工具）。
 
 用法:
-    uv run python scripts/check_env.py --id SO101Lift-v1
-    uv run python scripts/check_env.py --id SO101StackCamera-v1 --steps 30 --render
+    uv run python scripts/envs_check_env.py --id SO101Lift-v1
+    uv run python scripts/envs_check_env.py --id SO101StackCamera-v1 --steps 30 --render
 """
 
 from __future__ import annotations

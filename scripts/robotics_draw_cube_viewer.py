@@ -9,7 +9,7 @@
   SIDES_TO_TRY=[0.08,0.07,0.06], POINTS_PER_EDGE=6, Q_REF, CUBE_CENTER_OFFSET
 
 运行 (需要图形环境):
-    uv run python scripts/draw_cube_viewer.py [--side 0.06] [--edge-duration 1.5] [--kp 50] [--kd 5]
+    uv run python scripts/robotics_draw_cube_viewer.py [--side 0.06] [--edge-duration 1.5] [--kp 50] [--kd 5]
 """
 
 import argparse

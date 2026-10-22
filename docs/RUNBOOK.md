@@ -25,7 +25,7 @@
 | 力矩保持时机械臂缓慢下垂 | 纯重力补偿是中性稳定（无位置反馈）——`torque_control_node` 无目标时锁存 `q_hold` 做 PD+重力补偿，不要改回纯 g-comp |
 | t=0 时 MuJoCo 报一次 "NaN in CTRL at ACTUATOR 0" | mujoco_ros2_control 上游接口初始值是 quiet_NaN 的启动瞬态，首帧命令后消失，无需处理 |
 | 改了 rviz/launch 配置 build 后失效 | ament_python 的 data_files 是拷贝而非 symlink；draw_cube 的 RViz 配置已改为源文件优先加载，其余包改配置需重新 build 或改 src 后同步 |
-| 轨迹执行中力矩饱和失控 | IK 冗余分支翻转导致相邻航点关节跳变——段时长必须按关节距离自适应（已实现于 draw_cube_node / draw_cube_viewer） |
+| 轨迹执行中力矩饱和失控 | IK 冗余分支翻转导致相邻航点关节跳变——段时长必须按关节距离自适应（已实现于 draw_cube_node / robotics_draw_cube_viewer） |
 | ROS 节点报 `No module named 'so101_robotics'` | uv+colcon 混合环境：节点靠 sys.path 自举（向上找 pyproject.toml 后加 `libs/` 与 `.venv`）；launch 的 `additional_env` 在 Jazzy 实测不可靠，不要依赖 |
 | ament_python 包改了 launch/urdf/rviz 后行为没变 | 这类包的 data_files 是拷贝非 symlink，改动后必须 `colcon build`；或参照 draw_cube 的做法在代码里直接解析 src 源文件 |
 

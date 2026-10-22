@@ -1,4 +1,4 @@
-"""so101 模块路径注入：让测试可以 import scripts/verify_model_alignment.py。"""
+"""so101 模块路径注入：让测试可以 import scripts/setup_verify_model_alignment.py。"""
 
 import sys
 from pathlib import Path

@@ -9,8 +9,8 @@
 |---|---|
 | `colcon build --symlink-install` | 构建全部 colcon 包（5 个） |
 | `uv run pytest` | 全量测试（102 passed，库覆盖率 99%） |
-| `uv run python scripts/verify_model_alignment.py` | 位置版 URDF↔MJCF 对齐验证 → `reports/alignment_report.md` |
-| `uv run python scripts/verify_model_alignment.py --torque` | 力矩版对齐验证 → `reports/alignment_report_torque.md` |
+| `uv run python scripts/setup_verify_model_alignment.py` | 位置版 URDF↔MJCF 对齐验证 → `reports/alignment_report.md` |
+| `uv run python scripts/setup_verify_model_alignment.py --torque` | 力矩版对齐验证 → `reports/alignment_report_torque.md` |
 | `bash scripts/clean_ros.sh` | 清理 demo 残留进程（每轮测试前必做） |
 
 环境前置（zsh）：
@@ -59,7 +59,7 @@ ros2 launch so101_robotics_torque_app draw_cube.launch.py rviz:=false ctrl_mode:
 ## MuJoCo viewer 版 draw cube（无 ROS）
 
 ```bash
-uv run python scripts/draw_cube_viewer.py [--side 0.06] [--edge-duration 1.5] [--kp 150] [--kd 15]
+uv run python scripts/robotics_robotics_draw_cube_viewer.py [--side 0.06] [--edge-duration 1.5] [--kp 150] [--kd 15]
 ```
 
 - 加载 `src/so101_sim/mujoco/scene_torque.xml` 完整场景，500 Hz 内环 computed

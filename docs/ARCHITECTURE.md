@@ -46,7 +46,7 @@ so101/
 │   ├── so101_new_calib.urdf/.xml            # 位置控制版
 │   ├── so101_torque.urdf / *_torque.xml     # 力矩控制版
 │   └── assets/*.stl
-├── scripts/                     # verify_model_alignment / draw_cube_viewer / clean_ros
+├── scripts/                     # setup_verify_model_alignment / robotics_draw_cube_viewer / clean_ros
 ├── reports/                     # 对齐验证与 draw cube 验收报告
 ├── tests/                       # pytest 102 项（库覆盖率 99%）
 └── src/                         # colcon 工作区（5 包）
@@ -114,6 +114,6 @@ ROS 链路同等增益下略差于纯库链路（100 Hz ZOH + 传输延迟），
 
 对标 [mujoco-robotics-lab lab-2 (UR5e)](https://github.com/ozkannceylan/mujoco-robotics-lab)：
 A2/A3/A4/A5 → fk/jacobian/ik/dynamics；B1/B2/B3 → trajectory/control/constraints；
-C3 draw cube → draw_cube_node / draw_cube_viewer.py。差异：so101 工作空间小
+C3 draw cube → draw_cube_node / robotics_draw_cube_viewer.py。差异：so101 工作空间小
 （cube 6 cm vs UR5e 10 cm）、力矩上限 3.35 Nm、EE 用动爪 frame（掌部对 gripper
 关节的 Jacobian 列恒为 0）。

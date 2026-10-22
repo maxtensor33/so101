@@ -17,6 +17,9 @@ reports/*.png
 .idea/
 .vscode/
 
+# RL 训练产物（checkpoint/曲线/tensorboard）
+outputs/
+
 # 本地产物
 .coverage
 MUJOCO_LOG.TXT

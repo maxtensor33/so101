@@ -13,7 +13,15 @@ dependencies = [
     "python-xlib>=0.33",
     "lark>=1.3.1",
     "gymnasium>=1.0",
+    "torch>=2.3",
+    "stable-baselines3>=2.4",
+    "skrl>=1.4",
 ]
+
+[tool.uv]
+# torch 由系统提供（system torch 2.11+cu130, venv --system-site-packages 透传），
+# marker 永假使 uv 不安装 torch，运行时 import 走系统 site-packages
+override-dependencies = ["torch; sys_platform == 'never'"]
 
 [build-system]
 requires = ["hatchling"]
@@ -21,7 +29,7 @@ build-backend = "hatchling.build"
 
 # libs/ 下为非 ROS 纯 Python 库 (plan/robotics.md, plan/envs.md): uv 安装后可 import
 [tool.hatch.build.targets.wheel]
-packages = ["libs/so101_robotics", "libs/so101_envs"]
+packages = ["libs/so101_robotics", "libs/so101_envs", "libs/so101_rl"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
