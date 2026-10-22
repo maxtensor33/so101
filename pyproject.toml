@@ -27,6 +27,13 @@ override-dependencies = ["torch; sys_platform == 'never'"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[dependency-groups]
+docs = [
+    "myst-parser>=2",
+    "sphinx>=7",
+    "sphinx-rtd-theme>=2",
+]
+
 # libs/ 下为非 ROS 纯 Python 库 (plan/robotics.md, plan/envs.md): uv 安装后可 import
 [tool.hatch.build.targets.wheel]
 packages = ["libs/so101_robotics", "libs/so101_envs", "libs/so101_rl"]

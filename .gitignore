@@ -23,3 +23,6 @@ outputs/
 # 本地产物
 .coverage
 MUJOCO_LOG.TXT
+
+# sphinx 构建产物
+docs/_build/
