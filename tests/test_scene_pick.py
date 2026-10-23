@@ -16,7 +16,7 @@ REPO = Path(__file__).resolve().parents[1]
 SCENE_PICK = REPO / "src" / "so101_sim" / "mujoco" / "scene_pick.xml"
 GZ_WORLD = REPO / "src" / "so101_bringup" / "worlds" / "pick_place.sdf"
 
-# 摆位: Phase 0 探测脚本 (probe_pick_poses.py) 输出的推荐组合
+# 摆位: Phase 0 探测脚本 (mtc_probe_pick_poses.py) 输出的推荐组合
 # R2 (plan/mtc_fix.md): cube 4cm -> 2cm, 底面贴地 z = 0.01
 PICK_CUBE = [0.117, -0.077]
 PLACE_CUBE = [0.125, 0.063]

@@ -92,6 +92,9 @@ public:
       {-0.63090, -0.47374, 1.21428, 0.83027, -0.58222});
     execute_ = declare_parameter<bool>("execute", true);
     auto_exec_delay_ = declare_parameter<double>("auto_exec_delay", 5.0);
+    // RViz 模式: 任务完成后保持存活 (introspection 的 /description、/solution
+    // 是 transient_local, 但随进程销毁——晚启动的面板需要进程活着才有数据)
+    keep_running_ = declare_parameter<bool>("keep_running", false);
   }
 
   void spawnCollisionObjects()
@@ -517,6 +520,12 @@ private:
   double auto_exec_delay_;
   std::vector<double> grasp_joints_, lift_joints_, place_joints_;
   bool execute_;
+  bool keep_running_ = false;
+
+public:
+  bool keepRunning() const { return keep_running_; }
+
+private:
   mtc::Task task_;
 };
 
@@ -533,6 +542,12 @@ int main(int argc, char ** argv)
   // 等待 move_group / planning scene 就绪
   rclcpp::sleep_for(std::chrono::seconds(3));
   bool ok = node->run();
+
+  if (ok && node->keepRunning()) {
+    RCLCPP_INFO(so101_mtc_pick_place::LOGGER,
+                "task done; keeping node alive for RViz introspection (Ctrl+C to exit)");
+    executor.spin();  // 阻塞直到 Ctrl+C / shutdown
+  }
 
   executor.cancel();
   spin_thread.join();

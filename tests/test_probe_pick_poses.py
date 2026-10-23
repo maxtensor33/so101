@@ -1,4 +1,4 @@
-"""probe_pick_poses 脚本的 TDD 测试 (plan/mtc.md Phase 0)。
+"""mtc_probe_pick_poses 脚本的 TDD 测试 (plan/mtc.md Phase 0)。
 
 探测 so101 在桌面上抓取 cube 的 pick/place 摆位可达性。
 纯函数部分可测; 全量扫描作为脚本运行 (耗时长, 不进 pytest)。
@@ -12,14 +12,14 @@ import numpy as np
 import pinocchio as pin
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "probe_pick_poses.py"
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "mtc_probe_pick_poses.py"
 
 
 @pytest.fixture(scope="module")
 def mod():
-    spec = importlib.util.spec_from_file_location("probe_pick_poses", SCRIPT)
+    spec = importlib.util.spec_from_file_location("mtc_probe_pick_poses", SCRIPT)
     m = importlib.util.module_from_spec(spec)
-    sys.modules["probe_pick_poses"] = m
+    sys.modules["mtc_probe_pick_poses"] = m
     spec.loader.exec_module(m)
     return m
 

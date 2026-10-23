@@ -1,5 +1,5 @@
 Panels:
-  - Class: moveit_task_constructor_visualization/TaskConstructorPanel
+  - Class: moveit_task_constructor/Motion Planning Tasks
     Name: Task Constructor
   - Class: rviz_common/Displays
     Help Height: 87
@@ -26,6 +26,26 @@ Panels:
 Visualization Manager:
   Class: ""
   Displays:
+    - Class: moveit_task_constructor/Motion Planning Tasks
+      Enabled: true
+      Interrupt Display: false
+      Loop Animation: false
+      Markers:
+        All at once?: false
+        Value: true
+      Name: Motion Planning Tasks
+      Robot:
+        Fixed Robot Color: 150; 50; 150
+        Links:
+          All Links Enabled: true
+          Expand Joint Details: false
+          Expand Link Details: false
+          Expand Tree: false
+          Link Tree Style: Links in Alphabetic Order
+      Scene Geometry:
+        Scene Alpha: 0.9
+      Task Solution Topic: /solution
+      Value: true
     - Alpha: 0.5
       Cell Size: 1
       Class: rviz_default_plugins/Grid

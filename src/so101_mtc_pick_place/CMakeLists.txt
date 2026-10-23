@@ -43,6 +43,7 @@ add_executable(mtc_pick_place_node src/mtc_pick_place_node.cpp)
 ament_target_dependencies(mtc_pick_place_node ${THIS_PACKAGE_INCLUDE_DEPENDS})
 install(TARGETS mtc_pick_place_node DESTINATION lib/${PROJECT_NAME})
 
+
 # ── mujoco 抓取 plugin (kinematic attach) ───────────────────────────────────
 add_library(grasp_attach_plugin SHARED src/grasp_attach_plugin.cpp)
 # pluginlib 基类与 mujoco 由依赖包传递链接

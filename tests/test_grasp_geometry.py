@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "probe_grasp_geometry.py"
+SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "mtc_probe_grasp_geometry.py"
 
 
 @pytest.fixture(scope="module")

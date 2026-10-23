@@ -41,8 +41,8 @@ GRIP_RELEASE_THR = 0.6  # release: ctrl 升到此值以上 (张开中)
 
 # 两指面测量函数来自 probe_grasp_geometry (同一模型结构, 可用于场景 model)
 _spec = importlib.util.spec_from_file_location(
-    "probe_grasp_geometry",
-    Path(__file__).resolve().parent / "probe_grasp_geometry.py")
+    "mtc_probe_grasp_geometry",
+    Path(__file__).resolve().parent / "mtc_probe_grasp_geometry.py")
 pgg = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pgg)
 

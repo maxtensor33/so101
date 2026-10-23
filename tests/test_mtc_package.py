@@ -103,3 +103,27 @@ class TestLaunchAndRviz:
                    for k, v in cm.items() if k.startswith("mujoco_plugins."))
         # 控制器与位置版一致 (JTC ×2 + JSB)
         assert cm["arm_controller"]["type"] == "joint_trajectory_controller/JointTrajectoryController"
+
+
+class TestRvizMode:
+    """plan/mtc_rviz.md: 纯 RViz 模式 = mock 硬件 + 复用扁平链节点。
+
+    标准 MTC stage 链 (Connect/SerialContainer) 在 MTC 0.1.8 + 5-dof 上为
+    problems/ 三个会话共同确认的深水区, 暂停 (todo/mtc_sim_backends_todo.md)。
+    """
+
+    def test_rviz_controllers_config(self):
+        cfg = PKG / "config" / "controllers_rviz.yaml"
+        text = cfg.read_text()
+        assert "mock_components" not in text  # mock 硬件由 xacro sim:=none 决定
+        for ctrl in ("arm_controller", "gripper_controller"):
+            assert ctrl in text
+        assert "GraspAttachPlugin" not in text  # 无物理仿真, 无插件
+
+    def test_launch_rviz_mode_uses_flat_node(self):
+        text = (PKG / "launch" / "mtc_pick_place.launch.py").read_text()
+        assert '"rviz"' in text  # sim 选项
+        assert "controllers_rviz.yaml" in text
+        # rviz 模式不再有标准 stage 链节点
+        assert "mtc_rviz_node" not in text
+        assert "mtc_pick_place_node" in text

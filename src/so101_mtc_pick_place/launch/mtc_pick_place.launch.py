@@ -1,7 +1,8 @@
 """SO-ARM101 MTC pick and place (plan/mtc.md Phase 3).
 
 RViz 规划显示 + 双后端仿真执行:
-    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=mujoco   # 默认
+    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz     # 纯 RViz (plan/mtc_rviz.md)
+    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=mujoco   # 双后端已暂停, 见 todo/
     ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=gazebo
 """
 
@@ -61,12 +62,15 @@ def _setup(context, *args, **kwargs):
     actions = []
 
     controllers_yaml = os.path.join(
-        get_package_share_directory("so101_mtc_pick_place"), "config", "controllers_pick.yaml"
+        get_package_share_directory("so101_mtc_pick_place"), "config",
+        "controllers_rviz.yaml" if sim == "rviz" else "controllers_pick.yaml"
     )
     scene_pick = os.path.join(
         get_package_share_directory("so101_sim"), "mujoco", "scene_pick.xml"
     )
-    robot_description = _xacro_robot_description(sim, scene_pick)
+    # rviz 模式: xacro sim:=none -> mock_components 硬件, 无 scene_pick.xml
+    robot_description = _xacro_robot_description(
+        "none" if sim == "rviz" else sim, None if sim == "rviz" else scene_pick)
     moveit_cfg = _moveit_config()
     # R4 (plan/mtc_fix.md): gz 走 sim time —— joint_states 带仿真时间戳,
     # move_group 轨迹校验 (allowed_start_tolerance) 需同源时钟, 否则
@@ -83,7 +87,18 @@ def _setup(context, *args, **kwargs):
         )
     )
 
-    if sim == "mujoco":
+    if sim == "rviz":
+        # mock 硬件 + 普通 ros2_control_node (镜像 demo.launch.py sim:=none)
+        actions.append(
+            Node(
+                package="controller_manager",
+                executable="ros2_control_node",
+                parameters=[robot_description, controllers_yaml],
+                output="screen",
+                on_exit=Shutdown(),
+            )
+        )
+    elif sim == "mujoco":
         actions.append(
             Node(
                 package="mujoco_ros2_control",
@@ -182,16 +197,19 @@ def _setup(context, *args, **kwargs):
                 "execute": execute.lower() == "true",
                 "auto_exec_delay": 5.0,
                 "use_sim_time": use_sim_time,
+                # introspection 话题随进程销毁; RViz 面板晚连需要进程存活
+                "keep_running": sim == "rviz",
             },
         ],
     )
     # move_group/控制器就绪后再启动 MTC
     actions.append(TimerAction(period=10.0, actions=[mtc_node]))
 
+    # RViz (MotionPlanning + MTC Introspection 面板)
     if use_rviz == "true":
         actions.append(
             TimerAction(
-                period=8.0,
+                period=12.0,
                 actions=[
                     Node(
                         package="rviz2",
@@ -200,7 +218,8 @@ def _setup(context, *args, **kwargs):
                         arguments=["-d", os.path.join(
                             get_package_share_directory("so101_mtc_pick_place"),
                             "rviz", "mtc_pick_place.rviz")],
-                        parameters=[robot_description, moveit_cfg.robot_description_semantic],
+                        parameters=[robot_description,
+                                    moveit_cfg.robot_description_semantic],
                         on_exit=Shutdown(),
                     )
                 ],
@@ -214,7 +233,7 @@ def generate_launch_description():
     return LaunchDescription(
         [
             DeclareLaunchArgument("sim", default_value="mujoco",
-                                  choices=["mujoco", "gazebo"]),
+                                  choices=["mujoco", "gazebo", "rviz"]),
             DeclareLaunchArgument("rviz", default_value="true"),
             DeclareLaunchArgument("execute", default_value="true"),
             OpaqueFunction(function=_setup),

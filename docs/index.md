@@ -8,6 +8,7 @@ ROS2 Jazzy + MuJoCo + uv/colcon 混合管理的 SO-ARM101 机械臂项目。
 | 方向 | 定位 | 入口 |
 |---|---|---|
 | **robotics** | 力矩控制学习（教学目的）：FK/IK/动力学/轨迹/控制 → draw cube | {doc}`robotics/index` |
+| **mtc** | MoveIt Task Constructor pick-and-place（纯 RViz 模式） | {doc}`mtc/index` |
 | **envs** | gymnasium 环境集（mujoco 内核）：reach/lift/place/stack × 双相机 | {doc}`envs/index` |
 | **rl** | RL 训练/评估/推理（sb3/skrl 双后端 + ROS2 推理） | {doc}`rl/index` |
 | **il_sim** | 模仿学习（仿真采集/训练/推理，lerobot 管线） | {doc}`il_sim/index` |
@@ -31,7 +32,7 @@ export MUJOCO_GL=egl
 
 | 位置 | 内容 |
 |---|---|
-| `plan/` | 各方向原始计划（setup/robotics/envs/rl） |
+| `plan/` | 各方向原始计划（setup/robotics/envs/rl/mtc_rviz） |
 | `reports/` | 验收报告（对齐/draw cube/envs/rl） |
 | `todo/` | 待办勘察（gz 验证、GPU 并行路线、文档图片清单） |
 | `learn/` | 经验复盘（坑清单与改进） |
@@ -42,6 +43,7 @@ export MUJOCO_GL=egl
 :caption: 方向
 
 robotics/index
+mtc/index
 envs/index
 rl/index
 il_sim/index
