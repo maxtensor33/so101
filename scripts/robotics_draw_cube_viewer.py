@@ -1,4 +1,4 @@
-"""MuJoCo viewer 版 draw cube — 对标 lab-2 c3_draw_cube.py (plan/robotics.md Phase 4/5)。
+"""MuJoCo viewer 版 draw cube — 对标 lab-2 c3_draw_cube.py (workflow/plan/robotics.md Phase 4/5)。
 
 流水线 (全部复用 libs/so101_robotics):
   立方体 12 边 → 采样航点 → DLS IK (Q_REF 温启动链) → quintic 关节轨迹

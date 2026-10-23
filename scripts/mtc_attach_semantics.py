@@ -1,4 +1,4 @@
-"""attach 语义 spike (plan/mtc_fix.md R3) — 纯 mujoco 镜像 grasp_attach_plugin。
+"""attach 语义 spike (workflow/plan/mtc_fix.md R3) — 纯 mujoco 镜像 grasp_attach_plugin。
 
 在无 ROS 的 mujoco 里复现插件语义并验收:
   - ideal 模式: attach 后 cube 刚体跟随动爪 (ideal_rel_pose, 与

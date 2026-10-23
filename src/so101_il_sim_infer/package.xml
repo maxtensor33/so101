@@ -3,7 +3,7 @@
 <package format="3">
   <name>so101_il_sim_infer</name>
   <version>0.1.0</version>
-  <description>SO101 il_sim IL 推理：lerobot policy 驱动 env，MuJoCo 与 RViz 同步可视化（plan/il_sim.md Phase 5）</description>
+  <description>SO101 il_sim IL 推理：lerobot policy 驱动 env，MuJoCo 与 RViz 同步可视化（workflow/plan/il_sim.md Phase 5）</description>
   <maintainer email="maxtensor@todo.todo">maxtensor</maintainer>
   <license>Apache-2.0</license>
   <exec_depend>rclpy</exec_depend>

@@ -1,4 +1,4 @@
-"""VecNormalize 状态存/载往返一致性（plan/rl.md normalize.py 契约）。"""
+"""VecNormalize 状态存/载往返一致性（workflow/plan/rl.md normalize.py 契约）。"""
 
 from __future__ import annotations
 

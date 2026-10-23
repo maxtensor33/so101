@@ -1,4 +1,4 @@
-"""so101_mtc_pick_place 包结构测试 (plan/mtc.md Phase 2/3)。"""
+"""so101_mtc_pick_place 包结构测试 (workflow/plan/mtc.md Phase 2/3)。"""
 
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -48,7 +48,7 @@ class TestSources:
         assert "execute_task_solution" in text or "ExecuteTaskSolution" in text
 
     def test_cube_size_default_2cm(self):
-        """R2 (plan/mtc_fix.md): planning scene cube 缩小到 2cm
+        """R2 (workflow/plan/mtc_fix.md): planning scene cube 缩小到 2cm
         (三处同步之三: mtc 节点 cube_size 默认值)。"""
         text = (PKG / "src" / "mtc_pick_place_node.cpp").read_text()
         assert 'declare_parameter<double>("cube_size", 0.02)' in text
@@ -61,7 +61,7 @@ class TestSources:
         assert "qpos" in text
 
     def test_attach_plugin_ideal_rel_pose(self):
-        """R3 (plan/mtc_fix.md): 插件支持 ideal_rel_pose 刚体跟随,
+        """R3 (workflow/plan/mtc_fix.md): 插件支持 ideal_rel_pose 刚体跟随,
         阈值方向与纠正后的 SRDF (closed=-0.02/open=1.0) 一致。"""
         text = (PKG / "src" / "grasp_attach_plugin.cpp").read_text()
         assert "ideal_rel_pose" in text
@@ -88,9 +88,12 @@ class TestLaunchAndRviz:
         assert "sim" in text  # sim 参数
 
     def test_rviz_config_has_mtc_panel(self):
+        """MTC 0.1.8 面板/Display 类名均为 moveit_task_constructor/Motion Planning Tasks。"""
         text = (PKG / "rviz" / "mtc_pick_place.rviz").read_text()
         assert "MotionPlanning" in text
-        assert "TaskConstructor" in text or "Introspection" in text
+        # Panel（UI 壳）与 TaskDisplay（数据订阅者）都要在
+        assert text.count("moveit_task_constructor/Motion Planning Tasks") >= 2
+        assert "Task Solution Topic: /solution" in text
 
     def test_controllers_yaml_has_mujoco_plugins(self):
         import yaml
@@ -106,10 +109,10 @@ class TestLaunchAndRviz:
 
 
 class TestRvizMode:
-    """plan/mtc_rviz.md: 纯 RViz 模式 = mock 硬件 + 复用扁平链节点。
+    """workflow/plan/mtc_rviz.md: 纯 RViz 模式 = mock 硬件 + 复用扁平链节点。
 
     标准 MTC stage 链 (Connect/SerialContainer) 在 MTC 0.1.8 + 5-dof 上为
-    problems/ 三个会话共同确认的深水区, 暂停 (todo/mtc_sim_backends_todo.md)。
+    workflow/problems/ 三个会话共同确认的深水区, 暂停 (workflow/todo/mtc_sim_backends_todo.md)。
     """
 
     def test_rviz_controllers_config(self):

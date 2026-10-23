@@ -1,4 +1,4 @@
-"""Dynamics 模块 TDD 测试 (plan/robotics.md Phase 2, 对标 lab-2 A5)。"""
+"""Dynamics 模块 TDD 测试 (workflow/plan/robotics.md Phase 2, 对标 lab-2 A5)。"""
 
 import numpy as np
 import pinocchio as pin

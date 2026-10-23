@@ -19,7 +19,7 @@ import pinocchio as pin
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_URDF = REPO_ROOT / "models" / "so101_new_calib.urdf"
 DEFAULT_XML = REPO_ROOT / "models" / "so101_new_calib.xml"
-# 力矩控制版本 (plan/robotics.md Phase 0): 仅 actuator 不同, 运动学一致
+# 力矩控制版本 (workflow/plan/robotics.md Phase 0): 仅 actuator 不同, 运动学一致
 DEFAULT_URDF_TORQUE = REPO_ROOT / "models" / "so101_torque.urdf"
 DEFAULT_XML_TORQUE = REPO_ROOT / "models" / "so101_new_calib_torque.xml"
 

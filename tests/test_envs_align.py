@@ -1,4 +1,4 @@
-"""envs MJCF ↔ URDF 对齐验证（plan/envs.md Phase 0, TDD）。
+"""envs MJCF ↔ URDF 对齐验证（workflow/plan/envs.md Phase 0, TDD）。
 
 镜像 scripts/setup_verify_model_alignment.py 的模式，但针对 libs/so101_envs/assets/ 的
 场景版 MJCF（机器人 + 桌面 + 任务物体）：

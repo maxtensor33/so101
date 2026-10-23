@@ -3,7 +3,7 @@
 <package format="3">
   <name>so101_rl_infer</name>
   <version>0.1.0</version>
-  <description>SO101 RL inference: load checkpoint, drive env, publish to RViz (plan/rl.md Phase 4)</description>
+  <description>SO101 RL inference: load checkpoint, drive env, publish to RViz (workflow/plan/rl.md Phase 4)</description>
   <maintainer email="maxtensor@todo.todo">maxtensor</maintainer>
   <license>Apache-2.0</license>
   <exec_depend>rclpy</exec_depend>

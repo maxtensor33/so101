@@ -1,4 +1,4 @@
-# 力矩控制链路控制器配置 (plan/robotics.md Phase 0)
+# 力矩控制链路控制器配置 (workflow/plan/robotics.md Phase 0)
 # ForwardCommandController 直接转发 effort 命令到 hardware interface,
 # 上层由 torque_control_node 计算力矩 (tau = g(q) + PD + 前馈)。
 # 注意: update_rate 与位置版保持 100 Hz, Phase 4/5 联调时再实测调优。

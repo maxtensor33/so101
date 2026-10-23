@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""il_sim 采集 CLI（plan/il_sim.md Phase 2）：官方 lerobot-record 薄封装。
+"""il_sim 采集 CLI（workflow/plan/il_sim.md Phase 2）：官方 lerobot-record 薄封装。
 
 import so101_teleop 触发 draccus 注册后透传官方 CLI，用法与 lerobot-record 完全一致：
     uv run python scripts/il_sim_record.py \

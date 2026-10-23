@@ -1,4 +1,4 @@
-"""任务级行为测试（plan/envs.md Phase 1/2/4, TDD）。
+"""任务级行为测试（workflow/plan/envs.md Phase 1/2/4, TDD）。
 
 构造性用例：直接操控世界状态验证 evaluate() 与 reward 语义。
 Phase 4 增补 pinocchio IK 脚本专家端到端用例。

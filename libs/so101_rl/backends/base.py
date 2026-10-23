@@ -1,4 +1,4 @@
-"""TrainerSpec 抽象：sb3/skrl 双后端统一接口（plan/rl.md Phase 1）。
+"""TrainerSpec 抽象：sb3/skrl 双后端统一接口（workflow/plan/rl.md Phase 1）。
 
 契约（tests/test_rl_backends.py 锁定）:
 - make_model(env, **hparams) -> model

@@ -1,7 +1,7 @@
 """il_sim Phase 5: lerobot policy checkpoint 加载器 + predict 形状（ROS 无关部分）。
 
 自含链路：record 1 episode → ACT steps=10 → load_policy → select_action 形状/值域校验。
-ROS 推理节点本身（rclpy）不在 uv venv 覆盖范围，launch 验收见 .claude/tdd/il_sim.tdd.md。
+ROS 推理节点本身（rclpy）不在 uv venv 覆盖范围，launch 验收见 workflow/tdd/il_sim.tdd.md。
 """
 
 from __future__ import annotations

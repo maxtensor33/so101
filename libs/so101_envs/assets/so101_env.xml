@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- SO101 env 机器人模型（plan/envs.md Phase 0）。
+<!-- SO101 env 机器人模型（workflow/plan/envs.md Phase 0）。
      从 src/so101_sim/mujoco/so101_new_calib.xml 派生，改动仅三处：
      1. 夹爪相关 collision geom 加摩擦（friction=2.0, squint 同款）利于抓取
      2. gripper body 上挂 wrist_cam 相机（夹爪视角；Phase 4 可视化后可调）

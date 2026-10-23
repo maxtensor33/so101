@@ -1,5 +1,5 @@
 // Copyright 2026 maxtensor. Apache-2.0.
-// Kinematic-attach grasp plugin for mujoco_ros2_control (plan/mtc.md Phase 2).
+// Kinematic-attach grasp plugin for mujoco_ros2_control (workflow/plan/mtc.md Phase 2).
 //
 // Phase 0/1 spikes concluded that physical grasping with the single moving jaw
 // and weld-equality approaches are unreliable (cube knocked away / constraint
@@ -72,7 +72,7 @@ public:
     cube_x_ = dbl_param("cube_x", 0.117);
     cube_y_ = dbl_param("cube_y", -0.077);
     cube_z_ = dbl_param("cube_z", 0.01);
-    // R3 (plan/mtc_fix.md): R1 实测理想夹持位姿 (cube 相对动爪 body, 7 维
+    // R3 (workflow/plan/mtc_fix.md): R1 实测理想夹持位姿 (cube 相对动爪 body, 7 维
     // [x,y,z,qw,qx,qy,qz], scripts/probe_grasp_geometry.py calibrate 输出)。
     // 设置后 attach 用刚体跟随 (cube 随 jaw 旋转), 与抓/放两侧 IK 的 T_rel
     // 构造自洽; 不设则退回世界系平移偏移旧行为。

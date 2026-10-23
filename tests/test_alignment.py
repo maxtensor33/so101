@@ -1,7 +1,7 @@
 """URDF ↔ MuJoCo XML 对齐验证的 TDD 测试。
 
 被测模块: scripts/setup_verify_model_alignment.py
-对齐标准 (plan/setup.md Phase 2):
+对齐标准 (workflow/plan/setup.md Phase 2):
   - FK 对比: 平移误差 < 1 mm, 旋转误差 < 0.5° (0.5° ≈ 8.73e-3 rad)
   - 限位容差: 1e-3 rad; 质量容差: 1e-3 kg
 """

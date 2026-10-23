@@ -1,4 +1,4 @@
-"""So101KeyboardTeleop: joint-select + incremental control (plan/il_sim.md Phase 2).
+"""So101KeyboardTeleop: joint-select + incremental control (workflow/plan/il_sim.md Phase 2).
 
 Keys: 1-6 select joint, w/s increment/decrement, c requests env reset at the
 next frame boundary. Key events are injectable (handle_press/release) so the

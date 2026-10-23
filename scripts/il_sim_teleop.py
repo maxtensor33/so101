@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""il_sim 遥操主进程（plan/il_sim.md Phase 3）。
+"""il_sim 遥操主进程（workflow/plan/il_sim.md Phase 3）。
 
 - --teleop expert|keyboard  遥操类型
 - --record                  默认 false（纯遥操不落盘）；true 走官方 record 管线

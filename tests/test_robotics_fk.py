@@ -1,4 +1,4 @@
-"""FK 模块 TDD 测试 (plan/robotics.md Phase 1, 对标 lab-2 A2)。
+"""FK 模块 TDD 测试 (workflow/plan/robotics.md Phase 1, 对标 lab-2 A2)。
 
 对齐标准与 setup_verify_model_alignment 一致: 平移 < 1mm, 旋转 < 0.5°。
 """

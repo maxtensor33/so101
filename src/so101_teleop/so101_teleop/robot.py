@@ -1,4 +1,4 @@
-"""SimSO101Robot: so101_envs camera env -> lerobot Robot protocol (plan/il_sim.md Phase 1).
+"""SimSO101Robot: so101_envs camera env -> lerobot Robot protocol (workflow/plan/il_sim.md Phase 1).
 
 Conventions (lerobot 0.6.1, locked by tests/test_il_sim_smoke.py):
 - feature keys `{motor}.pos: float` -> derived observation.state / action (shape (6,))

@@ -1,4 +1,4 @@
-"""ros_viz：采集/遥操期间 RViz 同步显示（plan/il_sim.md Phase 3, 内置启用）。
+"""ros_viz：采集/遥操期间 RViz 同步显示（workflow/plan/il_sim.md Phase 3, 内置启用）。
 
 守护线程 ROS 节点：/joint_states、物体/goal TF、/il/{fixed,wrist}/image。
 数据源 = env_backend 共享 env；rclpy 惰性导入（无 ROS 时 teleop/record 照常工作）。

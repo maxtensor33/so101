@@ -1,8 +1,8 @@
-"""SO-ARM101 MTC pick and place (plan/mtc.md Phase 3).
+"""SO-ARM101 MTC pick and place (workflow/plan/mtc.md Phase 3).
 
 RViz 规划显示 + 双后端仿真执行:
-    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz     # 纯 RViz (plan/mtc_rviz.md)
-    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=mujoco   # 双后端已暂停, 见 todo/
+    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz     # 纯 RViz (workflow/plan/mtc_rviz.md)
+    ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=mujoco   # 双后端已暂停, 见 workflow/todo/
     ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=gazebo
 """
 
@@ -72,7 +72,7 @@ def _setup(context, *args, **kwargs):
     robot_description = _xacro_robot_description(
         "none" if sim == "rviz" else sim, None if sim == "rviz" else scene_pick)
     moveit_cfg = _moveit_config()
-    # R4 (plan/mtc_fix.md): gz 走 sim time —— joint_states 带仿真时间戳,
+    # R4 (workflow/plan/mtc_fix.md): gz 走 sim time —— joint_states 带仿真时间戳,
     # move_group 轨迹校验 (allowed_start_tolerance) 需同源时钟, 否则
     # "couldn't receive full current joint state within 1s" -> error_code=-4
     use_sim_time = (sim == "gazebo")

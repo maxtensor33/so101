@@ -1,4 +1,4 @@
-"""gamepad / leader 遥操 TODO 占位（plan/il_sim.md）。
+"""gamepad / leader 遥操 TODO 占位（workflow/plan/il_sim.md）。
 
 - gamepad: lerobot 自带 KeyboardGamepadTeleop（lerobot.teleoperators.gamepad）可低成本接入，
   只需映射其 6 维动作到 {motor}.pos 键名（TODO(il_real)）。

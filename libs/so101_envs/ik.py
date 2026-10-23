@@ -1,4 +1,4 @@
-"""pinocchio 数值 IK（plan/envs.md Phase 4）。
+"""pinocchio 数值 IK（workflow/plan/envs.md Phase 4）。
 
 仅供脚本专家策略与未来任务空间接口使用；env 核心不依赖本模块。
 DLS (damped least squares) + 关节限位裁剪 + 温启动。

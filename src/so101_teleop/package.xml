@@ -3,7 +3,7 @@
 <package format="3">
   <name>so101_teleop</name>
   <version>0.1.0</version>
-  <description>SO101 lerobot Robot/Teleoperator 适配层：仿真采集 + RViz 同步显示（plan/il_sim.md）</description>
+  <description>SO101 lerobot Robot/Teleoperator 适配层：仿真采集 + RViz 同步显示（workflow/plan/il_sim.md）</description>
   <maintainer email="maxtensor@todo.todo">maxtensor</maintainer>
   <license>Apache-2.0</license>
   <exec_depend>rclpy</exec_depend>

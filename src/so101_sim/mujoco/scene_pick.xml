@@ -26,7 +26,7 @@
         <geom name="floor" size="0 0 0.05" pos="0 0 0" type="plane" material="groundplane" />
 
         <!-- 可抓取 cube (摆位来自 scripts/probe_pick_poses.py 探测输出)
-             R2 (plan/mtc_fix.md): 4cm -> 2cm, 底面贴地 z=0.01 -->
+             R2 (workflow/plan/mtc_fix.md): 4cm -> 2cm, 底面贴地 z=0.01 -->
         <body name="cube" pos="0.117 -0.077 0.01">
             <freejoint/>
             <geom name="cube_geom" type="box" size="0.01 0.0101 0.01" mass="0.05"
@@ -42,5 +42,5 @@
          依 gripper 命令阈值触发, 每步把 cube 的 qpos/qvel 写为跟随 moving_jaw
          (运动学携带, robosuite 同款做法)。释放时停止覆盖, cube 落回物理仿真。
          (Phase 0/1 实测: 单动爪物理夹持与 weld equality 均不可靠, 详见
-         .claude/tdd/mtc.tdd.md) -->
+         workflow/tdd/mtc.tdd.md) -->
 </mujoco>

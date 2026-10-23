@@ -1,4 +1,4 @@
-"""il_sim 训练 config 组装（plan/il_sim.md Phase 4）。
+"""il_sim 训练 config 组装（workflow/plan/il_sim.md Phase 4）。
 
 小网络模板：只跑通流程用（冒烟/联调）；全量训练由用户迁移到大显存机器
 （迁移指引见 docs/il_sim/index.md），届时用官方默认超参即可。
@@ -45,7 +45,7 @@ def small_policy_config(policy: str):
         )
     if policy == "smolvla":
         raise NotImplementedError(
-            "SmolVLA 为 TODO（plan/il_sim.md）：需 smolvla_base 预训练权重 HF hub 下载 + 显存评估"
+            "SmolVLA 为 TODO（workflow/plan/il_sim.md）：需 smolvla_base 预训练权重 HF hub 下载 + 显存评估"
         )
     raise ValueError(f"unknown policy: {policy} (expected act|diffusion|vqbet)")
 

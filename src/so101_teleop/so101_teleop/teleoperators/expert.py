@@ -1,4 +1,4 @@
-"""ScriptExpertTeleop: IK state-machine Teleoperator (plan/il_sim.md Phase 2).
+"""ScriptExpertTeleop: IK state-machine Teleoperator (workflow/plan/il_sim.md Phase 2).
 
 Closed-loop via shared env (env_backend). Phases: WAIT -> GO -> SETTLE,
 then request_reset() so the robot resets the env at the next frame boundary

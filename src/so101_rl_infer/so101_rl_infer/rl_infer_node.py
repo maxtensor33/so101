@@ -1,4 +1,4 @@
-"""SO101 RL 推理节点 (plan/rl.md Phase 4)。
+"""SO101 RL 推理节点 (workflow/plan/rl.md Phase 4)。
 
 加载训练好的 checkpoint (sb3/skrl 双后端), 自持 env 实例, 每 tick:
 obs -> policy.predict -> env.step -> 发布 /joint_states、物体 TF、相机图像。

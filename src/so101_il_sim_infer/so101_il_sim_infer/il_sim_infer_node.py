@@ -1,4 +1,4 @@
-"""SO101 il_sim IL 推理节点（plan/il_sim.md Phase 5）。
+"""SO101 il_sim IL 推理节点（workflow/plan/il_sim.md Phase 5）。
 
 加载 lerobot policy checkpoint（ACT/DP/VQ-BeT 通用加载链路），自持相机版 env，
 10Hz tick: obs → preprocess → policy.select_action → postprocess → env.step → ROS 话题

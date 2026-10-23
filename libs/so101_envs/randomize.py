@@ -1,4 +1,4 @@
-"""域随机化配置（plan/envs.md Phase 3; Phase 1 起供 reset 使用）。
+"""域随机化配置（workflow/plan/envs.md Phase 3; Phase 1 起供 reset 使用）。
 
 只含 mujoco 运行期安全可变字段的随机化（qpos 噪声 / 出生域 / rgba / 摩擦 / 相机位姿）。
 尺寸随机化需处理 geom_size 派生量（rbound），留扩展。

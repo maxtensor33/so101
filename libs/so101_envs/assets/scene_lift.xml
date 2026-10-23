@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- SO101 lift 场景（plan/envs.md Phase 0）：桌面 + cube（抓起任务）。
+<!-- SO101 lift 场景（workflow/plan/envs.md Phase 0）：桌面 + cube（抓起任务）。
      桌面/地板/灯光/相机定义与 reach 场景一致，仅任务物体不同。 -->
 <mujoco model="so101_env_lift">
   <include file="so101_env.xml"/>

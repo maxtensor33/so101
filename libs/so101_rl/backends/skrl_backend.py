@@ -1,4 +1,4 @@
-"""skrl 后端（plan/rl.md Phase 2）。
+"""skrl 后端（workflow/plan/rl.md Phase 2）。
 
 - 手写单 env 训练循环（镜像 skrl sequential trainer，eval callback 可嵌入）
 - checkpoint: agent.save -> model.pt + meta.json (+hparams)

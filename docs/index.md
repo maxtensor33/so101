@@ -32,10 +32,10 @@ export MUJOCO_GL=egl
 
 | 位置 | 内容 |
 |---|---|
-| `plan/` | 各方向原始计划（setup/robotics/envs/rl/mtc_rviz） |
-| `reports/` | 验收报告（对齐/draw cube/envs/rl） |
-| `todo/` | 待办勘察（gz 验证、GPU 并行路线、文档图片清单） |
-| `learn/` | 经验复盘（坑清单与改进） |
+| `workflow/plan/` | 各方向原始计划（setup/robotics/envs/rl/mtc_rviz） |
+| `workflow/reports/` | 验收报告（对齐/draw cube/envs/rl） |
+| `workflow/todo/` | 待办勘察（gz 验证、GPU 并行路线、文档图片清单） |
+| `workflow/learn/` | 经验复盘（坑清单与改进） |
 | `outputs/` | RL 训练产物（gitignore） |
 
 ```{toctree}

@@ -1,4 +1,4 @@
-"""力矩控制器节点 (plan/robotics.md Phase 4)。
+"""力矩控制器节点 (workflow/plan/robotics.md Phase 4)。
 
 100 Hz 控制环: /joint_states 反馈 → τ → effort 命令。
 订阅 /draw_cube/arm_target (Float64MultiArray, 布局 [q_d(5), dq_d(5), ddq_d(5)]);

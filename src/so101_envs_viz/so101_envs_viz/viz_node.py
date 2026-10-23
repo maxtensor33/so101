@@ -1,4 +1,4 @@
-"""SO101 envs 可视化节点 (plan/envs.md Phase 5)。
+"""SO101 envs 可视化节点 (workflow/plan/envs.md Phase 5)。
 
 运行 gymnasium env (纯 MuJoCo 内核), 将状态发布到 ROS 供 RViz 显示:
 - /joint_states (6 关节位置) -> robot_state_publisher -> RViz RobotModel

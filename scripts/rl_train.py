@@ -1,4 +1,4 @@
-"""RL 训练 CLI（plan/rl.md；命名约定 <项目名>_<功能>.py）。
+"""RL 训练 CLI（workflow/plan/rl.md；命名约定 <项目名>_<功能>.py）。
 
 用法:
     uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Reach-v1 \

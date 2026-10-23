@@ -1,4 +1,4 @@
-"""SO101BaseEnv: mujoco 内核 gymnasium 基类（plan/envs.md Phase 1）。
+"""SO101BaseEnv: mujoco 内核 gymnasium 基类（workflow/plan/envs.md Phase 1）。
 
 - 动作: Box(-1,1,(6,)) 归一化关节位置目标, 经 6 个 <position> actuator 执行
 - 内环: 每控制步 n_substeps 次 mj_step (默认 50 x 2ms = 10Hz 控制 / 500Hz 仿真)

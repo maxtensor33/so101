@@ -1,6 +1,6 @@
 """so101_robotics 公共层: 常量、模型加载器、关节限位 (对标 lab-2 ur5e_common.py)。
 
-默认加载力矩版模型 (plan/robotics.md: 重点 torque 版本):
+默认加载力矩版模型 (workflow/plan/robotics.md: 重点 torque 版本):
   URDF : models/so101_torque.urdf          (Pinocchio 解析计算用)
   MJCF : models/so101_new_calib_torque.xml (MuJoCo 仿真/交叉验证用)
 """

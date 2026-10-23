@@ -1,4 +1,4 @@
-"""draw_cube_node RViz marker 构造的 TDD 测试 (plan/robotics.md Phase 5)。
+"""draw_cube_node RViz marker 构造的 TDD 测试 (workflow/plan/robotics.md Phase 5)。
 
 cube 线框 marker: 72 个航点按每边连续 POINTS_PER_EDGE=6 个排列,
 线段必须沿边连接 (段长 = side/(POINTS_PER_EDGE-1)), 不得跨边跳变。

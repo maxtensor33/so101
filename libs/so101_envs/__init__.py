@@ -1,4 +1,4 @@
-"""SO101 gymnasium 环境集（plan/envs.md）。
+"""SO101 gymnasium 环境集（workflow/plan/envs.md）。
 
 纯 MuJoCo 内核 + 关节位置控制动作空间（无相机 4 id + 带相机 4 id，Phase 3 补齐）。
 """

@@ -1,4 +1,4 @@
-"""lerobot sim2real 部署接口层（plan/rl.md Phase 5, 零 lerobot 依赖）。
+"""lerobot sim2real 部署接口层（workflow/plan/rl.md Phase 5, 零 lerobot 依赖）。
 
 定义部署策略协议 + 把训练 checkpoint 适配为该协议。
 真机接线待硬件就绪（见 LerobotSO101Arm 类内 TODO）。
@@ -77,7 +77,7 @@ class LerobotSO101Arm(SO101DeployPolicy):
     """
 
     def __init__(self, policy, port: str = ""):
-        raise NotImplementedError("lerobot 真机部署待硬件就绪（plan/rl.md Phase 5 TODO）")
+        raise NotImplementedError("lerobot 真机部署待硬件就绪（workflow/plan/rl.md Phase 5 TODO）")
 
     def reset(self) -> None:  # pragma: no cover
         raise NotImplementedError

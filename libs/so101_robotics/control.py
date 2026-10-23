@@ -1,4 +1,4 @@
-"""control 模块 (plan/robotics.md Phase 3, 对标 lab-2 b2_control_hierarchy.py)。
+"""control 模块 (workflow/plan/robotics.md Phase 3, 对标 lab-2 b2_control_hierarchy.py)。
 
 力矩控制器族 (学习梯度): PD+重力 → computed torque → 任务空间阻抗。
 全部输出 6 维关节力矩, 上层用 constraints.saturate_torque 饱和。

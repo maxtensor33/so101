@@ -1,4 +1,4 @@
-# RViz-only 模式控制器 (plan/mtc_rviz.md Phase 2):
+# RViz-only 模式控制器 (workflow/plan/mtc_rviz.md Phase 2):
 # mock 硬件 (xacro sim:=none) + JTC; 无 mujoco_plugins。
 controller_manager:
   ros__parameters:

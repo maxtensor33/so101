@@ -1,4 +1,4 @@
-"""脚本专家验收（plan/envs.md Phase 4）。
+"""脚本专家验收（workflow/plan/envs.md Phase 4）。
 
 pinocchio IK + 状态机驱动 4 个 env 端到端，输出 success rate。
 用法:

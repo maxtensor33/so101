@@ -1,4 +1,4 @@
-"""单环境快速验证（plan/envs.md 日常工具）。
+"""单环境快速验证（workflow/plan/envs.md 日常工具）。
 
 用法:
     uv run python scripts/envs_check_env.py --id SO101Lift-v1

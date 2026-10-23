@@ -1,4 +1,4 @@
-"""夹持几何校准 (plan/mtc_fix.md Phase R1)。
+"""夹持几何校准 (workflow/plan/mtc_fix.md Phase R1)。
 
 在抓取位形 (GRASP_JOINTS) 下扫描 gripper 闭合角, 实测固定指面与动爪指面的
 世界位姿, 计算:

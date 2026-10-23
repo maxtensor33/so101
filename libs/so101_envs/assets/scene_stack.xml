@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- SO101 stack 场景（plan/envs.md Phase 0）：桌面 + cube（堆叠任务，itemA 红 + itemB 蓝）。
+<!-- SO101 stack 场景（workflow/plan/envs.md Phase 0）：桌面 + cube（堆叠任务，itemA 红 + itemB 蓝）。
      桌面/地板/灯光/相机定义与 reach 场景一致，仅任务物体不同。 -->
 <mujoco model="so101_env_stack">
   <include file="so101_env.xml"/>

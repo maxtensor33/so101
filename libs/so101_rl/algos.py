@@ -1,4 +1,4 @@
-"""算法注册表：--backend/--algo -> TrainerSpec + 默认超参（plan/rl.md Phase 3）。"""
+"""算法注册表：--backend/--algo -> TrainerSpec + 默认超参（workflow/plan/rl.md Phase 3）。"""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Dynamics 模块 (plan/robotics力矩.md Phase 2, 对标 lab-2 a5_dynamics.py)。
+"""Dynamics 模块 (workflow/plan/robotics力矩.md Phase 2, 对标 lab-2 a5_dynamics.py)。
 
 Pinocchio RNEA/CRBA/ABA 与 MuJoCo qfrc_bias/mj_fullM 交叉验证过。
 """

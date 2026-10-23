@@ -1,4 +1,4 @@
-"""il_sim 推理核心（ROS 无关, plan/il_sim.md Phase 5）。
+"""il_sim 推理核心（ROS 无关, workflow/plan/il_sim.md Phase 5）。
 
 load_policy: checkpoint → (policy, preprocessor, postprocessor)。
 make_obs_batch: env obs → policy 输入 batch（state=归一化 qpos(6,), 图像 CHW float 0-1）。

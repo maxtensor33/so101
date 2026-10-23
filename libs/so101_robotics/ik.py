@@ -1,4 +1,4 @@
-"""IK 模块 (plan/robotics.md Phase 2, 对标 lab-2 a4_inverse_kinematics.py)。
+"""IK 模块 (workflow/plan/robotics.md Phase 2, 对标 lab-2 a4_inverse_kinematics.py)。
 
 DLS (阻尼最小二乘) 与伪逆两种数值 IK:
   - target 为 pin.SE3: 6D (位置+姿态), rot_weight 可调 (位置优先用小权重)

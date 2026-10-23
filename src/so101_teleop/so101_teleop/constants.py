@@ -1,4 +1,4 @@
-"""so101_teleop 共享常量（features 键名集中定义，双端引用防漂移 — plan/il_sim.md）。"""
+"""so101_teleop 共享常量（features 键名集中定义，双端引用防漂移 — workflow/plan/il_sim.md）。"""
 
 # SO-ARM101 六关节，与 env 动作向量顺序一一对应（qpos/ctrl 同序）
 JOINT_NAMES = [

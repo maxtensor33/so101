@@ -1,4 +1,4 @@
-"""夹持几何校准的 TDD 测试 (plan/mtc_fix.md Phase R1)。
+"""夹持几何校准的 TDD 测试 (workflow/plan/mtc_fix.md Phase R1)。
 
 理想夹持位姿: cube 中心位于固定指面与动爪指面的中点 (留 gap 间隙),
 与两指面等距、无穿透, 且相对几何随 yaw 旋转不变。

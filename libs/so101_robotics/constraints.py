@@ -1,4 +1,4 @@
-"""Constraints 模块 (plan/robotics.md Phase 3, 对标 lab-2 b3_constraints.py)。
+"""Constraints 模块 (workflow/plan/robotics.md Phase 3, 对标 lab-2 b3_constraints.py)。
 
 力矩饱和 (STS3215 ±3.35 Nm) 与关节限位约束。
 """

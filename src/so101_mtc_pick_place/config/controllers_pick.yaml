@@ -1,4 +1,4 @@
-# pick 场景控制器配置 (plan/mtc.md Phase 3)
+# pick 场景控制器配置 (workflow/plan/mtc.md Phase 3)
 # 位置控制 (MTC 经 JTC 执行) + mujoco_plugins (GraspAttachPlugin: kinematic attach)
 # gz 侧的 DetachableJoint 由 world 文件与 ros_gz_bridge 处理, 不在此配置。
 controller_manager:

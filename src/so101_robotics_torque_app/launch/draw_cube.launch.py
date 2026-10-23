@@ -1,4 +1,4 @@
-"""SO-ARM101 draw_cube acceptance launch (plan/robotics.md Phase 4).
+"""SO-ARM101 draw_cube acceptance launch (workflow/plan/robotics.md Phase 4).
 
 Usage:
     ros2 launch so101_robotics_torque_app draw_cube.launch.py                     # torque (default)

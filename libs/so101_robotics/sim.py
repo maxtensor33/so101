@@ -1,4 +1,4 @@
-"""sim 模块: MuJoCo 仿真 wrapper (plan/robotics.md Phase 3, 对标 lab-2 mujoco_sim.py)。"""
+"""sim 模块: MuJoCo 仿真 wrapper (workflow/plan/robotics.md Phase 3, 对标 lab-2 mujoco_sim.py)。"""
 
 import mujoco
 import numpy as np

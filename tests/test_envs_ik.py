@@ -1,4 +1,4 @@
-"""pinocchio IK 测试（plan/envs.md Phase 4, TDD）。
+"""pinocchio IK 测试（workflow/plan/envs.md Phase 4, TDD）。
 
 - 可达位姿: IK 收敛 (err < 1mm) 且 FK 复核
 - 解在关节限位内

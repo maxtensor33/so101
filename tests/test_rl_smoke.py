@@ -1,4 +1,4 @@
-"""rl 依赖与环境兼容冒烟（plan/rl.md Phase 0, TDD）。
+"""rl 依赖与环境兼容冒烟（workflow/plan/rl.md Phase 0, TDD）。
 
 - torch/sb3/skrl 可导入且版本满足下限
 - cuda 可用性打印（CI 无 GPU 不强制）

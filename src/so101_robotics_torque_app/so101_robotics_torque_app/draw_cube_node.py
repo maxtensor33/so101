@@ -1,4 +1,4 @@
-"""draw_cube 验收节点 (plan/robotics.md Phase 4/5, 对标 lab-2 c3_draw_cube.py)。
+"""draw_cube 验收节点 (workflow/plan/robotics.md Phase 4/5, 对标 lab-2 c3_draw_cube.py)。
 
 流水线: 立方体 12 边 → 航点 → DLS IK (温启动) → quintic 关节轨迹 → 执行。
   - ctrl_mode:=torque   轨迹采样发 /draw_cube/arm_target (力矩层执行)

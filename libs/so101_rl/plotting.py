@@ -1,4 +1,4 @@
-"""训练可视化（plan/rl.md 增量：训练步骤可视化）。"""
+"""训练可视化（workflow/plan/rl.md 增量：训练步骤可视化）。"""
 
 from __future__ import annotations
 

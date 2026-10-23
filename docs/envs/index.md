@@ -46,4 +46,4 @@ src/so101_envs_viz ── joint_states/TF/相机图像 ──▶ RViz
 ## 已知问题
 
 - lift/place/stack 抓取保持失败（mesh 凸包 + 硬位置伺服），诊断与调参记录见
-  `reports/envs_report.md`——**RL 可训练但成功率预期低**。
+  `workflow/reports/envs_report.md`——**RL 可训练但成功率预期低**。

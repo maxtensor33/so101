@@ -1,5 +1,5 @@
 // Copyright 2026 maxtensor. Apache-2.0.
-// MTC pick and place for SO-ARM101 (plan/mtc.md Phase 2).
+// MTC pick and place for SO-ARM101 (workflow/plan/mtc.md Phase 2).
 //
 // 实际 stage 链 (扁平, 每个 stage 都是前向传播器, 无 SerialContainer/Connect):
 //   CurrentState -> open gripper -> move to pick (OMPL 关节目标)
@@ -72,11 +72,11 @@ public:
     world_frame_ = declare_parameter<std::string>("world_frame", "world");
     cube_x_ = declare_parameter<double>("cube_x", 0.117);
     cube_y_ = declare_parameter<double>("cube_y", -0.077);
-    // R2 (plan/mtc_fix.md): cube 4cm -> 2cm, 三处同步 (scene_pick.xml /
+    // R2 (workflow/plan/mtc_fix.md): cube 4cm -> 2cm, 三处同步 (scene_pick.xml /
     // pick_place.sdf / 本节点 planning scene), 底面贴地 z=0.01
     cube_z_ = declare_parameter<double>("cube_z", 0.01);
     cube_size_ = declare_parameter<double>("cube_size", 0.02);
-    // R2 (plan/mtc_fix.md) 重探测解 (pick=0.117,-0.077 / place=0.125,0.063,
+    // R2 (workflow/plan/mtc_fix.md) 重探测解 (pick=0.117,-0.077 / place=0.125,0.063,
     // cube 2cm): grasp_pose 由 R1 ideal_rel_pose 构造 (EE 带 standoff 偏移),
     // IK 解逐个过 mujoco 自碰撞校验 (probe_pick_poses.probe_pair)。
     // 旧 economy 解 [0.59347,...] 基于 "EE 正上方 cube" 目标, 是贴边根因之一。

@@ -1,4 +1,4 @@
-"""il_sim Phase 4: 训练 config 构造 + ACT steps=10 冒烟（SmolVLA=TODO 见 plan/il_sim.md）。"""
+"""il_sim Phase 4: 训练 config 构造 + ACT steps=10 冒烟（SmolVLA=TODO 见 workflow/plan/il_sim.md）。"""
 
 from __future__ import annotations
 

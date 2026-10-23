@@ -1,4 +1,4 @@
-"""RL 双后端契约测试（plan/rl.md Phase 1/2, TDD）。
+"""RL 双后端契约测试（workflow/plan/rl.md Phase 1/2, TDD）。
 
 契约：make_env / make_model / train / save / load_policy 形状与目录约定一致。
 """

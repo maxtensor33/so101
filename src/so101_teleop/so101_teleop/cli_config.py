@@ -1,4 +1,4 @@
-"""CLI config 构造器（plan/il_sim.md Phase 3）：遥操/采集两种模式的 lerobot config 组装。
+"""CLI config 构造器（workflow/plan/il_sim.md Phase 3）：遥操/采集两种模式的 lerobot config 组装。
 
 ROS 无关、可单测；scripts/il_sim_teleop.py 与 launch 验收共用。
 """

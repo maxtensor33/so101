@@ -1,4 +1,4 @@
-"""RL checkpoint 评估 CLI（plan/rl.md）。
+"""RL checkpoint 评估 CLI（workflow/plan/rl.md）。
 
 用法:
     uv run python scripts/rl_eval.py --ckpt outputs/rl/sb3-sac-reach --episodes 10

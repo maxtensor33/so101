@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!-- SO101 reach 场景（plan/envs.md Phase 0）：桌面 + cube + goal site（mocap）。
+<!-- SO101 reach 场景（workflow/plan/envs.md Phase 0）：桌面 + cube + goal site（mocap）。
      桌面顶面 z=0，机器人基座在桌面边缘（原点），物体出生域 x∈[0.15,0.35], y∈[-0.1,0.1]。 -->
 <mujoco model="so101_env_reach">
   <include file="so101_env.xml"/>

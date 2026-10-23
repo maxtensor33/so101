@@ -1,4 +1,4 @@
-"""teleop.launch.py — il_sim 遥操/采集验收入口（plan/il_sim.md Phase 3）。
+"""teleop.launch.py — il_sim 遥操/采集验收入口（workflow/plan/il_sim.md Phase 3）。
 
 用法:
     ros2 launch so101_teleop teleop.launch.py teleop:=expert record:=false [env:=reach] [rviz:=true]

@@ -83,7 +83,7 @@ lerobot-train \
   --dataset.root=outputs/datasets/il_sim/il_sim/reach_expert \
   --policy.type=act --steps=100000 --batch-size=8 \
   --output_dir=outputs/il_sim/act_full
-# SmolVLA = TODO：需 smolvla_base 预训练权重（HF hub ~1GB+）+ 显存评估，见 todo/
+# SmolVLA = TODO：需 smolvla_base 预训练权重（HF hub ~1GB+）+ 显存评估，见 workflow/todo/
 ```
 
 ### 推理（ROS2, MuJoCo 与 RViz 同步）
@@ -107,8 +107,8 @@ ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach \
   创建，viewer 惰性弹出、step 自动 sync；无显示环境（服务器采集）用 `mujoco:=false`。
   viewer 默认**隐藏左右工具栏 + 最大化**（`viewer_ui=False, viewer_maximize=True`；
   工具栏 Tab/Shift+Tab 可切，maximize 走 X11 EWMH，Wayland 静默跳过）。
-  键盘焦点抑制（`viewer_no_input`）当前无效（TODO 见 `todo/il_sim_viewer_no_input_todo.md`），
+  键盘焦点抑制（`viewer_no_input`）当前无效（TODO 见 `workflow/todo/il_sim_viewer_no_input_todo.md`），
   workaround：焦点保持在终端——viewer 字母键为 C++ 层渲染开关，仅鼠标交互即可。
 - **推理帧率**：diffusion 小网络 ~5-6Hz（GPU），ACT 更快；`rate` 参数可调。
-- **SmolVLA**：TODO（`todo/il_sim_smolvla_todo.md`），当前 `small_policy_config("smolvla")`
+- **SmolVLA**：TODO（`workflow/todo/il_sim_smolvla_todo.md`），当前 `small_policy_config("smolvla")`
   显式 NotImplementedError。

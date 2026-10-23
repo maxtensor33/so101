@@ -1,4 +1,4 @@
-"""il_sim Phase 2: Teleoperator 契约 + 官方 record() 采集冒烟（plan/il_sim.md）。
+"""il_sim Phase 2: Teleoperator 契约 + 官方 record() 采集冒烟（workflow/plan/il_sim.md）。
 
 - ScriptExpertTeleop: IK 状态机（WAIT→GO→SETTLE），经 env_backend 共享 env 闭环
 - So101KeyboardTeleop: 关节选择 + 增量控制（键事件可注入，headless 可测）

@@ -1,4 +1,4 @@
-"""FK 模块 (plan/robotics.md Phase 1, 对标 lab-2 a2_forward_kinematics.py)。
+"""FK 模块 (workflow/plan/robotics.md Phase 1, 对标 lab-2 a2_forward_kinematics.py)。
 
 Pinocchio 与 MuJoCo 双引擎 FK + 随机配置交叉验证。
 两模型已在 Phase 0 验证为运动学一致。

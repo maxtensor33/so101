@@ -1,4 +1,4 @@
-"""rl_infer.launch.py — SO101 RL 推理可视化 (plan/rl.md Phase 4)。
+"""rl_infer.launch.py — SO101 RL 推理可视化 (workflow/plan/rl.md Phase 4)。
 
 用法:
     ros2 launch so101_rl_infer rl_infer.launch.py env:=reach \

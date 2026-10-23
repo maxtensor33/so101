@@ -1,4 +1,4 @@
-"""pick 场景的 TDD 测试 (plan/mtc.md Phase 1)。
+"""pick 场景的 TDD 测试 (workflow/plan/mtc.md Phase 1)。
 
 双后端抓取场景:
   - MuJoCo: scene_pick.xml = 位置控制版场景 + 可抓取 cube + weld equality (默认
@@ -17,7 +17,7 @@ SCENE_PICK = REPO / "src" / "so101_sim" / "mujoco" / "scene_pick.xml"
 GZ_WORLD = REPO / "src" / "so101_bringup" / "worlds" / "pick_place.sdf"
 
 # 摆位: Phase 0 探测脚本 (mtc_probe_pick_poses.py) 输出的推荐组合
-# R2 (plan/mtc_fix.md): cube 4cm -> 2cm, 底面贴地 z = 0.01
+# R2 (workflow/plan/mtc_fix.md): cube 4cm -> 2cm, 底面贴地 z = 0.01
 PICK_CUBE = [0.117, -0.077]
 PLACE_CUBE = [0.125, 0.063]
 CUBE_SIZE = 0.02  # 全边长 (mujoco box size 为半边长 0.01)

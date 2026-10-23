@@ -1,4 +1,4 @@
-"""il_sim_infer.launch.py — IL 推理验收入口（plan/il_sim.md Phase 5）。
+"""il_sim_infer.launch.py — IL 推理验收入口（workflow/plan/il_sim.md Phase 5）。
 
 用法:
     ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=outputs/il_sim/<run>/checkpoints/000010/pretrained_model [camera:=true] [rviz:=true]

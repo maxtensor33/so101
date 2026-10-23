@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""il_sim 训练 CLI（plan/il_sim.md Phase 4）。
+"""il_sim 训练 CLI（workflow/plan/il_sim.md Phase 4）。
 
 冒烟/联调：
     uv run python scripts/il_sim_train.py --policy act --repo-id il_sim/reach_expert --steps 10

@@ -1,4 +1,4 @@
-"""MuJoCo viewer 交互窗口查看 env（plan/envs.md 日常工具, 需图形环境）。
+"""MuJoCo viewer 交互窗口查看 env（workflow/plan/envs.md 日常工具, 需图形环境）。
 
 复用 env 的 gymnasium 标准 human 渲染（render_mode="human"）,
 脚本只附加视角选择与实时节流。

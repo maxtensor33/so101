@@ -1,4 +1,4 @@
-"""pick/place 摆位可达性探测 (plan/mtc.md Phase 0)。
+"""pick/place 摆位可达性探测 (workflow/plan/mtc.md Phase 0)。
 
 so101 工作空间小, pick 与 place 双点须同时可达。本脚本在极坐标网格上扫描
 cube 摆位, 对每处生成 top-grasp 序列位姿 (pre-grasp / grasp / lift) 并用
@@ -29,7 +29,7 @@ CUBE_HALF = 0.01  # 默认 2cm cube 的半高 (R2: 4cm -> 2cm, cube 底面在地
 # cube 理想中心相对动爪 (EE) body 的位姿 [x,y,z,qw,qx,qy,qz],
 # cube 朝向对齐 gripper frame, 与两指面等距 (留 1mm 间隙)。
 # 旧摆位把 EE 放 cube 正上方 —— cube 从未处于两指面之间, 是 "贴一边提起"
-# 与 "attach 后穿模" 的共同根因 (plan/mtc_fix.md)。
+# 与 "attach 后穿模" 的共同根因 (workflow/plan/mtc_fix.md)。
 IDEAL_REL_POSE = [-0.019618, -0.048269, 0.0188,
                   0.707071, -0.707071, -0.007071, 0.007071]
 _q = np.array(IDEAL_REL_POSE[3:], dtype=float)

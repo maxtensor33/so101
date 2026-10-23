@@ -1,4 +1,4 @@
-"""gymnasium API 合规与行为测试（plan/envs.md Phase 1, TDD）。
+"""gymnasium API 合规与行为测试（workflow/plan/envs.md Phase 1, TDD）。
 
 - env_checker（gymnasium 官方）对注册 id 全查
 - reset(seed) 可复现

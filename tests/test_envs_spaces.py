@@ -1,4 +1,4 @@
-"""obs/action 空间测试（plan/envs.md Phase 1/3, TDD）。
+"""obs/action 空间测试（workflow/plan/envs.md Phase 1/3, TDD）。
 
 - 无相机 id: 扁平 state 向量（Box），形状与语义布局锁定
 - 带相机 id（Phase 3 补）: Dict{"state", "rgb": {"fixed","wrist"}}，128x128 uint8

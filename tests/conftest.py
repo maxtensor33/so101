@@ -12,7 +12,7 @@ REPO_ROOT = MODELS_DIR.parent
 URDF_PATH = MODELS_DIR / "so101_new_calib.urdf"
 XML_PATH = MODELS_DIR / "so101_new_calib.xml"
 
-# 力矩控制版本 (plan/robotics.md Phase 0): xxx_torque 命名
+# 力矩控制版本 (workflow/plan/robotics.md Phase 0): xxx_torque 命名
 URDF_TORQUE_PATH = MODELS_DIR / "so101_torque.urdf"
 XML_TORQUE_PATH = MODELS_DIR / "so101_new_calib_torque.xml"
 SCENE_TORQUE_PATH = REPO_ROOT / "src" / "so101_sim" / "mujoco" / "scene_torque.xml"

@@ -1,4 +1,4 @@
-"""env_viz.launch.py — SO101 envs RViz 可视化 (plan/envs.md Phase 5)。
+"""env_viz.launch.py — SO101 envs RViz 可视化 (workflow/plan/envs.md Phase 5)。
 
 用法:
     ros2 launch so101_envs_viz env_viz.launch.py env:=reach camera:=false rviz:=true

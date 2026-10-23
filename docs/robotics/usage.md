@@ -6,8 +6,8 @@
 |---|---|
 | `colcon build --symlink-install` | 构建全部 colcon 包（7 个） |
 | `uv run pytest` | 全量测试（220 passed） |
-| `uv run python scripts/setup_verify_model_alignment.py` | 位置版 URDF↔MJCF 对齐 → `reports/alignment_report.md` |
-| `uv run python scripts/setup_verify_model_alignment.py --torque` | 力矩版对齐 → `reports/alignment_report_torque.md` |
+| `uv run python scripts/setup_verify_model_alignment.py` | 位置版 URDF↔MJCF 对齐 → `workflow/reports/alignment_report.md` |
+| `uv run python scripts/setup_verify_model_alignment.py --torque` | 力矩版对齐 → `workflow/reports/alignment_report_torque.md` |
 | `bash scripts/clean_ros.sh` | 清理 demo 残留进程（每轮测试前必做） |
 
 ## 仿真 + MoveIt（so101_bringup）

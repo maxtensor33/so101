@@ -1,4 +1,4 @@
-"""VecNormalize 开关约定（plan/rl.md）。
+"""VecNormalize 开关约定（workflow/plan/rl.md）。
 
 默认关闭。启用时训练侧 wrap + 随 checkpoint 保存 vecnormalize.pkl，
 推理/评估侧必须从同一 checkpoint 目录加载（契约测试锁定往返一致）。

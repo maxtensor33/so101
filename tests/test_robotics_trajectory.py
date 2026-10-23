@@ -1,4 +1,4 @@
-"""Trajectory 模块 TDD 测试 (plan/robotics.md Phase 3, 对标 lab-2 B1)。"""
+"""Trajectory 模块 TDD 测试 (workflow/plan/robotics.md Phase 3, 对标 lab-2 B1)。"""
 
 import numpy as np
 import pytest

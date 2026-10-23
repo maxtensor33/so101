@@ -1,4 +1,4 @@
-"""so101_teleop: lerobot Robot/Teleoperator 协议适配层（plan/il_sim.md）。
+"""so101_teleop: lerobot Robot/Teleoperator 协议适配层（workflow/plan/il_sim.md）。
 
 Robot 后端为 so101_envs 相机版仿真环境；il_real 阶段换真机 Robot 后端即可复用采集管线。
 import 本包即完成 draccus ChoiceRegistry 注册（官方 CLI 依赖）。

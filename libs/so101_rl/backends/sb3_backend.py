@@ -1,4 +1,4 @@
-"""SB3 后端（plan/rl.md Phase 1）。
+"""SB3 后端（workflow/plan/rl.md Phase 1）。
 
 - make_model: SAC/PPO/TD3 直接接受 gymnasium env（sb3 自动包 Monitor+DummyVecEnv）
 - train: 自写 SuccessEvalCallback（统计 info["success"]，sb3 内置 EvalCallback 只给 reward）

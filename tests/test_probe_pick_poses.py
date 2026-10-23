@@ -1,4 +1,4 @@
-"""mtc_probe_pick_poses 脚本的 TDD 测试 (plan/mtc.md Phase 0)。
+"""mtc_probe_pick_poses 脚本的 TDD 测试 (workflow/plan/mtc.md Phase 0)。
 
 探测 so101 在桌面上抓取 cube 的 pick/place 摆位可达性。
 纯函数部分可测; 全量扫描作为脚本运行 (耗时长, 不进 pytest)。
@@ -97,7 +97,7 @@ class TestGraspSequence:
 
 
 class TestIdealGraspFromRelPose:
-    """R2 (plan/mtc_fix.md): grasp_pose 由 R1 实测 ideal_rel_pose 构造。
+    """R2 (workflow/plan/mtc_fix.md): grasp_pose 由 R1 实测 ideal_rel_pose 构造。
 
     旧实现 EE 在 cube 正上方 (水平偏移 0), 而理想夹持几何中 EE (动爪) 原点
     相对 cube 中心有 ~28mm 水平 standoff —— 这是 "cube 贴一边夹爪提起" 的
@@ -133,7 +133,7 @@ class TestIdealGraspFromRelPose:
 
 
 class TestSelfCollisionFilter:
-    """R2 (plan/mtc_fix.md): probe IK 解必须过 mujoco 自碰撞校验。
+    """R2 (workflow/plan/mtc_fix.md): probe IK 解必须过 mujoco 自碰撞校验。
 
     economy 教训: 原 probe 只查关节限位, 曾给出 gripper_link 穿 shoulder_link
     3mm 的解, 导致 move_group 规划目标 state 无效。

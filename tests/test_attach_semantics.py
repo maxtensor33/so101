@@ -1,4 +1,4 @@
-"""attach 语义 spike 的 TDD 测试 (plan/mtc_fix.md R3/R4 mujoco 侧)。
+"""attach 语义 spike 的 TDD 测试 (workflow/plan/mtc_fix.md R3/R4 mujoco 侧)。
 
 scripts/mtc_attach_semantics.py 镜像 grasp_attach_plugin C++ 语义 (纯 mujoco,
 无 ROS), ideal_rel_pose 从 controllers_pick.yaml 读出货值。

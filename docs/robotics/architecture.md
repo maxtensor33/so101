@@ -35,7 +35,7 @@
   launch 直接加载 `src/` 下 rviz 配置，File→Save 落盘源头。
 - **MoveIt 配置经 `MoveItConfigsBuilder`**（MoveIt 2.12 参数名 `planning_plugins` 复数）。
 
-## 实测基准（reports/draw_cube_report.md）
+## 实测基准（workflow/reports/draw_cube_report.md）
 
 | 场景 | RMS (mm) | Max (mm) |
 |---|---|---|

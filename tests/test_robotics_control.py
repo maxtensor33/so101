@@ -1,4 +1,4 @@
-"""Control / constraints / sim 模块 TDD 测试 (plan/robotics.md Phase 3, 对标 lab-2 B2/B3)。"""
+"""Control / constraints / sim 模块 TDD 测试 (workflow/plan/robotics.md Phase 3, 对标 lab-2 B2/B3)。"""
 
 import numpy as np
 import pytest

@@ -51,11 +51,11 @@ ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz
 - **纯 RViz 闭环**：cube/table 为 planning scene 虚拟场景，MTC 规划 solution
   在 Motion Planning Tasks 面板逐段回放，mock 硬件执行动画（一条命令）。
 - **扁平 stage 链**（预求解关节解 + ModifyPlanningScene attach）：MTC 0.1.8 +
-  5-dof 下标准 Connect/SerialContainer 调度为实证深水区（problems/ 三会话记录），
+  5-dof 下标准 Connect/SerialContainer 调度为实证深水区（workflow/problems/ 三会话记录），
   扁平链是验证过的正确架构。
 - **夹持几何校准（TDD）**：R1 两指面中点理想夹持位姿（居中偏差 0.1mm）、
   standoff 27.9mm；R2 探测脚本带自碰撞过滤。
-- mujoco/gz 双后端产物保留、暂停待恢复（`todo/mtc_sim_backends_todo.md`）。
+- mujoco/gz 双后端产物保留、暂停待恢复（`workflow/todo/mtc_sim_backends_todo.md`）。
 
 ### envs — gymnasium 环境集（供 RL/IL 训练）
 
@@ -152,8 +152,8 @@ ros2 launch so101_teleop teleop.launch.py teleop:=expert record:=false     # il_
 | `scripts/` | `<域>_<功能>.py` 命名：setup_verify_model_alignment、robotics_draw_cube_viewer、envs_{check_env,view_env,run_expert}、rl_{train,eval}、il_sim_{record,teleop,train}、mtc_{probe_pick_poses,probe_grasp_geometry,attach_semantics} |
 | `models/` | 上游模型副本（位置版 / 力矩版） |
 | `outputs/` | 运行产物（gitignore）：`rl/` 训练、`il_sim/` 数据集与 checkpoint、`datasets/il_sim/` LeRobotDataset |
-| `plan/` · `reports/` · `todo/` · `learn/` · `.claude/tdd/` | 各方向计划（含 mtc_rviz） / 验收报告 / 暂停待办 / 经验复盘 / TDD 证据 |
-| `problems/` | mtc 方向跨会话调试交接记录（深水区实证） |
+| [workflow/](workflow/README.md) | 开发流程工件（约定见其 README）：`plan/`（原始计划）、`tdd/`（TDD 证据）、`reports/`（验收报告）、`todo/`（暂停待办）、`learn/`（经验复盘）、`problems/`（调试交接）、`reviews/`（评审） |
+| `workflow/problems/` | mtc 方向跨会话调试交接记录（深水区实证） |
 
 ## 故障排查
 
@@ -165,9 +165,10 @@ KDL IK tip、执行 PREEMPT）等。
 ## 开发流程约定
 
 - **所有 git commit 必须先征得维护者同意**（工作流强制）。
-- 测试先行（TDD）：证据记入 `.claude/tdd/`；每个方向一份原始计划（`plan/`）。
+- 测试先行（TDD）：证据记入 `workflow/tdd/`；每个方向一份原始计划（`workflow/plan/`）。
+- `.claude/` 为本地工作区配置，不入库（见 .gitignore）。
 - 每轮运行 ROS 测试前先 `bash scripts/clean_ros.sh`，防止残留进程污染。
-- 脚本命名约定：`<项目名>_<功能>.py`（项目 = plan/ 下的方向名）。
+- 脚本命名约定：`<项目名>_<功能>.py`（项目 = workflow/plan/ 下的方向名）。
 
 ## 相关资料
 

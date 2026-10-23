@@ -62,7 +62,7 @@ uv run python scripts/rl_train.py --backend sb3 --algo ppo --n-envs 16 --steps 4
   15GB 机器桌面环境（GUI 占 4-5GB）建议 `--n-envs ≤ 32`；超过会触发 OOM
   killer，**症状是 wezterm/vscode 集体闪退而非训练报错**。
 - 大规模并行（数百 envs / 视觉训练）需要 GPU 物理管线，路线勘察见
-  `todo/rl_gpu_parallel_todo.md`（Warp/mjlab/ManiSkill3）。
+  `workflow/todo/rl_gpu_parallel_todo.md`（Warp/mjlab/ManiSkill3）。
 
 ## 评估与可视化
 
@@ -101,7 +101,7 @@ ros2 launch so101_rl_infer rl_infer.launch.py env:=reach \
   TB 是否有事件（skrl 的 `experiment.directory` 必须在 agent 构造前设置）、
   内存是否打爆（多环境 OOM 杀 GUI 不报错）。
 - lift/place/stack 环境可训练，但抓取保持有已知物理问题（见
-  `reports/envs_report.md`），成功率预期低——reach 验收后再扩展。
+  `workflow/reports/envs_report.md`），成功率预期低——reach 验收后再扩展。
 - 长训前先跑 `--steps 2000 --n-envs 4` 冒烟，确认动线全通再上大预算。
 - 部署真机：`libs/so101_rl/lerobot_deploy.py` 定义了协议与适配器
   （零 lerobot 依赖），真机接线 TODO 见类内文档。

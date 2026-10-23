@@ -1,4 +1,4 @@
-"""力矩控制版本模型对齐与配置验证的 TDD 测试 (plan/robotics.md Phase 0)。
+"""力矩控制版本模型对齐与配置验证的 TDD 测试 (workflow/plan/robotics.md Phase 0)。
 
 xxx_torque 命名规则:
   - models/so101_torque.urdf            (验证副本)
