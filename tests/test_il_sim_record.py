@@ -197,7 +197,7 @@ def test_record_cli_renders_default():
     import sys
     from pathlib import Path
 
-    sys.path.insert(0, str(Path("/home/maxtensor/Third/Projects/local/so101/scripts")))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
     import il_sim_record
 
     # 未指定 → 注入 true
