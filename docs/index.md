@@ -10,7 +10,7 @@ ROS2 Jazzy + MuJoCo + uv/colcon 混合管理的 SO-ARM101 机械臂项目。
 | **robotics** | 力矩控制学习（教学目的）：FK/IK/动力学/轨迹/控制 → draw cube | {doc}`robotics/index` |
 | **envs** | gymnasium 环境集（mujoco 内核）：reach/lift/place/stack × 双相机 | {doc}`envs/index` |
 | **rl** | RL 训练/评估/推理（sb3/skrl 双后端 + ROS2 推理） | {doc}`rl/index` |
-| **il_sim** | 模仿学习（仿真数据）——待实现 | {doc}`il_sim/index` |
+| **il_sim** | 模仿学习（仿真采集/训练/推理，lerobot 管线） | {doc}`il_sim/index` |
 | **il_real** | 模仿学习（真机遥操作）——待实现 | {doc}`il_real/index` |
 
 ## 快速命令

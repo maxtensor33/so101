@@ -55,6 +55,8 @@ class TestMassMatrix:
         _set_mujoco_qpos(mj_model, mj_data, q)
         mujoco.mj_forward(mj_model, mj_data)
         M_mj = np.zeros((6, 6))
+        # mujoco 3.16 绑定: mj_fullM(m, d, dst)（3.8.x 换成 (m, dst, M) 签名, pyproject
+        # 已 override 锁 3.16 线, 勿降）
         mujoco.mj_fullM(mj_model, mj_data, M_mj)
         # mujoco M 含 armature; mass_matrix(include_armature=True) 与之直接对齐
         d = M_pin - M_mj

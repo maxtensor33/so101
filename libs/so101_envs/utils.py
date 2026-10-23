@@ -79,3 +79,93 @@ def is_body_static(model, data, body, threshold=0.15):
     vadr = model.jnt_dofadr[model.body_jntadr[bid]]
     v = data.qvel[vadr:vadr + 6]
     return bool(np.max(np.abs(v)) <= threshold)
+
+
+def maximize_window_by_name(title_substr="MuJoCo", timeout_s=5.0):
+    """EWMH 最大化标题含 title_substr 的 X11 窗口（best-effort, Wayland/无显示静默跳过）。
+
+    mujoco viewer 无最大化 API, 经 _NET_WM_STATE ClientMessage 实现。
+    """
+    try:
+        from Xlib import X, display
+        from Xlib.protocol import event as xevent
+    except Exception:
+        return False
+
+    import time
+
+    try:
+        d = display.Display()
+        root = d.screen().root
+        net_client_list = d.intern_atom("_NET_CLIENT_LIST")
+        net_wm_name = d.intern_atom("_NET_WM_NAME")
+        net_wm_state = d.intern_atom("_NET_WM_STATE")
+        vert = d.intern_atom("_NET_WM_STATE_MAXIMIZED_VERT")
+        horz = d.intern_atom("_NET_WM_STATE_MAXIMIZED_HORZ")
+
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            prop = root.get_full_property(net_client_list, X.AnyPropertyType)
+            for wid in (prop.value if prop else []):
+                w = d.create_resource_object("window", int(wid))
+                name_prop = w.get_full_property(net_wm_name, 0)
+                if name_prop is None:
+                    continue
+                name = name_prop.value
+                if isinstance(name, bytes):
+                    name = name.decode("utf-8", "ignore")
+                if title_substr not in str(name):
+                    continue
+                ev = xevent.ClientMessage(
+                    window=w, client_type=net_wm_state,
+                    data=(32, [1, vert, horz, 1, 0]),
+                )
+                root.send_event(ev, event_mask=X.SubstructureRedirectMask | X.SubstructureNotifyMask)
+                d.flush()
+                return True
+            time.sleep(0.2)
+    except Exception:
+        return False
+    return False
+
+
+def set_window_no_input(title_substr="MuJoCo", timeout_s=5.0):
+    """WM_HINTS.input=False: 窗口永不抢键盘焦点（X11 best-effort, 鼠标事件不受影响）。
+
+    解决 mujoco viewer 字母键渲染开关与 pynput 全局遥操键的冲突。
+    """
+    try:
+        from Xlib import X, display
+    except Exception:
+        return False
+
+    import time
+
+    try:
+        d = display.Display()
+        root = d.screen().root
+        net_client_list = d.intern_atom("_NET_CLIENT_LIST")
+        net_wm_name = d.intern_atom("_NET_WM_NAME")
+
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            prop = root.get_full_property(net_client_list, X.AnyPropertyType)
+            for wid in (prop.value if prop else []):
+                w = d.create_resource_object("window", int(wid))
+                name_prop = w.get_full_property(net_wm_name, 0)
+                if name_prop is None:
+                    continue
+                name = name_prop.value
+                if isinstance(name, bytes):
+                    name = name.decode("utf-8", "ignore")
+                if title_substr not in str(name):
+                    continue
+                hints = w.get_wm_hints() or {}
+                flags = int(hints.get("flags", 0)) | X.InputHint
+                w.set_wm_hints(flags=flags, input=0)
+                d.flush()
+                return True
+            time.sleep(0.2)
+    except Exception:
+        return False
+    return False

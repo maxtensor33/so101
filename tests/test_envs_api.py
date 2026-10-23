@@ -137,6 +137,7 @@ def test_human_in_render_modes():
 
 def test_human_mode_step_syncs_viewer(monkeypatch):
     """render_mode=human: 构造/reset 不开窗, 首次 render 惰性开窗, 每 step sync, close 关闭。"""
+    from so101_envs.base_env import SO101BaseEnv
     from so101_envs.reach import SO101ReachEnv
 
     fake = _FakeViewer()
@@ -169,3 +170,35 @@ def test_human_mode_via_gym_make():
         assert spec_gym.unwrapped.render_mode == "human"
     finally:
         spec_gym.close()
+
+
+def test_viewer_ui_kwargs(monkeypatch):
+    """viewer_ui/viewer_maximize: launch_passive 收到 show_*_ui kwargs（默认保持 True）。"""
+    import mujoco.viewer  # noqa: F401  先加载子模块供 monkeypatch
+    import mujoco
+
+    from so101_envs.base_env import SO101BaseEnv
+    from so101_envs.reach import SO101ReachEnv
+
+    captured = {}
+    real = mujoco.viewer.launch_passive
+
+    def fake_launch(model, data, **kwargs):
+        captured.update(kwargs)
+        return real(model, data, **kwargs) if False else type(
+            "H", (), {"sync": lambda s: None, "close": lambda s: None}
+        )()
+
+    monkeypatch.setattr(mujoco.viewer, "launch_passive", fake_launch)
+
+    env = SO101ReachEnv(camera=True, render_mode="human", viewer_ui=False, viewer_maximize=True)
+    env.render()  # 惰性开 viewer
+    assert captured.get("show_left_ui") is False
+    assert captured.get("show_right_ui") is False
+
+    captured.clear()
+    env2 = SO101ReachEnv(camera=True, render_mode="human")
+    env2.render()
+    assert captured.get("show_left_ui") is True
+    assert captured.get("show_right_ui") is True
+    env2.close()

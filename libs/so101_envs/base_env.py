@@ -40,7 +40,8 @@ class SO101BaseEnv(gymnasium.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 10}
     SCENE_XML = None  # 子类必须指定 assets 下的场景文件名
 
-    def __init__(self, camera=False, render_mode=None, cfg=None, n_substeps=N_SUBSTEPS):
+    def __init__(self, camera=False, render_mode=None, cfg=None, n_substeps=N_SUBSTEPS,
+                 viewer_ui=True, viewer_maximize=False, viewer_no_input=False):
         super().__init__()
         assert self.SCENE_XML is not None, "子类必须设置 SCENE_XML"
         assert render_mode in (None, "rgb_array", "human")
@@ -70,6 +71,10 @@ class SO101BaseEnv(gymnasium.Env):
         self._init_spaces()
         self._renderer = None
         self._viewer = None
+        # viewer 窗口选项（human 模式, _open_viewer 惰性消费）
+        self._viewer_ui = viewer_ui
+        self._viewer_maximize = viewer_maximize
+        self._viewer_no_input = viewer_no_input
         self._closed = False
         self._item_base_rgba = {}   # geom_name -> 基色 (DR 从基色采样, 防累积漂移)
         self._fixed_cam_base = None  # fixed_cam 基位姿 (同上)
@@ -170,7 +175,18 @@ class SO101BaseEnv(gymnasium.Env):
         """惰性打开 mujoco viewer 交互窗口（render_mode="human"）。"""
         import mujoco.viewer
 
-        self._viewer = mujoco.viewer.launch_passive(self.model, self.data)
+        self._viewer = mujoco.viewer.launch_passive(
+            self.model, self.data,
+            show_left_ui=self._viewer_ui, show_right_ui=self._viewer_ui,
+        )
+        if self._viewer_maximize:
+            from .utils import maximize_window_by_name
+
+            maximize_window_by_name("MuJoCo")
+        if self._viewer_no_input:
+            from .utils import set_window_no_input
+
+            set_window_no_input("MuJoCo")
 
     def close(self):
         self._closed = True
