@@ -1,0 +1,8 @@
+#!/usr/bin/python3
+"""ros2 run 入口 wrapper（setuptools>=80 将 console_scripts 装到 bin/，ros2 run 需要 lib/<pkg>/）。"""
+import sys
+
+from so101_rl_infer.rl_infer_node import main
+
+if __name__ == "__main__":
+    sys.exit(main())
