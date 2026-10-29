@@ -18,6 +18,8 @@
   5. `src/so101_hardware/src/so101_system.cpp`（so101JointLimits）
   6. `scripts/setup_capture_named_pose.py`（JOINT_LIMITS）+
      `scripts/setup_convert_lerobot_calibration.py`（JOINT_TRAVEL_DEG）
+  7. `libs/so101_envs/assets/so101_env.xml`（joint range + ctrlrange；
+     全链同步时曾漏掉, test_envs_align 抓住）
 - 其余 5 个关节的软限位（尤其 elbow/wrist_roll/gripper 与参考项目有微差）同样
   **未对真机逐关节验证**。
 
