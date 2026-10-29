@@ -29,4 +29,27 @@
   <disable_collisions link1="lower_arm_link" link2="wrist_link" reason="Adjacent"/>
   <disable_collisions link1="wrist_link" link2="gripper_link" reason="Adjacent"/>
   <disable_collisions link1="gripper_link" link2="moving_jaw_so101_v1_link" reason="Adjacent"/>
+  <!-- 真机折叠姿态 (lift≈-1.8, elbow≈1.6) 下 mesh 轻微相交, MoveIt 拒绝该起始状态;
+       物理上该姿态可达且无害, 按用户实测禁用 (todo/to_real_joint_calibration.md) -->
+  <disable_collisions link1="lower_arm_link" link2="shoulder_link" reason="User"/>
+  <group_state name="extend" group="arm">
+    <joint name="shoulder_pan" value="0.000000"/>
+    <joint name="shoulder_lift" value="1.584275"/>
+    <joint name="elbow_flex" value="-1.463963"/>
+    <joint name="wrist_flex" value="-0.180345"/>
+    <joint name="wrist_roll" value="0.114828"/>
+  </group_state>
+  <group_state name="extend" group="gripper">
+    <joint name="gripper" value="-0.164197"/>
+  </group_state>
+  <group_state name="reset" group="arm">
+    <joint name="shoulder_pan" value="-0.006951"/>
+    <joint name="shoulder_lift" value="-1.802795"/>
+    <joint name="elbow_flex" value="1.601092"/>
+    <joint name="wrist_flex" value="1.114228"/>
+    <joint name="wrist_roll" value="0.116192"/>
+  </group_state>
+  <group_state name="reset" group="gripper">
+    <joint name="gripper" value="-0.164197"/>
+  </group_state>
 </robot>

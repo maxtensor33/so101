@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>so101_hardware</name>
+  <version>0.1.0</version>
+  <description>ros2_control hardware interface for the SO-ARM101 with Feetech STS3215 servos</description>
+  <maintainer email="maxtensor@163.com">maxtensor</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <!-- real 宏引用 so101_sim 的 so101_joint_interfaces 宏 (xacro 级依赖) -->
+  <exec_depend>so101_sim</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

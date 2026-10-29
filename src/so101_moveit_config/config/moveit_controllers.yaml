@@ -1,3 +1,8 @@
+# 真机调整 (2026-10-29): 编码器噪声/齿隙会让启动状态偏差超 0.01 rad,
+# 执行前校验直接 abort ("start point deviates ... shoulder_lift") — 放宽到 0.05
+trajectory_execution:
+  allowed_start_tolerance: 0.05
+
 moveit_controller_manager: moveit_simple_controller_manager/MoveItSimpleControllerManager
 moveit_simple_controller_manager:
   controller_names:

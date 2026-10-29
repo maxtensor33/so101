@@ -1,21 +1,35 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="so101">
-  <!-- sim: none | gazebo | mujoco -->
+  <!-- sim: none | gazebo | mujoco; real: true 时 ros2_control 换实机插件 (workflow/plan/setup_hardware.md) -->
   <xacro:arg name="sim" default="none"/>
+  <xacro:arg name="real" default="false"/>
   <xacro:arg name="mujoco_model_path" default="$(find so101_sim)/mujoco/scene.xml"/>
+  <xacro:arg name="port" default="/dev/ttyACM0"/>
+  <xacro:arg name="calibration_file" default="$(find so101_hardware)/config/motor_calibration.yaml"/>
 
   <xacro:include filename="$(find so101_description)/urdf/so101.urdf"/>
   <xacro:include filename="$(find so101_sim)/urdf/so101.ros2_control.xacro"/>
+  <xacro:include filename="$(find so101_hardware)/urdf/so101.ros2_control_real.xacro"/>
 
   <xacro:property name="sim" value="$(arg sim)"/>
+  <xacro:property name="real" value="$(arg real)"/>
 
-  <xacro:if value="${sim == 'none'}">
-    <xacro:so101_ros2_control_mock name="so101"/>
+  <!-- real:=true: 实机插件接管 ros2_control (sim:=mujoco 时 MuJoCo 仅作数字孪生显示)
+       注意: xacro property 求值会把 arg 的 "true"/"false" 自动转成 bool,
+       必须用 ${real} 布尔判断, ${real == 'true'} 字符串比较恒为 False (pitfalls/setup-hardware.md) -->
+  <xacro:if value="${real}">
+    <xacro:so101_ros2_control_real
+        name="so101" port="$(arg port)" calibration_file="$(arg calibration_file)"/>
   </xacro:if>
-  <xacro:if value="${sim == 'gazebo'}">
-    <xacro:so101_ros2_control_gazebo name="so101"/>
-  </xacro:if>
-  <xacro:if value="${sim == 'mujoco'}">
-    <xacro:so101_ros2_control_mujoco name="so101" mujoco_model_path="$(arg mujoco_model_path)"/>
-  </xacro:if>
+  <xacro:unless value="${real}">
+    <xacro:if value="${sim == 'none'}">
+      <xacro:so101_ros2_control_mock name="so101"/>
+    </xacro:if>
+    <xacro:if value="${sim == 'gazebo'}">
+      <xacro:so101_ros2_control_gazebo name="so101"/>
+    </xacro:if>
+    <xacro:if value="${sim == 'mujoco'}">
+      <xacro:so101_ros2_control_mujoco name="so101" mujoco_model_path="$(arg mujoco_model_path)"/>
+    </xacro:if>
+  </xacro:unless>
 </robot>

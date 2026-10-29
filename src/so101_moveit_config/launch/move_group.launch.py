@@ -8,7 +8,8 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
@@ -32,12 +33,21 @@ def generate_launch_description():
 
     # 与 demo.launch.py 一致: 用 xacro 展开 robot_description
     # (name=so101 与 SRDF 匹配; ros2_control 块对 move_group 无害)
+    # sim/real/port/calibration_file 透传 (workflow/plan/setup_hardware.md Phase 4):
+    # real:=true 时 MoveIt 规划即作用于实机
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
             PathJoinSubstitution([FindPackageShare("so101_bringup"), "urdf", "so101.urdf.xacro"]),
-            " sim:=none",
+            " sim:=",
+            LaunchConfiguration("sim"),
+            " real:=",
+            LaunchConfiguration("real"),
+            " port:=",
+            LaunchConfiguration("port"),
+            " calibration_file:=",
+            LaunchConfiguration("calibration_file"),
         ]
     )
     robot_description = {
@@ -59,4 +69,20 @@ def generate_launch_description():
         parameters=[robot_description, config.robot_description_semantic],
     )
 
-    return LaunchDescription([move_group, moveit_rviz])
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument("sim", default_value="none"),
+            DeclareLaunchArgument("real", default_value="false"),
+            DeclareLaunchArgument("port", default_value="/dev/ttyACM0"),
+            DeclareLaunchArgument(
+                "calibration_file",
+                default_value=os.path.join(
+                    get_package_share_directory("so101_hardware"),
+                    "config",
+                    "motor_calibration.yaml",
+                ),
+            ),
+            move_group,
+            moveit_rviz,
+        ]
+    )

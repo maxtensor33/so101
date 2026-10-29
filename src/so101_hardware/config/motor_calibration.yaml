@@ -1,0 +1,40 @@
+# SO-ARM101 电机标定 (scripts/setup_convert_lerobot_calibration.py 自动生成, 请勿手改)
+# 来源: LeRobot 标定 JSON 全行程标定 (homing_offset 已丢弃, 采用全行程线性映射)
+# 消费方: src/so101_hardware (so101_system.cpp) 与 scripts/setup_capture_named_pose.py
+
+shoulder_pan:
+  id: 1
+  drive_mode: 0
+  range_min: 617
+  range_max: 3379
+  invert: false
+shoulder_lift:
+  id: 2
+  drive_mode: 0
+  range_min: 854
+  range_max: 3314
+  invert: false
+elbow_flex:
+  id: 3
+  drive_mode: 0
+  range_min: 823
+  range_max: 3066
+  invert: false
+wrist_flex:
+  id: 4
+  drive_mode: 0
+  range_min: 851
+  range_max: 3223
+  invert: false
+wrist_roll:
+  id: 5
+  drive_mode: 0
+  range_min: 0
+  range_max: 4095
+  invert: false
+gripper:
+  id: 6
+  drive_mode: 0
+  range_min: 1962
+  range_max: 3448
+  invert: false

@@ -11,7 +11,7 @@ source /opt/ros/jazzy/setup.zsh && source install/setup.zsh
 # 构建
 colcon build --symlink-install
 
-# Python 测试（对齐验证, 9 tests）
+# Python 测试（全量回归）
 uv run pytest
 
 # URDF↔MuJoCo 对齐验证 CLI（输出 workflow/reports/alignment_report.md）
@@ -55,6 +55,13 @@ ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=out
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz [execute:=false] [rviz:=true]
 uv run python scripts/mtc_probe_pick_poses.py   # 可达性探测（摆位/校准变更后）
 
+# hardware: 实机控制（workflow/plan/setup_hardware.md; 真机验收清单见 workflow/pitfalls/setup-hardware.md H7）
+uv run python scripts/setup_convert_lerobot_calibration.py [--invert gripper]  # LeRobot 标定 JSON → motor_calibration.yaml
+uv run python scripts/setup_capture_named_pose.py   # 力矩失能手摆 → 命名姿势 → SRDF group_state + named_poses.yaml（真机）
+ros2 launch so101_bringup demo.launch.py sim:=none real:=true    # 纯实机（无零位要求, 从当前位置起步）
+ros2 launch so101_bringup demo.launch.py sim:=mujoco real:=true [moveit:=true] [twin:=false]  # 数字孪生: 实机被控 + MuJoCo 镜像
+# 可选 port:=/dev/ttyACM0 calibration_file:=<yaml>; real:=true+sim:=gazebo 不支持
+
 # envs: mujoco viewer 交互窗口（C 键循环 free/fixed/wrist 视角; 需图形环境）
 uv run python scripts/envs_view_env.py --id SO101Reach-v1 [--cam fixed] [--random]
 
@@ -89,6 +96,7 @@ bash scripts/clean_ros.sh
 - `src/so101_teleop` — lerobot Robot/Teleoperator 协议适配层（workflow/plan/il_sim.md）：SimSO101Robot（so101_envs 相机版后端）+ expert/keyboard teleop + ros_viz；`scripts/il_sim_record.py`/`il_sim_teleop.py` 采集/遥操 CLI
 - `src/so101_il_sim_infer` — IL 推理包（镜像 rl_infer）：checkpoint 加载（policy/pre/post 三元组）+ env 驱动 + ROS 话题
 - `src/so101_mtc_pick_place` — MTC pick-and-place（workflow/plan/mtc_rviz.md）：扁平 stage 链节点（mtc_pick_place_node）+ kinematic attach 插件（仿真后端用）+ sim:=rviz|mujoco|gazebo launch（后两者暂停）
+- `src/so101_hardware` — 实机 ros2_control 插件（workflow/plan/setup_hardware.md）：C++ SystemInterface + vendor SCServo SDK；标定 YAML 驱动电机 ID/量程，rad↔raw 全行程线性映射，无零位要求；`scripts/setup_convert_lerobot_calibration.py` 生成标定、`scripts/setup_capture_named_pose.py` 采集命名姿势
 - `src/so101_robotics_torque_app` — 力矩学习 app：torque_control_node + draw_cube_node + draw_cube.launch.py
 - `tests/` + `scripts/setup_verify_model_alignment.py` — URDF↔XML 对齐验证（TDD）
 - `scripts/robotics_robotics_draw_cube_viewer.py` — MuJoCo viewer 版 draw cube（lab-2 c3 风格 user_scn 覆盖层）

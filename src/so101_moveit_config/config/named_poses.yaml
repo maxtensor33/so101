@@ -1,0 +1,15 @@
+# SO-ARM101 命名姿势 (scripts/setup_capture_named_pose.py 采集, rad, URDF 约定)
+extend:
+  shoulder_pan: 0.0
+  shoulder_lift: 1.5842747154471546
+  elbow_flex: -1.4639634418189924
+  wrist_flex: -0.18034548060708255
+  wrist_roll: 0.11482784126984091
+  gripper: -0.16419726379542396
+reset:
+  shoulder_pan: -0.006950977552498072
+  shoulder_lift: -1.8027953658536584
+  elbow_flex: 1.60109228711547
+  wrist_flex: 1.1142275042158516
+  wrist_roll: 0.11619171428571429
+  gripper: -0.16419726379542396

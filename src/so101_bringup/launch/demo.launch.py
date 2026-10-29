@@ -6,6 +6,13 @@
     ros2 launch so101_bringup demo.launch.py sim:=mujoco   # MuJoCo + RViz
     可选 moveit:=true (默认 false) 附加 move_group + MoveIt RViz
     gazebo 模式下 gz_gui:=false 为 headless server-only
+
+实机模式 (workflow/plan/setup_hardware.md):
+    ros2 launch so101_bringup demo.launch.py sim:=none   real:=true   # 纯实机
+    ros2 launch so101_bringup demo.launch.py sim:=mujoco real:=true   # 数字孪生:
+        # ros_control 控实机, MuJoCo 仅镜像显示 (twin:=false 关闭)
+    可选 port:=/dev/ttyACM0 calibration_file:=<yaml> 覆盖串口与标定
+    real:=true + sim:=gazebo 不支持 (直接报错)
 """
 
 import os
@@ -31,6 +38,18 @@ def _setup(context, *args, **kwargs):
     gz_gui = LaunchConfiguration("gz_gui").perform(context)
     use_rviz = LaunchConfiguration("rviz").perform(context)
     moveit = LaunchConfiguration("moveit").perform(context)
+    real = LaunchConfiguration("real").perform(context)
+    twin = LaunchConfiguration("twin").perform(context)
+
+    # 实机参数 (real:=false 时仅作为 xacro 默认值透传, 无副作用)
+    port = LaunchConfiguration("port").perform(context)
+    calibration_file = LaunchConfiguration("calibration_file").perform(context)
+
+    if real == "true" and sim == "gazebo":
+        raise RuntimeError(
+            "real:=true 与 sim:=gazebo 不支持: gz_ros2_control 无法与实机插件共存, "
+            "请用 sim:=none (纯实机) 或 sim:=mujoco (数字孪生)"
+        )
 
     controllers_yaml = os.path.join(
         get_package_share_directory("so101_sim"), "config", "controllers.yaml"
@@ -43,6 +62,12 @@ def _setup(context, *args, **kwargs):
             PathJoinSubstitution([FindPackageShare("so101_bringup"), "urdf", "so101.urdf.xacro"]),
             " sim:=",
             sim,
+            " real:=",
+            real,
+            " port:=",
+            port,
+            " calibration_file:=",
+            calibration_file,
         ]
     )
     robot_description = {
@@ -62,8 +87,9 @@ def _setup(context, *args, **kwargs):
         )
     )
 
-    # 仿真后端三选一
-    if sim == "none":
+    # 控制后端: 标准 controller_manager 用于 sim:=none (mock) 与实机 (real:=true,
+    # 含 sim:=mujoco 数字孪生 — MuJoCo 仅显示); mujoco_ros2_control 仅用于纯 MuJoCo 仿真
+    if sim == "none" or real == "true":
         actions.append(
             Node(
                 package="controller_manager",
@@ -121,6 +147,23 @@ def _setup(context, *args, **kwargs):
                 executable="parameter_bridge",
                 arguments=["/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock"],
                 output="screen",
+            )
+        )
+
+    # 数字孪生: real+mujoco 时 MuJoCo 仅镜像 /joint_states (ros_control 控实机)
+    if real == "true" and sim == "mujoco" and twin == "true":
+        actions.append(
+            Node(
+                package="so101_sim",
+                executable="mujoco_twin.py",
+                output="screen",
+                parameters=[
+                    {
+                        "model": os.path.join(
+                            get_package_share_directory("so101_sim"), "mujoco", "scene.xml"
+                        )
+                    }
+                ],
             )
         )
 
@@ -185,7 +228,13 @@ def _setup(context, *args, **kwargs):
                         "launch",
                         "move_group.launch.py",
                     )
-                )
+                ),
+                launch_arguments={
+                    "sim": sim,
+                    "real": real,
+                    "port": port,
+                    "calibration_file": calibration_file,
+                }.items(),
             )
         )
 
@@ -201,6 +250,18 @@ def generate_launch_description():
             DeclareLaunchArgument("moveit", default_value="false"),
             DeclareLaunchArgument("rviz", default_value="true"),
             DeclareLaunchArgument("gz_gui", default_value="true"),
+            # 实机模式 (workflow/plan/setup_hardware.md)
+            DeclareLaunchArgument("real", default_value="false"),
+            DeclareLaunchArgument("twin", default_value="true"),
+            DeclareLaunchArgument("port", default_value="/dev/ttyACM0"),
+            DeclareLaunchArgument(
+                "calibration_file",
+                default_value=os.path.join(
+                    get_package_share_directory("so101_hardware"),
+                    "config",
+                    "motor_calibration.yaml",
+                ),
+            ),
             OpaqueFunction(function=_setup),
         ]
     )

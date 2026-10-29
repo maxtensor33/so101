@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- 实机 ros2_control 宏 (workflow/plan/setup_hardware.md Phase 4)。
+     依赖 so101_joint_interfaces 宏 (so101_sim 的 so101.ros2_control.xacro 中定义),
+     仅应从 so101_bringup/urdf/so101.urdf.xacro 调用 (该文件已先 include 两者)。 -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="so101_ros2_control_real" params="name port calibration_file">
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>so101_hardware/SO101SystemHardware</plugin>
+        <param name="port">${port}</param>
+        <param name="calibration_file">${calibration_file}</param>
+      </hardware>
+      <xacro:so101_joint_interfaces/>
+    </ros2_control>
+  </xacro:macro>
+</robot>
