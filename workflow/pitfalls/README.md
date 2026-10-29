@@ -8,6 +8,7 @@ myst include 汇总本目录（单源，勿在 docs 里直接加坑）。
 |---|---|
 | [general.md](general.md) | 通用/环境：残留进程、GL、sys.path 自举、colcon/pytest、清理脚本 |
 | [setup.md](setup.md) | URDF/SRDF 结构约定、模型对齐验证 |
+| [setup-hardware.md](setup-hardware.md) | 实机控制（xacro bool 坑、SRDF 文本级更新、插件标定校验、真机验收清单） |
 | [robotics.md](robotics.md) | 力矩控制 / draw cube |
 | [mtc.md](mtc.md) | MTC 纯 RViz 模式（KDL tip、调度深水区、planning scene 共享） |
 | [envs.md](envs.md) | gymnasium 环境集（夹爪语义、EGL 噪声、OOM 闪退） |
