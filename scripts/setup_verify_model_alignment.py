@@ -224,7 +224,8 @@ def main():
     parser.add_argument("--xml", type=Path, default=None)
     parser.add_argument("--n-samples", type=int, default=N_SAMPLES)
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--out", type=Path, default=REPO_ROOT / "reports" / "alignment_report.md")
+    parser.add_argument(
+        "--out", type=Path, default=REPO_ROOT / "workflow" / "reports" / "alignment_report.md")
     args = parser.parse_args()
     if args.torque:
         urdf = args.urdf or DEFAULT_URDF_TORQUE
