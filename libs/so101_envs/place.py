@@ -10,7 +10,6 @@ from .utils import is_grasping, is_static, is_touching
 
 ITEM_BODY = "item"
 ITEM_GEOM = "item_geom"
-ITEM_HALF = 0.022
 BIN_HALF_INNER = (0.055, 0.075)  # bin 内框半长 (x, y)
 BIN_MARGIN = 0.006               # 物体完全落入内框余量
 BIN_WALL_TOP = 0.048             # bin 壁顶高度
@@ -19,12 +18,14 @@ BIN_WALL_TOP = 0.048             # bin 壁顶高度
 class SO101PlaceEnv(SO101BaseEnv):
     SCENE_XML = "scene_place.xml"
     TASK_OBS_DIM = 15  # item_pose(7)+tcp_to_item(3)+bin_xy(2)+item_to_bin_xy(2)+in_bin(1)
+    ITEM_HALF = 0.022     # 物体半高（spawn z 基准; can 子类覆盖）
+    ITEM_XY_HALF = 0.022  # 物体 xy 半尺寸（bin 内缩判定; can 子类覆盖为罐半径）
 
     def _reset_task(self, rng):
         # cube 出生域
         x = 0.25 + rng.uniform(-0.08, 0.08)
         y = -0.1 + rng.uniform(-0.06, 0.06)
-        self.set_free_body_pose(ITEM_BODY, (x, y, ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
+        self.set_free_body_pose(ITEM_BODY, (x, y, self.ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
         self._randomize_item(ITEM_GEOM, rng)
         # bin 出生域（与 cube 保持 >=12cm 间距）
         for _ in range(50):
@@ -55,8 +56,8 @@ class SO101PlaceEnv(SO101BaseEnv):
         bp = self.free_body_pos("bin")
         dx = abs(item_p[0] - bp[0])
         dy = abs(item_p[1] - bp[1])
-        return (dx <= BIN_HALF_INNER[0] - ITEM_HALF - BIN_MARGIN
-                and dy <= BIN_HALF_INNER[1] - ITEM_HALF - BIN_MARGIN
+        return (dx <= BIN_HALF_INNER[0] - self.ITEM_XY_HALF - BIN_MARGIN
+                and dy <= BIN_HALF_INNER[1] - self.ITEM_XY_HALF - BIN_MARGIN
                 and item_p[2] <= BIN_WALL_TOP)
 
     def evaluate(self):
@@ -85,3 +86,14 @@ class SO101PlaceEnv(SO101BaseEnv):
         if info["success"]:
             r += 2.0
         return r
+
+
+class SO101PlaceCanEnv(SO101PlaceEnv):
+    """place-can: 任务物体换圆柱罐（squint PlaceCan 镜像）。
+
+    罐立放: spawn z = 罐半高 0.03; bin 落入判定 xy 内缩 = 罐半径 0.0165（非半高）。
+    """
+
+    SCENE_XML = "scene_place_can.xml"
+    ITEM_HALF = 0.03
+    ITEM_XY_HALF = 0.0165

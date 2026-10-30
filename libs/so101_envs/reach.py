@@ -18,6 +18,7 @@ class SO101ReachEnv(SO101BaseEnv):
 
     SCENE_XML = "scene_reach.xml"
     TASK_OBS_DIM = 6  # goal_pos(3) + tcp_to_goal(3)
+    ITEM_HALF = 0.024  # 物体半高（spawn z 与 goal 高度基准; can 子类覆盖）
 
     def _reset_task(self, rng):
         cfg = self.cfg
@@ -25,10 +26,10 @@ class SO101ReachEnv(SO101BaseEnv):
         h = cfg.spawn_box_half_size
         x = cx + rng.uniform(-h, h)
         y = cy + rng.uniform(-h, h)
-        self.set_free_body_pose(ITEM_BODY, (x, y, ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
+        self.set_free_body_pose(ITEM_BODY, (x, y, self.ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
         self._randomize_item(ITEM_GEOM, rng)
         self._randomize_fixed_cam(rng)
-        self._goal = np.array([x, y, 2 * ITEM_HALF + cfg.goal_height_above_item])
+        self._goal = np.array([x, y, 2 * self.ITEM_HALF + cfg.goal_height_above_item])
         # 同步 goal_site mocap（viewer/RViz 显示与判定点一致）
         bid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "goal_site")
         self.data.mocap_pos[self.model.body_mocapid[bid]] = self._goal
@@ -64,3 +65,13 @@ class SO101ReachEnv(SO101BaseEnv):
         if info["success"]:
             r += 2.0
         return r
+
+
+class SO101ReachCanEnv(SO101ReachEnv):
+    """reach-can: 任务物体换圆柱罐（squint ReachCan 镜像）。
+
+    罐立放: spawn z 与 goal 高度基准 = 罐半高 0.03（squint 默认 r=0.0165 half_h=0.03）。
+    """
+
+    SCENE_XML = "scene_reach_can.xml"
+    ITEM_HALF = 0.03

@@ -2,6 +2,39 @@
 
 **状态**: 待办 · **创建**: 2026-10-29 · **来源**: il_sim_leader 遥操实测 + `scripts/il_sim_grasp_diagnose.py` 诊断
 
+## 2026-10-30 突破: 根因定位 + squint 碰撞网格迁移（已验证）
+
+**根因确认（运行时运动学实测）**: v1 指尖 pad box 的"手工换算顶点"位置全错——
+固定指 pad 偏到手掌后方（rest 姿态世界系 z=0.236 vs 指尖 0.094–0.200），距
+gripperframe site 0.10–0.14m。方块传送到夹持中心 + 渐进闭爪到底 = **零接触**
+（is_grasping=False），指尖唯一碰撞体不在手指上 → 视觉 mesh（contype=0）直接
+穿过方块 = 用户遥操"穿模"的真因。todo 下文"物理侧已可抓（传送实验 0.2mm）"的
+旧结论是软接触深穿透假象：当年闭爪穿透 2-3cm 靠摩擦"夹住"，硬接触后伪影暴露。
+
+**修复（照抄 squint/ManiSkill 成功配方）**: 对比 squint `envs/robot/so101.urdf`
+（注释 "Decomposed collision for proper gripper contact"），迁移其三块碰撞网格
+到 `libs/so101_envs/assets/`（已去 mtllib 行），替换两个错位 pad box：
+- 固定指: `Fixed_part_1.obj` + `Fixed_part_2.obj`（凸分解），
+  origin 与 URDF 同源 `pos="0 -0.000218214 0.000949706" quat="0 1 0 0"`
+- 动爪: `moving_jaw_so101_v1_convex.obj`，origin `pos="0 0 0.0189"`
+- 指尖碰撞网格同步硬接触 `solref="0.005 1" solimp="0.95 0.99 0.0001"`
+
+**验证结果**:
+- 闭爪卡在方块上（qpos 停 1.551 未达全闭合限位），平衡穿透 **0.2mm**
+- 此前全量唯一失败的 `test_lift_grasp_teleported_item` 转绿，envs 测试全绿
+- **遗留（原有问题，与本次无关）**: 专家 IK 对准 1/3（爪闭在方块旁零接触，见下文
+  "剩余问题"）；遥操需用户实测复验
+
+**测量陷阱（防复发）**: `m.mesh_vert` 是全局扁平数组，必须用 `mesh_vertadr[id]`/
+`mesh_vertnum[id]` 切片再变换，直接 `[mesh_id]` 索引得到错数据（本轮踩坑，与
+v1 pad box 手工换算出错同源）。几何结论一律以运行时 `d.geom_xpos/xmat` 变换 +
+渲染 PNG 目视为准，不做手工坐标换算。
+
+**测试方法陷阱**: 把方块传送到 site 本身就是几何错误——site 是爪尖全闭合收敛点，
+固定指尖永远在 site 处，方块中心放那里必然与爪重叠（表现为与夹爪力参数无关的
+初始穿透）；悬空方块还会被闭爪弧线切向推走（无桌面摩擦抵抗）。真实判定只能走
+"桌上方块 + 上方合围"流程（专家/遥操）。
+
 ## 诊断数据（2026-10-29, SO101Lift-v1）
 
 - 穿透深度：双爪闭合到底时爪-块接触穿透 **2.0-2.9cm**（方块边长 4.4cm）→ 目视"直接穿过"

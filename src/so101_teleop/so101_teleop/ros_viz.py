@@ -71,6 +71,11 @@ TASK_BODIES = {
     "SO101LiftEnv": ["item"],
     "SO101PlaceEnv": ["item", "goal_site"],
     "SO101StackEnv": ["item", "box"],
+    # can 变体（镜像对应 cube 的 TF 物体列表; 缺失 body 已由 mj_name2id 过滤）
+    "SO101ReachCanEnv": ["item", "goal_site"],
+    "SO101LiftCanEnv": ["item"],
+    "SO101PlaceCanEnv": ["item", "goal_site"],
+    "SO101StackCanEnv": ["item", "box"],
 }
 
 

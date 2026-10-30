@@ -99,6 +99,11 @@ class ScriptExpertTeleop(Teleoperator):
         a = u.normalize_qpos(u.data.qpos[u._qpos_adr])
         a[5] = self._grip_hold
 
+        # 非 reach 环境（如 lift）: 零动作保持。lift 专家已移除,
+        # 见 workflow/todo/il_sim_expert_lift.md, 不在此处做抓取。
+        if not hasattr(u, "_goal"):
+            return {f"{m}.pos": float(v) for m, v in zip(JOINT_NAMES, a)}
+
         if self._phase == "WAIT":
             self._step += 1
             if self._step >= WAIT_STEPS:

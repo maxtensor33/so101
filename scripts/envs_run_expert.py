@@ -121,8 +121,8 @@ def walk_to_q(ex, q_ref, max_steps=80, tol=0.02):
     return info
 
 
-def grasp_item(ex, item, grasp_dz=-0.01):
-    """tool-down 抓取流程: 多种子 IK 预解 -> 走到位 -> 闭爪。返回 is_grasped。
+def grasp_item(ex, item, grasp_dz=-0.01, close_fn=None):
+    """tool-down 抓取流程: 多种子 IK 预解 -> 走到位 -> 小步逼近 -> 闭爪。返回 is_grasped。
 
     TCP 目标 = 方块中心下方 |grasp_dz| (-0.01: 指底离桌 1cm 不拖桌, 捏方块上部 2/3)。原因: 本臂 5-DOF
     tool-down 在高目标处不可达 (item 中心及以上 err 17mm~40cm 级, 低目标 0mm),
@@ -145,13 +145,18 @@ def grasp_item(ex, item, grasp_dz=-0.01):
             break
     walk_to_q(ex, best_q)
     ex._go(staging, steps=20, R_des=TOOL_DOWN_R, tol=0.005)
-    # 自适应爬行: warm-start IK 有局部滞点, 每轮 _go 只能爬 1-2cm —
-    # 反复走到 TCP 真正到位 (水平 <1cm) 为止, 帧数上限防死循环
-    for _ in range(12):
-        ex._go(target, steps=20, R_des=TOOL_DOWN_R, tol=0.005)
-        if np.linalg.norm(ex.u.tcp_pos[:2] - target[:2]) < 0.01:
+    # 小步插值逼近 (2026-10-30): 停机坪->目标一次 _go 直线 10cm 会触发 warm-start
+    # IK 局部滞点 (TCP 跳到 20cm+ 外不返回, 2026-10-30 逐阶段实测), 改 1.5cm 路点;
+    # 收尾自适应爬行兜底 (水平 <5mm)
+    start = ex.u.tcp_pos.copy()
+    n = max(1, int(np.linalg.norm(target - start) / 0.015))
+    for i in range(1, n + 1):
+        ex._go(start + (target - start) * i / n, steps=20, R_des=TOOL_DOWN_R, tol=0.004)
+    for _ in range(6):
+        ex._go(target, steps=20, R_des=TOOL_DOWN_R, tol=0.003)
+        if np.linalg.norm(ex.u.tcp_pos[:2] - target[:2]) < 0.005:
             break
-    return _close_steps(ex)
+    return close_fn(ex, item, grasp_dz=grasp_dz) if close_fn is not None else _close_steps(ex)
 
 
 def _close_steps(ex, n=30, rate=0.05):
@@ -165,6 +170,58 @@ def _close_steps(ex, n=30, rate=0.05):
     return grasped
 
 
+def _servo_step(ex, env, target_pos, R_des=TOOL_DOWN_R):
+    """单帧: 手臂向目标 IK 伺服一步, 夹爪通道保持当前值。返回 info。"""
+    u = ex.u
+    q_arm = u.data.qpos[u._qpos_adr][:5]
+    q_ref, _ = ex.ik.solve(q_arm, target_pos, R_des=R_des, n_iter=40)
+    lo, hi = u._ctrlrange[:5, 0], u._ctrlrange[:5, 1]
+    dq = np.clip(q_ref - q_arm, -MAX_DQ, MAX_DQ)
+    a = 2.0 * (q_arm + dq - lo) / (hi - lo) - 1.0
+    a5 = u.normalize_qpos(u.data.qpos[u._qpos_adr])[5]
+    *_, info = env.step(np.concatenate([a, [a5]]))
+    ex.t += 1
+    return info
+
+
+def servo_close(ex, item, grasp_dz=-0.01, frames=60, rate=0.035, hold=12):
+    """伺服闭爪: 手臂跟随 + 夹爪小步闭合交替 (2026-10-30)。
+
+    纯合爪 (_close_steps, 手臂定住) 下, 全开动爪的大角度闭合弧线以切向把方块
+    沿桌面推走 (ep2 逐帧实测: 4 帧内被推 4.6cm 后爪闭空); 手臂跟随使抓取
+    ~7/10 vs ~3/10。抓住后保持 hold 帧稳定。未根治, 见 todo/envs_grasp_tuning_todo.md。
+    """
+    env = ex.env
+    target = item + [0, 0, grasp_dz]
+    grasped = False
+    for _ in range(frames):
+        info = _servo_step(ex, env, target)
+        grasped = grasped or info["is_grasped"]
+        a = ex.u.normalize_qpos(ex.u.data.qpos[ex.u._qpos_adr])
+        a[5] = max(a[5] - rate, -1.0)
+        *_, info = env.step(a)
+        ex.t += 1
+        grasped = grasped or info["is_grasped"]
+        if info["is_grasped"]:
+            for _ in range(hold):
+                a = ex.u.normalize_qpos(ex.u.data.qpos[ex.u._qpos_adr])
+                a = ex._grip(a, open_=False)
+                *_, info = env.step(a)
+                ex.t += 1
+            break
+    return grasped
+
+
+def lift_servo(ex, item, height=0.10, frames=90):
+    """缓升伺服抬升: 爪角保持当前值 (open_=False 全闭合命令会把边缘态抓取挤掉),
+    TCP 以 ~height/frames 每帧上升, 手臂每帧重解 IK。"""
+    u = ex.u
+    info = {}
+    for i in range(frames):
+        info = _servo_step(ex, ex.env, item + [0, 0, height * (i + 1) / frames])
+    return info
+
+
 def run_lift(env, episodes):
     results = []
     for ep in range(episodes):
@@ -172,10 +229,12 @@ def run_lift(env, episodes):
         env.reset(seed=100 + ep)
         ex._wait(10)
         item = ex.u.free_body_pos("item")
-        grasped = grasp_item(ex, item)
-        ex._go(item + [0, 0, 0.09], steps=15)  # 抬起
-        info = ex._wait(8)
-        results.append(bool(grasped and info["item_lifted"]))
+        grasped = grasp_item(ex, item, close_fn=servo_close)
+        if grasped:
+            info = lift_servo(ex, item)
+            results.append(bool(info["item_lifted"]))
+        else:
+            results.append(False)
     return results
 
 
@@ -193,10 +252,10 @@ def run_place(env, episodes):
             a = ex._grip(a, open_=False)
             a[5] = np.clip(a[5] + 0.05, -1.0, 1.0)
             *_, info = env.step(a)
-        ex._go(item + [0, 0, 0.10], steps=15)           # 抓起提升
+        ex._go(item + [0, 0, 0.10], steps=15, open_=False)           # 抓起提升 (保持闭合!)
         binp = ex.u.free_body_pos("bin")
-        ex._go(binp + [0, 0, 0.12], steps=30)           # 移到 bin 上方
-        ex._go(binp + [0, 0, 0.05], steps=15)           # 降入 bin
+        ex._go(binp + [0, 0, 0.12], steps=30, open_=False)           # 移到 bin 上方
+        ex._go(binp + [0, 0, 0.05], steps=15, open_=False)           # 降入 bin
         info = ex._wait(12, grip_open=True)             # 松爪
         results.append(info["success"])
     return results
@@ -217,9 +276,9 @@ def run_stack(env, episodes):
             a[5] = np.clip(a[5] + 0.05, -1.0, 1.0)
             *_, info = env.step(a)
         b_pos = ex.u.free_body_pos("itemB")
-        ex._go(a_pos + [0, 0, 0.10], steps=15)           # 提升
-        ex._go(b_pos + [0, 0, 0.11], steps=30)           # B 上方
-        ex._go(b_pos + [0, 0, 0.022 + 0.028 + 0.004], steps=15)  # 降到 B 顶
+        ex._go(a_pos + [0, 0, 0.10], steps=15, open_=False)           # 提升 (保持闭合!)
+        ex._go(b_pos + [0, 0, 0.11], steps=30, open_=False)           # B 上方
+        ex._go(b_pos + [0, 0, ex.u.HALF_A + ex.u.HALF_B + 0.004], steps=15, open_=False)  # 降到 B 顶
         info = ex._wait(12, grip_open=True)              # 松爪
         results.append(info["success"])
     return results
@@ -230,6 +289,11 @@ POLICIES = {
     "SO101Lift-v1": run_lift,
     "SO101Place-v1": run_place,
     "SO101Stack-v1": run_stack,
+    # can 变体（run_* 直接读物体位置, 任务逻辑通用）
+    "SO101ReachCan-v1": run_reach,
+    "SO101LiftCan-v1": run_lift,
+    "SO101PlaceCan-v1": run_place,
+    "SO101StackCan-v1": run_stack,
 }
 
 
@@ -237,9 +301,20 @@ def main():
     parser = argparse.ArgumentParser(description="脚本专家验收")
     parser.add_argument("--env", default="all", choices=["all", *POLICIES])
     parser.add_argument("--episodes", type=int, default=10)
+    parser.add_argument("--view", action="store_true",
+                        help="MuJoCo viewer 可视化单 episode (需图形环境; 弹 viewer 窗口实时观看专家操作)")
     args = parser.parse_args()
+    if args.view:
+        env_id = args.env if args.env != "all" else "SO101Lift-v1"
+        env = gym.make(env_id, render_mode="human")
+        try:
+            results = POLICIES[env_id](env, 1)
+            print(f"{env_id} view episode: success={results[0]}")
+        finally:
+            env.close()
+        return 0
     ids = list(POLICIES) if args.env == "all" else [args.env]
-    print(f"{'env':<18} {'success':>8}  detail")
+    print(f"{'env':<22} {'success':>8}  detail")
     all_ok = True
     for env_id in ids:
         env = gym.make(env_id)
@@ -248,8 +323,8 @@ def main():
             n_ok = sum(results)
             rate = n_ok / len(results)
             # reach 验收线 >= 0.9; 其余 > 0 且稳定
-            print(f"{env_id:<18} {rate:>7.0%}  {n_ok}/{len(results)}")
-            if env_id.endswith("Reach-v1"):
+            print(f"{env_id:<22} {rate:>7.0%}  {n_ok}/{len(results)}")
+            if "Reach" in env_id:
                 all_ok &= rate >= 0.9
             else:
                 all_ok &= rate > 0.0

@@ -177,3 +177,66 @@ def test_stack_success_requires_itemA_static():
         assert info["success"] is False
     finally:
         env.close()
+
+
+# ---------- can 变体（squint 8 环境对齐: item_type 换物体, 任务逻辑复用） ----------
+
+CAN_IDS = [
+    "SO101ReachCan-v1",
+    "SO101LiftCan-v1",
+    "SO101PlaceCan-v1",
+    "SO101StackCan-v1",
+]
+
+
+@pytest.mark.parametrize("env_id", CAN_IDS)
+def test_can_variant_smoke(env_id):
+    """can 变体冒烟: reset/step 闭环 + info 键 + 圆柱罐出生在桌面上方。"""
+    env = gym.make(env_id)
+    try:
+        env.reset(seed=0)
+        u = env.unwrapped
+        info = _settle(env, 4)
+        # 罐中心 z = 罐半高 0.03 (桌面 0 上方立放; stack 场景含 itemA cube 0.022 亦成立)
+        for body in ("item", "itemA", "itemB"):
+            bid = mujoco.mj_name2id(u.model, mujoco.mjtObj.mjOBJ_BODY, body)
+            if bid < 0 or u.model.body_jntadr[bid] < 0:
+                continue  # 场景无此物体或非自由体
+            p = u.free_body_pos(body)
+            z_expect = 0.022 if body == "itemA" else 0.03
+            assert p[2] > z_expect - 0.01, f"{body} 未立在桌面: z={p[2]:.4f}"
+        assert "success" in info
+    finally:
+        env.close()
+
+
+def test_lift_can_item_half_used_in_evaluate():
+    """lift-can 的 lifted 判定用罐半高 0.03（而非 cube 0.022）。"""
+    env = gym.make("SO101LiftCan-v1")
+    try:
+        env.reset(seed=0)
+        u = env.unwrapped
+        u.set_free_body_pose("item", (0.25, 0.0, 0.035), yaw=0.0)
+        mujoco.mj_forward(u.model, u.data)
+        info = u.evaluate()
+        # 0.035 >= 0.03 + 0.005 -> 边界恰好判定为已抬起
+        assert info["item_lifted"] is True
+    finally:
+        env.close()
+
+
+def test_stack_can_on_top_semantics():
+    """stack-can 的 on_top 判定: cube A 中心距罐 B 顶 = HALF_A + 罐半高。"""
+    env = gym.make("SO101StackCan-v1")
+    try:
+        env.reset(seed=0)
+        u = env.unwrapped
+        _settle(env)
+        b = u.free_body_pos("itemB")
+        a_pos = b + np.array([0, 0, 0.022 + 0.03 + 0.001])
+        u.set_free_body_pose("itemA", a_pos, yaw=0.0)
+        mujoco.mj_forward(u.model, u.data)
+        info = u.evaluate()
+        assert info["on_top"] is True
+    finally:
+        env.close()

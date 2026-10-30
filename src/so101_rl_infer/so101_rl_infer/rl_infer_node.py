@@ -41,6 +41,11 @@ ENV_ID = {
     "lift": "SO101Lift-v1",
     "place": "SO101Place-v1",
     "stack": "SO101Stack-v1",
+    # can 变体（短名 = cube 短名 + "can" 后缀）
+    "reachcan": "SO101ReachCan-v1",
+    "liftcan": "SO101LiftCan-v1",
+    "placecan": "SO101PlaceCan-v1",
+    "stackcan": "SO101StackCan-v1",
 }
 TASK_BODIES = {
     "reach": ["item", "goal_site"],

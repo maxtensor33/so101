@@ -46,6 +46,11 @@ ENV_ID = {
     "lift": "SO101LiftCamera-v1",
     "place": "SO101PlaceCamera-v1",
     "stack": "SO101StackCamera-v1",
+    # can 变体（短名 = cube 短名 + "can" 后缀）
+    "reachcan": "SO101ReachCanCamera-v1",
+    "liftcan": "SO101LiftCanCamera-v1",
+    "placecan": "SO101PlaceCanCamera-v1",
+    "stackcan": "SO101StackCanCamera-v1",
 }
 
 TASK_BODIES = {
@@ -53,6 +58,11 @@ TASK_BODIES = {
     "SO101LiftEnv": ["item"],
     "SO101PlaceEnv": ["item", "goal_site"],
     "SO101StackEnv": ["item", "box"],
+    # can 变体（镜像对应 cube 的 TF 物体列表; 消费点有缺省过滤）
+    "SO101ReachCanEnv": ["item", "goal_site"],
+    "SO101LiftCanEnv": ["item"],
+    "SO101PlaceCanEnv": ["item", "goal_site"],
+    "SO101StackCanEnv": ["item", "box"],
 }
 
 

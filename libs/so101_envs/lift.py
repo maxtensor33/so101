@@ -10,7 +10,6 @@ from .utils import is_grasping, is_static, is_touching
 
 ITEM_BODY = "item"
 ITEM_GEOM = "item_geom"
-ITEM_HALF = 0.022
 LIFT_HEIGHT = 0.005  # 物体中心高于 half 多少算"抬起"
 
 
@@ -19,6 +18,7 @@ class SO101LiftEnv(SO101BaseEnv):
 
     SCENE_XML = "scene_lift.xml"
     TASK_OBS_DIM = 10  # item_pose(7) + tcp_to_item(3)
+    ITEM_HALF = 0.022  # 物体半高（spawn z 与 lifted 判定基准; can 子类覆盖）
 
     # tool-down 可抓工作空间半径上限 (todo/envs_grasp_tuning_todo.md):
     # 半径 >0.28 时 wrist_flex 触限 + 固定指拖桌, 无法抓取 — 超出部分钳回可抓带
@@ -32,7 +32,7 @@ class SO101LiftEnv(SO101BaseEnv):
         r = float(np.hypot(x, y))
         if r > self.GRASPABLE_RADIUS:
             x, y = x / r * self.GRASPABLE_RADIUS, y / r * self.GRASPABLE_RADIUS
-        self.set_free_body_pose(ITEM_BODY, (x, y, ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
+        self.set_free_body_pose(ITEM_BODY, (x, y, self.ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
         self._randomize_item(ITEM_GEOM, rng)
         mujoco.mj_forward(self.model, self.data)
 
@@ -53,7 +53,7 @@ class SO101LiftEnv(SO101BaseEnv):
         item_p = self.free_body_pos(ITEM_BODY)
         d_tcp = float(np.linalg.norm(item_p - self.tcp_pos))
         grasped = is_grasping(self.model, self.data, ITEM_BODY)
-        lifted = item_p[2] >= ITEM_HALF + LIFT_HEIGHT
+        lifted = item_p[2] >= self.ITEM_HALF + LIFT_HEIGHT
         arm_q = self.data.qpos[self._qpos_adr][:5]
         d_rest = float(np.linalg.norm(arm_q - REST_QPOS[:5]))
         return {
@@ -75,3 +75,14 @@ class SO101LiftEnv(SO101BaseEnv):
         if info["success"]:
             r += 2.0
         return r
+
+
+class SO101LiftCanEnv(SO101LiftEnv):
+    """lift-can: 任务物体换圆柱罐（squint LiftCan 镜像）。
+
+    罐立放: spawn z 与 lifted 判定基准 = 罐半高 0.03（squint 默认 r=0.0165 half_h=0.03）;
+    GRASPABLE_RADIUS 等其余逻辑继承 cube。
+    """
+
+    SCENE_XML = "scene_lift_can.xml"
+    ITEM_HALF = 0.03

@@ -23,7 +23,7 @@ ros2 launch so101_bringup demo.launch.py sim:=none|gazebo|mujoco [moveit:=true] 
 # draw cube 验收（torque 默认; position 基线; kp/kd 逗号列表各 5 关节）
 ros2 launch so101_robotics_torque_app draw_cube.launch.py [ctrl_mode:=torque|position] [rviz:=true] [kp:=150.0,...] [kd:=15.0,...]
 
-# envs: gymnasium 环境集（reach/lift/place/stack, mujoco 内核, 位置控制; workflow/plan/envs.md）
+# envs: gymnasium 环境集（reach/lift/place/stack × cube/can 共 8 任务, mujoco 内核, 位置控制; workflow/plan/envs.md）
 uv run python -c "import gymnasium as gym, so101_envs; env = gym.make('SO101Reach-v1'); env.reset(); env.step([0.0]*6)"
 
 # envs: 单环境快速验证（--render 存 /tmp 双视角 png）

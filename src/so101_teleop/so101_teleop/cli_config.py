@@ -18,6 +18,11 @@ ENV_IDS = {
     "lift": "SO101LiftCamera-v1",
     "place": "SO101PlaceCamera-v1",
     "stack": "SO101StackCamera-v1",
+    # can 变体（短名 = cube 短名 + "can" 后缀）
+    "reachcan": "SO101ReachCanCamera-v1",
+    "liftcan": "SO101LiftCanCamera-v1",
+    "placecan": "SO101PlaceCanCamera-v1",
+    "stackcan": "SO101StackCanCamera-v1",
 }
 
 

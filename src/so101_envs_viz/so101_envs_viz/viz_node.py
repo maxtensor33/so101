@@ -47,12 +47,26 @@ ENV_ID = {
     ("place", True): "SO101PlaceCamera-v1",
     ("stack", False): "SO101Stack-v1",
     ("stack", True): "SO101StackCamera-v1",
+    # can 变体（短名 = cube 短名 + "can" 后缀）
+    ("reachcan", False): "SO101ReachCan-v1",
+    ("reachcan", True): "SO101ReachCanCamera-v1",
+    ("liftcan", False): "SO101LiftCan-v1",
+    ("liftcan", True): "SO101LiftCanCamera-v1",
+    ("placecan", False): "SO101PlaceCan-v1",
+    ("placecan", True): "SO101PlaceCanCamera-v1",
+    ("stackcan", False): "SO101StackCan-v1",
+    ("stackcan", True): "SO101StackCanCamera-v1",
 }
 TASK_BODIES = {
     "reach": ["item", "goal_site"],
     "lift": ["item"],
     "place": ["item", "bin"],
     "stack": ["itemA", "itemB"],
+    # can 变体（任务物体语义与 cube 相同）
+    "reachcan": ["item", "goal_site"],
+    "liftcan": ["item"],
+    "placecan": ["item", "bin"],
+    "stackcan": ["itemA", "itemB"],
 }
 JOINT_NAMES = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper"]
 
