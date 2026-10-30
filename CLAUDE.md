@@ -45,6 +45,11 @@ uv run python scripts/il_sim_record.py --robot.type=so101_sim --teleop.type=so10
 # il_sim: 遥操 launch 验收（teleop 类型/是否录制/RViz; record 默认 false 不落盘）
 ros2 launch so101_teleop teleop.launch.py teleop:=expert record:=false [env:=reach] [rviz:=true] [mujoco:=false]
 
+# il_sim: leader 臂遥操/采集（真机 leader=ACM0; 先跑探针校方向, 反向关节加 --invert;
+# 采集用 il_sim_record.py 走 draccus 透传 --teleop.type=so101_leader_sim --teleop.port=... --teleop.id=...）
+uv run python scripts/il_sim_leader_probe.py [--invert <关节>]
+uv run python scripts/il_sim_teleop.py --teleop leader [--record] [--env reach] [--invert <关节>]
+
 # il_sim: 训练（小网络冒烟; 全量迁移见 docs/il_sim/index.md; VQ-BeT 需单相机数据集）
 uv run python scripts/il_sim_train.py --policy act --repo-id il_sim/reach_expert --steps 10
 

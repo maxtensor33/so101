@@ -21,7 +21,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "so101_tele
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--teleop", choices=["expert", "keyboard"], default="expert")
+    ap.add_argument("--teleop", choices=["expert", "keyboard", "leader"], default="expert")
+    ap.add_argument("--leader-port", default="/dev/ttyACM0",
+                    help="leader 臂串口（teleop=leader 时用; 本机 leader=ACM0）")
+    ap.add_argument("--leader-id", default="L07252801", help="leader 标定名")
+    ap.add_argument("--invert", default="", help="方向需镜像的关节, 逗号分隔（探针实测后填, 如 gripper)")
     ap.add_argument("--record", action="store_true", help="录制数据（默认 false 不落盘）")
     ap.add_argument("--env", default="reach", help="reach|lift|place|stack")
     ap.add_argument("--repo-id", default="il_sim/reach_expert")
@@ -43,6 +47,12 @@ def main() -> None:
     import so101_teleop  # noqa: F401  draccus 注册
     from so101_teleop.cli_config import build_record_config, build_teleop_mode_config
 
+    leader_kwargs = dict(
+        leader_port=args.leader_port,
+        leader_id=args.leader_id,
+        invert=[j.strip() for j in args.invert.split(",") if j.strip()],
+    )
+
     # ros_viz 内置启动（无 ROS 环境时静默跳过；等 robot connect 后自动挂上）
     from so101_teleop.ros_viz import RosVizThread
 
@@ -62,12 +72,14 @@ def main() -> None:
             render=args.mujoco,
             reset_time_s=args.reset_time_s,
             resume=args.resume,
+            **leader_kwargs,
         )
         from lerobot.scripts.lerobot_record import record
 
         record(cfg)
     else:
-        cfg = build_teleop_mode_config(teleop=args.teleop, env=args.env, render=args.mujoco)
+        cfg = build_teleop_mode_config(
+            teleop=args.teleop, env=args.env, render=args.mujoco, **leader_kwargs)
         cfg.teleop_time_s = None  # 一直遥操直到 Ctrl+C
         from lerobot.scripts.lerobot_teleoperate import teleoperate
 

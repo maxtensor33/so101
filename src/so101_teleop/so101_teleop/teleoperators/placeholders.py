@@ -1,8 +1,9 @@
-"""gamepad / leader 遥操 TODO 占位（workflow/plan/il_sim.md）。
+"""gamepad 遥操 TODO 占位（workflow/plan/il_sim.md）。
 
 - gamepad: lerobot 自带 KeyboardGamepadTeleop（lerobot.teleoperators.gamepad）可低成本接入，
   只需映射其 6 维动作到 {motor}.pos 键名（TODO(il_real)）。
-- leader: lerobot 自带 so101_leader（真机主臂）已注册, il_real 直接使用, 无需占位。
+- leader: 已落地为 leader.py 的 so101_leader_sim（度/0-100 → [-1,1] 语义转换，
+  workflow/plan/il_sim_leader.md），不再依赖 lerobot 内建注册直连。
 """
 
 from __future__ import annotations

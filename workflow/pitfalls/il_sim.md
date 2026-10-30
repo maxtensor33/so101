@@ -13,5 +13,7 @@
 | mujoco 版本被压 | gym-aloha（lerobot[all] 带入）会把 mujoco 压到 <3.9 破坏 envs 抓取物理——pyproject 已 override-dependencies 锁 mujoco>=3.9，勿删 |
 | MuJoCo 窗口/工具栏 | viewer 由 SimSO101Robot config `render` 开关（launch `mujoco:=true` 默认开，无显示环境置 false）；默认隐藏左右工具栏+最大化（`SO101*Env(viewer_ui=, viewer_maximize=)`，maximize 走 X11 EWMH，Wayland 无效静默跳过）；viewer_no_input（不抢键盘焦点）KWin 下无效=TODO，workaround=焦点留终端 |
 | keyboard 录制键位 | `←/→/n/r` 取消/提前完成（lerobot 语义）+ 自动重置；`c` 手动重置；`1-6`+`w/s` 选关节/增减；`ESC/q` 停止+编码 |
+| leader 臂单位语义链 | lerobot 内建 `so101_leader` 的 `get_action()` 返回 **body=度（相对其标定 home）、gripper=0-100**，而管线统一动作是 [-1,1]——必须经 `teleoperators/leader.py` 换算（度走 follower 标定链 `homing+deg*2048/180→range 线性映射`，D2）。勿绕过包装类直连内建注册（单位不同会直接打到 env） |
+| leader home ≠ env home | follower 标定 home 不必落在量程中点（本仓库映射约定 home=量程中点），leader 回 home 时仿真臂姿态可能有非零偏差——探针 `scripts/il_sim_leader_probe.py` 实测记录；方向反向用 `--invert <关节>`（含 gripper） |
 
 完整复盘：`workflow/learn/il_sim.md`。

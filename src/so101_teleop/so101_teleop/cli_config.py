@@ -31,7 +31,12 @@ def default_dataset_root(repo_id: str) -> Path:
     return _REPO / "outputs" / "datasets" / "il_sim" / repo_id
 
 
-def make_teleop_config(teleop: str):
+def make_teleop_config(
+    teleop: str,
+    leader_port: str = "/dev/ttyACM0",
+    leader_id: str = "L07252801",
+    invert: list[str] | None = None,
+):
     if teleop == "expert":
         from so101_teleop.teleoperators.expert import ScriptExpertTeleopConfig
 
@@ -40,7 +45,12 @@ def make_teleop_config(teleop: str):
         from so101_teleop.teleoperators.keyboard import So101KeyboardTeleopConfig
 
         return So101KeyboardTeleopConfig()
-    raise ValueError(f"unknown teleop: {teleop} (expected expert|keyboard)")
+    if teleop == "leader":
+        from so101_teleop.teleoperators.leader import So101LeaderSimTeleopConfig
+
+        return So101LeaderSimTeleopConfig(
+            port=leader_port, id=leader_id, invert=invert or [])
+    raise ValueError(f"unknown teleop: {teleop} (expected expert|keyboard|leader)")
 
 
 def build_record_config(
@@ -55,6 +65,9 @@ def build_record_config(
     render: bool = False,
     reset_time_s: float | None = None,
     resume: bool = False,
+    leader_port: str = "/dev/ttyACM0",
+    leader_id: str = "L07252801",
+    invert: list[str] | None = None,
 ):
     from lerobot.configs.dataset import DatasetRecordConfig
     from lerobot.scripts.lerobot_record import RecordConfig
@@ -62,9 +75,9 @@ def build_record_config(
     from .configs import SimSO101RobotConfig
 
     if reset_time_s is None:
-        # keyboard: 成功即自动重置, reset 期留给 lerobot 的集间缓冲; expert: 状态机自动重置
-        reset_time_s = 5.0 if teleop == "keyboard" else 0.0
-    auto_reset_on_success = teleop == "keyboard"
+        # keyboard/leader: 成功即自动重置, reset 期留给 lerobot 的集间缓冲; expert: 状态机自动重置
+        reset_time_s = 5.0 if teleop in ("keyboard", "leader") else 0.0
+    auto_reset_on_success = teleop in ("keyboard", "leader")
 
     return RecordConfig(
         resume=resume,
@@ -88,14 +101,23 @@ def build_record_config(
     )
 
 
-def build_teleop_mode_config(teleop: str, env: str, fps: int = 10, render: bool = False):
+def build_teleop_mode_config(
+    teleop: str,
+    env: str,
+    fps: int = 10,
+    render: bool = False,
+    leader_port: str = "/dev/ttyACM0",
+    leader_id: str = "L07252801",
+    invert: list[str] | None = None,
+):
     from lerobot.scripts.lerobot_teleoperate import TeleoperateConfig
 
     from .configs import SimSO101RobotConfig
 
     return TeleoperateConfig(
         robot=SimSO101RobotConfig(env_id=resolve_env_id(env), fps=fps, render=render),
-        teleop=make_teleop_config(teleop),
+        teleop=make_teleop_config(
+            teleop, leader_port=leader_port, leader_id=leader_id, invert=invert),
         fps=fps,
         display_data=False,
     )
