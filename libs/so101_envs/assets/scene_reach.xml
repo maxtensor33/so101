@@ -20,7 +20,7 @@
     <!-- 任务物体: cube -->
     <body name="item" pos="0.25 0 0.024">
       <freejoint name="item_free"/>
-      <geom name="item_geom" type="box" size="0.024 0.024 0.024" mass="0.03" friction="1.0 0.005 0.0001" condim="3" rgba="0.85 0.15 0.15 1"/>
+      <geom name="item_geom" type="box" size="0.024 0.024 0.024" mass="0.03" friction="1.0 0.005 0.0001" solref="0.005 1" solimp="0.95 0.99 0.0001" condim="3" rgba="0.85 0.15 0.15 1"/>
     </body>
     <!-- goal site (mocap, 由 env 代码定位) -->
     <body name="goal_site" mocap="true" pos="0.25 0 0.068">

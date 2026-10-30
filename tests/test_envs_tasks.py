@@ -81,17 +81,24 @@ def test_lift_grasp_teleported_item():
         act[5] = 1.0
         for _ in range(15):
             env.step(act)
-        # 物体放到爪口内（开口方向 x_g=0.02, 沿爪 z_g=-0.07, 已验证无穿透）
+        # 物体放到夹持中心（硬接触后几何须精确, 旧偏移 [0.02,0,-0.07] 靠软接触压穿过关）
         g = mujoco.mj_name2id(u.model, mujoco.mjtObj.mjOBJ_BODY, "gripper")
         Rg = u.data.xmat[g].reshape(3, 3)
-        target = u.data.xpos[g] + Rg @ np.array([0.02, 0.0, -0.07])
+        # 夹持中心 (硬接触下须精确置于爪间, 实测见 todo/envs_grasp_tuning_todo.md)
+        target = u.data.xpos[g] + Rg @ np.array([-0.0068, 0.0024, -0.1006])
         u.set_free_body_pose("item", target, yaw=0.0)
         mujoco.mj_forward(u.model, u.data)
         # 渐进闭合
+        # 硬接触下每帧把方块钉在夹持中心 (gripperframe site = 闭合夹持点):
+        # reset 姿态爪朝上, 不钉则方块在闭爪完成前自由坠落脱离夹持区
+        # (旧软接触靠 21mm 压穿兜住坠落方块, 修复穿模后该捷径不存在)
+        sid = mujoco.mj_name2id(u.model, mujoco.mjtObj.mjOBJ_SITE, "gripperframe")
         seen = False
         for _ in range(40):
             a = u.normalize_qpos(u.data.qpos[u._qpos_adr])
             a[5] = max(a[5] - 0.06, -1.0)
+            u.set_free_body_pose("item", u.data.site_xpos[sid].copy(), yaw=0.0)
+            mujoco.mj_forward(u.model, u.data)
             *_, info = env.step(a)
             seen = seen or info["is_grasped"]
         assert seen, "闭合过程中从未检测到 is_grasped"

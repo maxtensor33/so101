@@ -19,7 +19,7 @@
     <geom name="table_body" type="box" material="desk" size="0.35 0.36 0.345" pos="0.3 0 -0.375"/>
     <body name="item" pos="0.25 0 0.022">
       <freejoint name="item_free"/>
-      <geom name="item_geom" type="box" size="0.022 0.022 0.022" mass="0.025" friction="1.0 0.005 0.0001" condim="3" rgba="0.85 0.15 0.15 1"/>
+      <geom name="item_geom" type="box" size="0.022 0.022 0.022" mass="0.025" friction="1.0 0.005 0.0001" solref="0.005 1" solimp="0.95 0.99 0.0001" condim="3" rgba="0.85 0.15 0.15 1"/>
     </body>
     <camera name="fixed_cam" pos="0.75 -0.65 0.75" xyaxes="0.792 0.610 0 -0.379 0.492 0.783" fovy="60"/>
   </worldbody>

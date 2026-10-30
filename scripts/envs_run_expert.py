@@ -61,7 +61,7 @@ class Expert:
         info = {}
         for _ in range(steps):
             q_arm = self.u.data.qpos[self.u._qpos_adr][:5]
-            q_ref, _ = self.ik.solve(q_arm, target_pos, R_des=R_des, n_iter=5)
+            q_ref, _ = self.ik.solve(q_arm, target_pos, R_des=R_des, n_iter=40)
             a = self._arm_action(q_ref)
             a = self._grip(a, open_=open_)
             *_, info = self.env.step(a)
@@ -121,19 +121,36 @@ def walk_to_q(ex, q_ref, max_steps=80, tol=0.02):
     return info
 
 
-def grasp_item(ex, item, pre_h=0.06):
-    """tool-down 抓取流程: 多种子 IK 预解 -> 走到位 -> 下探 -> 闭爪。返回 is_grasped。"""
-    target = item + [0, 0, pre_h]
+def grasp_item(ex, item, grasp_dz=-0.01):
+    """tool-down 抓取流程: 多种子 IK 预解 -> 走到位 -> 闭爪。返回 is_grasped。
+
+    TCP 目标 = 方块中心下方 |grasp_dz| (-0.01: 指底离桌 1cm 不拖桌, 捏方块上部 2/3)。原因: 本臂 5-DOF
+    tool-down 在高目标处不可达 (item 中心及以上 err 17mm~40cm 级, 低目标 0mm),
+    误差曲线见 workflow/todo/envs_grasp_tuning_todo.md; 旧版抓中线导致指尖只
+    捏到方块上半缘, 抬升即滑落 (envs 已知"抓取保持失败"的真因之一)。
+    种子池加 neutral (实测优于部分随机种子, DLS 局部极小问题)。
+    """
+    target = item + [0, 0, grasp_dz]
+    # 停机坪: 方块后方 10cm 同高度 — walk_to_q 的关节空间扫掠会推飞方块
+    # (2026-10-29 渲染实测 item 被扫出 5cm), 先走到停机坪再任务空间直线推近
+    xy_dir = item[:2] / np.linalg.norm(item[:2])
+    staging = target.copy()
+    staging[:2] -= xy_dir * 0.10
     best_q, best_err = None, np.inf
-    for seed in SEED_POOL:
-        q_ref, err = ex.ik.solve(seed, target, R_des=TOOL_DOWN_R, n_iter=300)
+    for seed in [np.zeros(5), *SEED_POOL]:
+        q_ref, err = ex.ik.solve(seed, staging, R_des=TOOL_DOWN_R, n_iter=300)
         if err < best_err:
             best_q, best_err = q_ref, err
         if err < 0.005:
             break
     walk_to_q(ex, best_q)
-    ex._go(item + [0, 0, pre_h], steps=20, R_des=TOOL_DOWN_R)
-    ex._go(item + [0, 0, 0.0], steps=25, R_des=TOOL_DOWN_R, tol=0.004)
+    ex._go(staging, steps=20, R_des=TOOL_DOWN_R, tol=0.005)
+    # 自适应爬行: warm-start IK 有局部滞点, 每轮 _go 只能爬 1-2cm —
+    # 反复走到 TCP 真正到位 (水平 <1cm) 为止, 帧数上限防死循环
+    for _ in range(12):
+        ex._go(target, steps=20, R_des=TOOL_DOWN_R, tol=0.005)
+        if np.linalg.norm(ex.u.tcp_pos[:2] - target[:2]) < 0.01:
+            break
     return _close_steps(ex)
 
 

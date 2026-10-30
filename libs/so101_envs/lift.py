@@ -20,11 +20,18 @@ class SO101LiftEnv(SO101BaseEnv):
     SCENE_XML = "scene_lift.xml"
     TASK_OBS_DIM = 10  # item_pose(7) + tcp_to_item(3)
 
+    # tool-down 可抓工作空间半径上限 (todo/envs_grasp_tuning_todo.md):
+    # 半径 >0.28 时 wrist_flex 触限 + 固定指拖桌, 无法抓取 — 超出部分钳回可抓带
+    GRASPABLE_RADIUS = 0.26
+
     def _reset_task(self, rng):
         cx, cy = self.cfg.spawn_box_pos
         h = self.cfg.spawn_box_half_size
         x = cx + rng.uniform(-h, h)
         y = cy + rng.uniform(-h, h)
+        r = float(np.hypot(x, y))
+        if r > self.GRASPABLE_RADIUS:
+            x, y = x / r * self.GRASPABLE_RADIUS, y / r * self.GRASPABLE_RADIUS
         self.set_free_body_pose(ITEM_BODY, (x, y, ITEM_HALF), yaw=rng.uniform(0, 2 * np.pi))
         self._randomize_item(ITEM_GEOM, rng)
         mujoco.mj_forward(self.model, self.data)
