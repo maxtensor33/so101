@@ -16,8 +16,13 @@ from pathlib import Path
 
 
 def write_meta(ckpt_dir: Path, backend: str, algo: str, env_id: str,
-               obs_dim: int, normalize: bool, hparams: dict | None = None) -> None:
-    """checkpoint 元数据（推理侧校验 env/obs 一致性用）。"""
+               obs_dim: int, normalize: bool, hparams: dict | None = None,
+               env_kwargs: dict | None = None) -> None:
+    """checkpoint 元数据（推理侧校验 env/obs 一致性用）。
+
+    env_kwargs 必须随 checkpoint 保存（action_mode=delta / domain_randomization 等）:
+    推理侧建 env 时必须使用同一配置，否则动作语义不一致。
+    """
     meta = {
         "backend": backend,
         "algo": algo,
@@ -25,6 +30,7 @@ def write_meta(ckpt_dir: Path, backend: str, algo: str, env_id: str,
         "obs_dim": obs_dim,
         "action_dim": 6,
         "normalize": normalize,
+        "env_kwargs": dict(env_kwargs or {}),
         "created": time.strftime("%Y-%m-%dT%H:%M:%S"),
     }
     if hparams:

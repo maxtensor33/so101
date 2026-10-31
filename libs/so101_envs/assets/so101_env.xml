@@ -85,13 +85,14 @@
                 <joint axis="0 0 1" name="wrist_roll" type="hinge" range="-2.7438472969992493 2.841206309382605" class="sts3215"/>
                 <inertial pos="0.000213627 0.000245138 -0.025187" mass="0.087" fullinertia="2.75087e-05 4.33657e-05 3.45059e-05 -3.35241e-07 -5.7352e-06 -5.17847e-08"/>
                 <geom type="mesh" class="visual" pos="0.0077 0.0001 -0.0234" quat="0.707107 -0.707107 1.66015e-15 6.45094e-15" mesh="sts3215_03a_v1" material="sts3215_03a_v1_material"/>
-                <geom type="mesh" class="collision" pos="0.0077 0.0001 -0.0234" quat="0.707107 -0.707107 1.66015e-15 6.45094e-15" mesh="sts3215_03a_v1" material="sts3215_03a_v1_material" friction="3.5 0.005 0.0001"/>
+                <geom type="mesh" class="collision" pos="0.0077 0.0001 -0.0234" quat="0.707107 -0.707107 1.66015e-15 6.45094e-15" mesh="sts3215_03a_v1" material="sts3215_03a_v1_material" friction="2.0 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
                 <geom type="mesh" class="visual" pos="8.32667e-17 -0.000218214 0.000949706" quat="0 1 0 0" mesh="wrist_roll_follower_so101_v1" material="wrist_roll_follower_so101_v1_material"/>
                 <!-- 指尖夹持碰撞体 v2 (squint 同款凸分解, 2026-10-30): v1 pad box 手工换算位置
                      全错 (偏到腕部后方 4-14cm, 遥操穿模根因); 改用 squint URDF 实测可抓取的
-                     Fixed_part_1/2.obj (固定指凸分解), origin 与 squint so101.urdf 同源 -->
-                <geom type="mesh" class="collision" pos="0 -0.000218214 0.000949706" quat="0 1 0 0" mesh="Fixed_part_1" friction="3.5 0.005 0.0001"/>
-                <geom type="mesh" class="collision" pos="0 -0.000218214 0.000949706" quat="0 1 0 0" mesh="Fixed_part_2" friction="3.5 0.005 0.0001"/>
+                     Fixed_part_1/2.obj (固定指凸分解), origin 与 squint so101.urdf 同源。
+                     摩擦改回 squint 材质值 2.0（此前 3.5 是为 4.4cm/25g 大方块临时加大的）。 -->
+                <geom type="mesh" class="collision" pos="0 -0.000218214 0.000949706" quat="0 1 0 0" mesh="Fixed_part_1" friction="2.0 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
+                <geom type="mesh" class="collision" pos="0 -0.000218214 0.000949706" quat="0 1 0 0" mesh="Fixed_part_2" friction="2.0 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
                                 <site group="3" name="gripperframe" pos="-0.0079 -0.000218121 -0.0981274" quat="0.707107 -0 0.707107 -2.37788e-17"/>
                 <!-- 夹爪视角相机（squint 实测基座偏移思路；朝爪尖方向, Phase 4 可视化后可调） -->
                 <camera name="wrist_cam" pos="0.04 -0.045 -0.02" quat="0.866 0 0.5 0" fovy="71"/>
@@ -99,9 +100,10 @@
                   <joint axis="0 0 1" name="gripper" type="hinge" range="-0.17453297762778586 1.7453291995659765" class="sts3215"/>
                   <inertial pos="-0.00157495 -0.0300244 0.0192755" mass="0.012" fullinertia="6.61427e-06 1.89032e-06 5.28738e-06 -3.19807e-07 -5.90717e-09 -1.09945e-07"/>
                   <geom type="mesh" class="visual" pos="-5.55112e-17 -5.55112e-17 0.0189" quat="1 -0 3.00524e-16 -2.00834e-17" mesh="moving_jaw_so101_v1" material="moving_jaw_so101_v1_material"/>
-                  <!-- 指尖夹持碰撞体: mesh 凸包的幽灵面会提前碰/挤出方块 (视觉未碰先动+滑落根因),
-               换实测夹持面 box (顶点实测, todo/envs_grasp_tuning_todo.md); 视觉 mesh 保留 -->
-                  <geom type="mesh" class="collision" pos="0 0 0.0189" mesh="moving_jaw_so101_v1_convex" friction="3.5 0.005 0.0001"/>
+                  <!-- 指尖夹持碰撞体: 原 moving_jaw_so101_v1_convex.obj 是 218 个凸分解块,
+                       MuJoCo 会合成一个大凸包（填平指缝, 方块陷进碰撞体 6-13mm = 视觉穿模）。
+                       只保留夹持面两块 convex_37/38 -> moving_jaw_pad.obj; 视觉 mesh 保留。 -->
+                  <geom type="mesh" class="collision" pos="0 0 0.0189" mesh="moving_jaw_pad" friction="2.0 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
                 </body>
               </body>
             </body>
@@ -118,7 +120,7 @@
     <mesh file="moving_jaw_so101_v1.stl"/>
     <mesh file="Fixed_part_1.obj"/>
     <mesh file="Fixed_part_2.obj"/>
-    <mesh file="moving_jaw_so101_v1_convex.obj"/>
+    <mesh file="moving_jaw_pad.obj"/>
     <mesh file="base_motor_holder_so101_v1.stl"/>
     <mesh file="upper_arm_so101_v1.stl"/>
     <mesh file="wrist_roll_pitch_so101_v2.stl"/>

@@ -25,20 +25,22 @@ def _move_goal_to_tcp(env):
 
 
 def test_reach_teleported_goal_success():
-    """goal 移到 TCP 处 -> is_reached 且 success（静止时）。"""
+    """goal 移到 TCP 处 + 夹爪闭合 -> is_reached 且 success（squint 语义）。"""
     env = gym.make("SO101Reach-v1")
     try:
         env.reset(seed=0)
         u = env.unwrapped
-        for _ in range(10):  # 先 settle 到静止
-            *_, info = env.step(np.zeros(6))
-        assert info["is_static"]
+        hold = u.normalize_qpos(u.data.qpos[u._qpos_adr])
+        hold[5] = -1.0  # squint: success 要求夹爪闭合
+        for _ in range(10):  # settle 到静止并闭合夹爪
+            *_, info = env.step(hold)
+        assert info["is_static"] and info["is_gripper_closed"]
         _move_goal_to_tcp(u)
         u._goal = u.tcp_pos.copy()  # 同步 obs 内的 goal 缓存
-        obs, reward, terminated, truncated, info = env.step(np.zeros(6))
+        obs, reward, terminated, truncated, info = env.step(hold)
         assert info["is_reached"] is True
         assert info["success"] is True
-        assert terminated is True
+        assert terminated is False  # squint: success 不终止 episode
     finally:
         env.close()
 
@@ -163,7 +165,7 @@ def test_stack_success_requires_itemA_static():
         u = env.unwrapped
         _settle(env)
         b = u.free_body_pos("itemB")
-        a_pos = b + np.array([0, 0, 0.022 + 0.028 + 0.002])
+        a_pos = b + np.array([0, 0, u._item_a_half_z + u._item_b_half_z + 0.001])
         u.set_free_body_pose("itemA", a_pos, yaw=0.0)
         mujoco.mj_forward(u.model, u.data)
         # 给 itemA 一个横向速度（未静止）
@@ -197,14 +199,16 @@ def test_can_variant_smoke(env_id):
         env.reset(seed=0)
         u = env.unwrapped
         info = _settle(env, 4)
-        # 罐中心 z = 罐半高 0.03 (桌面 0 上方立放; stack 场景含 itemA cube 0.022 亦成立)
-        for body in ("item", "itemA", "itemB"):
+        # 物体中心 z = 各自半高（cube half / can half-h; squint 尺寸）
+        for body, geom in (("item", "item_geom"), ("itemA", "itemA_geom"),
+                           ("itemB", "itemB_geom")):
             bid = mujoco.mj_name2id(u.model, mujoco.mjtObj.mjOBJ_BODY, body)
             if bid < 0 or u.model.body_jntadr[bid] < 0:
                 continue  # 场景无此物体或非自由体
+            gid = mujoco.mj_name2id(u.model, mujoco.mjtObj.mjOBJ_GEOM, geom)
+            half = float(u.model.geom_size[gid][2])  # box h / cylinder half-length
             p = u.free_body_pos(body)
-            z_expect = 0.022 if body == "itemA" else 0.03
-            assert p[2] > z_expect - 0.01, f"{body} 未立在桌面: z={p[2]:.4f}"
+            assert p[2] > half - 0.01, f"{body} 未立在桌面: z={p[2]:.4f}"
         assert "success" in info
     finally:
         env.close()
@@ -216,10 +220,10 @@ def test_lift_can_item_half_used_in_evaluate():
     try:
         env.reset(seed=0)
         u = env.unwrapped
-        u.set_free_body_pose("item", (0.25, 0.0, 0.035), yaw=0.0)
+        u.set_free_body_pose("item", (0.3, 0.0, 0.032), yaw=0.0)
         mujoco.mj_forward(u.model, u.data)
         info = u.evaluate()
-        # 0.035 >= 0.03 + 0.005 -> 边界恰好判定为已抬起
+        # squint: lifted = z >= half_z + 1e-3 -> 0.032 > 0.03 + 1e-3
         assert info["item_lifted"] is True
     finally:
         env.close()
@@ -233,7 +237,7 @@ def test_stack_can_on_top_semantics():
         u = env.unwrapped
         _settle(env)
         b = u.free_body_pos("itemB")
-        a_pos = b + np.array([0, 0, 0.022 + 0.03 + 0.001])
+        a_pos = b + np.array([0, 0, u._item_a_half_z + u._item_b_half_z + 0.001])
         u.set_free_body_pose("itemA", a_pos, yaw=0.0)
         mujoco.mj_forward(u.model, u.data)
         info = u.evaluate()

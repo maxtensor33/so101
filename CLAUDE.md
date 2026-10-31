@@ -32,9 +32,14 @@ uv run python scripts/envs_check_env.py --id SO101Lift-v1 [--steps 30] [--render
 # rl: 训练/评估（sb3/skrl 双后端; torch 走系统安装, uv 不重复装）
 uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Reach-v1 --steps 200000
 uv run python scripts/rl_eval.py --ckpt outputs/rl/sb3-sac-reach --episodes 10
+# rl: lift（严格对齐 squint: delta 控制 / 2.2-2.8cm 密度200 物体 / squint SAC 超参; 默认即此配置）
+uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Lift-v1 \
+  --steps 1500000 --eval-freq 20000 --n-envs 4 --out outputs/rl/lift-squint
+# 对照: --action-mode position / --no-domain-randomization / --config none
 
-# rl: ROS2 推理可视化（加载 checkpoint 驱动 env, RViz 订阅）
-ros2 launch so101_rl_infer rl_infer.launch.py env:=reach checkpoint:=outputs/rl/sb3-sac-reach [camera:=true] [rviz:=true]
+# rl: ROS2 推理可视化（加载 checkpoint 驱动 env, RViz 订阅; mujoco:=true 开同一 env 的 MuJoCo 窗口;
+#      默认 Enter 重置 episode, reset_on_enter:=false 关闭）
+ros2 launch so101_rl_infer rl_infer.launch.py env:=reach checkpoint:=outputs/rl/sb3-sac-reach [camera:=true] [rviz:=true] [mujoco:=true] [reset_on_enter:=true]
 
 # il_sim: 采集（官方 lerobot-record 薄封装; expert/keyboard; episode 自动重置; 默认弹 MuJoCo 窗口, 关闭用 --robot.render=false）
 uv run python scripts/il_sim_record.py --robot.type=so101_sim --teleop.type=so101_expert \
@@ -73,7 +78,7 @@ uv run python scripts/envs_view_env.py --id SO101Reach-v1 [--cam fixed] [--rando
 # envs: gymnasium 标准 human 渲染（render_mode 透传, 同样弹 mujoco viewer 窗口）
 uv run python -c "import gymnasium as gym, so101_envs; env = gym.make('SO101Reach-v1', render_mode='human'); env.reset(seed=0); [env.step([0.0]*6) for _ in range(100)]; env.close()"
 
-# envs: 脚本专家验收（reach 100%; lift/place/stack 抓取保持为已知问题）
+# envs: 脚本专家（squint 迁移后需按新尺寸/出生域重调; 当前仅 reach 近点可解）
 uv run python scripts/envs_run_expert.py --env all --episodes 5
 
 # envs: RViz 可视化（env:=reach|lift|place|stack, camera:=true 开双相机图像）

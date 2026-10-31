@@ -20,8 +20,12 @@ def register(backend: str, algo: str, defaults: dict) -> None:
     REGISTRY[f"{backend}:{algo}"] = AlgoSpec(backend=backend, algo=algo, defaults=defaults)
 
 
-def load_defaults(backend: str, algo: str, configs_dir: Path | None = None) -> dict:
-    """默认超参：代码内置 < configs/<backend>_<algo>.yaml < CLI overrides。"""
+def load_defaults(backend: str, algo: str, configs_dir: Path | None = None,
+                  variant: str | None = None) -> dict:
+    """默认超参：代码内置 < configs/<backend>_<algo>.yaml < 变体 yaml < CLI overrides。
+
+    variant="squint" -> 叠加 configs/<backend>_<algo>_squint.yaml（对齐 squint 配方）。
+    """
     key = f"{backend}:{algo}"
     if key not in REGISTRY:
         raise KeyError(f"unknown algo {key}; known: {sorted(REGISTRY)}")
@@ -29,9 +33,13 @@ def load_defaults(backend: str, algo: str, configs_dir: Path | None = None) -> d
     if configs_dir is not None:
         import yaml
 
-        cfg_path = Path(configs_dir) / f"{backend}_{algo}.yaml"
-        if cfg_path.exists():
-            params.update(yaml.safe_load(cfg_path.read_text()) or {})
+        base_path = Path(configs_dir) / f"{backend}_{algo}.yaml"
+        if base_path.exists():
+            params.update(yaml.safe_load(base_path.read_text()) or {})
+        if variant:
+            variant_path = Path(configs_dir) / f"{backend}_{algo}_{variant}.yaml"
+            if variant_path.exists():
+                params.update(yaml.safe_load(variant_path.read_text()) or {})
     return params
 
 

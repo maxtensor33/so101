@@ -48,6 +48,18 @@
    `cfg.experiment.{write,checkpoint}_interval` 置 0 关自动保存
 4. meta.json env_id 曾丢 "-v1"（sb3 从内部 env 读 spec），改为 make_model 时记录
 
+## 2026-10-31 更新：lift 严格对齐 squint
+
+`workflow/reports/lift_squint_migration.md` 记录了逐项迁移（delta 控制、2.2–2.8cm /
+密度 200 物体、归一化奖励、target_qpos success、观测补全、squint 超参接线）。
+`rl_train.py` 默认 `--config squint --action-mode delta --domain-randomization`，
+`meta.json` 记录 `env_kwargs` 供 `rl_eval`/`rl_infer` 一致重建 env。
+
+```bash
+uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Lift-v1 \
+  --steps 1500000 --eval-freq 20000 --n-envs 4 --out outputs/rl/lift-squint
+```
+
 ## TDD 证据与复盘
 
 - TDD 证据：`.claude/tdd/rl.tdd.md`

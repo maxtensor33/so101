@@ -15,12 +15,15 @@
   </asset>
   <worldbody>
     <light pos="0.4 0 0.75" dir="0 0 -1" directional="true"/>
-    <geom name="floor" type="plane" size="0 0 0.05" pos="0 0 -0.75" rgba="0.2 0.3 0.4 1"/>
-    <geom name="table_top" type="box" material="desk" size="0.45 0.4 0.015" pos="0.3 0 -0.015"/>
+    <geom name="floor" type="plane" size="0 0 0.05" pos="0 0 -0.75" rgba="0.2 0.3 0.4 1" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
+    <!-- 硬接触: 同 scene_lift.xml（小物体接触刚度不足会压进桌面/指尖） -->
+    <geom name="table_top" type="box" material="desk" size="0.45 0.4 0.015" pos="0.3 0 -0.015" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
     <geom name="table_body" type="box" material="desk" size="0.35 0.36 0.345" pos="0.3 0 -0.375"/>
-    <body name="item" pos="0.25 0 0.03">
+    <!-- squint lift can 默认值: r=0.0165, half_h=0.03, 密度 200 -> 10.26g,
+         摩擦 range 中点 0.3（env reset 时按 DR 开关重写 size/mass/friction） -->
+    <body name="item" pos="0.3 0 0.03">
       <freejoint name="item_free"/>
-      <geom name="item_geom" type="cylinder" size="0.0165 0.03" mass="0.01" friction="1.0 0.005 0.0001" solref="0.005 1" solimp="0.95 0.99 0.0001" condim="3" rgba="0.15 0.15 0.85 1"/>
+      <geom name="item_geom" type="cylinder" size="0.0165 0.03" mass="0.010264" friction="0.3 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.15 0.15 0.85 1"/>
     </body>
     <camera name="fixed_cam" pos="0.75 -0.65 0.75" xyaxes="0.792 0.610 0 -0.379 0.492 0.783" fovy="60"/>
   </worldbody>

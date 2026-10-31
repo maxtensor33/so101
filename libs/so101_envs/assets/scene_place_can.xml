@@ -15,21 +15,21 @@
   </asset>
   <worldbody>
     <light pos="0.4 0 0.75" dir="0 0 -1" directional="true"/>
-    <geom name="floor" type="plane" size="0 0 0.05" pos="0 0 -0.75" rgba="0.2 0.3 0.4 1"/>
-    <geom name="table_top" type="box" material="desk" size="0.45 0.4 0.015" pos="0.3 0 -0.015"/>
+    <geom name="floor" type="plane" size="0 0 0.05" pos="0 0 -0.75" rgba="0.2 0.3 0.4 1" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
+    <geom name="table_top" type="box" material="desk" size="0.45 0.4 0.015" pos="0.3 0 -0.015" solref="0.001 1" solimp="0.99 0.999 0.0001"/>
     <geom name="table_body" type="box" material="desk" size="0.35 0.36 0.345" pos="0.3 0 -0.375"/>
-    <body name="item" pos="0.25 -0.1 0.03">
+    <body name="item" pos="0.3 0 0.03">
       <freejoint name="item_free"/>
-      <geom name="item_geom" type="cylinder" size="0.0165 0.03" mass="0.01" friction="1.0 0.005 0.0001" solref="0.005 1" solimp="0.95 0.99 0.0001" condim="3" rgba="0.15 0.15 0.85 1"/>
+      <geom name="item_geom" type="cylinder" size="0.0165 0.03" mass="0.010264" friction="0.3 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.15 0.15 0.85 1"/>
     </body>
-    <!-- bin: 底 + 4 壁，内尺寸 half 0.055 x 0.075，壁高 0.045 -->
-    <body name="bin" pos="0.42 0.10 0">
+    <!-- bin: squint 默认 bx=0.04 by=0.05 bz=0.015 thickness=0.005; reset 时逐 episode 重写 -->
+    <body name="bin" pos="0.3 0.1 0.0025">
       <freejoint name="bin_free"/>
-      <geom name="bin_bottom" type="box" size="0.055 0.075 0.003" pos="0 0 0.003" mass="0.04" friction="0.8 0.005 0.0001" condim="3" rgba="0.2 0.4 0.8 1"/>
-      <geom name="bin_wall_px" type="box" size="0.0025 0.075 0.021" pos="0.0575 0 0.027" mass="0.015" rgba="0.2 0.4 0.8 1"/>
-      <geom name="bin_wall_nx" type="box" size="0.0025 0.075 0.021" pos="-0.0575 0 0.027" mass="0.015" rgba="0.2 0.4 0.8 1"/>
-      <geom name="bin_wall_py" type="box" size="0.055 0.0025 0.021" pos="0 0.0775 0.027" mass="0.015" rgba="0.2 0.4 0.8 1"/>
-      <geom name="bin_wall_ny" type="box" size="0.055 0.0025 0.021" pos="0 -0.0775 0.027" mass="0.015" rgba="0.2 0.4 0.8 1"/>
+      <geom name="bin_bottom" type="box" size="0.04 0.05 0.0025" pos="0 0 0.0025" mass="0.04" friction="0.8 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.2 0.4 0.8 1"/>
+      <geom name="bin_wall_px" type="box" size="0.0025 0.05 0.015" pos="0.04 0 0.015" mass="0.015" friction="0.8 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.2 0.4 0.8 1"/>
+      <geom name="bin_wall_nx" type="box" size="0.0025 0.05 0.015" pos="-0.04 0 0.015" mass="0.015" friction="0.8 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.2 0.4 0.8 1"/>
+      <geom name="bin_wall_py" type="box" size="0.04 0.0025 0.015" pos="0 0.05 0.015" mass="0.015" friction="0.8 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.2 0.4 0.8 1"/>
+      <geom name="bin_wall_ny" type="box" size="0.04 0.0025 0.015" pos="0 -0.05 0.015" mass="0.015" friction="0.8 0.005 0.0001" solref="0.001 1" solimp="0.99 0.999 0.0001" condim="4" rgba="0.2 0.4 0.8 1"/>
     </body>
     <camera name="fixed_cam" pos="0.75 -0.65 0.75" xyaxes="0.792 0.610 0 -0.379 0.492 0.783" fovy="60"/>
   </worldbody>

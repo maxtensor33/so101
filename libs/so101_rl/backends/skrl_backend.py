@@ -71,16 +71,20 @@ class SkrlTrainer(TrainerSpec):
         self.algo = algo
         self._last_hparams: dict = {}
 
-    def make_env(self, env_id: str, seed=None):
+    def make_env(self, env_id: str, seed=None, env_kwargs: dict | None = None):
         self._env_id = env_id
-        return gym.make(env_id)
+        self._env_kwargs = dict(env_kwargs or {})
+        return gym.make(env_id, **self._env_kwargs)
 
-    def make_vec_envs(self, env_id: str, seed: int = 0, n_envs: int = 1):
+    def make_vec_envs(self, env_id: str, seed: int = 0, n_envs: int = 1,
+                      env_kwargs: dict | None = None):
         """CPU 多环境: gymnasium 官方 make_vec（skrl 官方示例同款用法）。"""
         self._env_id = env_id
+        self._env_kwargs = dict(env_kwargs or {})
         if n_envs <= 1:
-            return gym.make(env_id)
-        return gym.make_vec(env_id, num_envs=n_envs, vectorization_mode="sync")
+            return gym.make(env_id, **self._env_kwargs)
+        return gym.make_vec(env_id, num_envs=n_envs, vectorization_mode="sync",
+                            **self._env_kwargs)
 
     def make_model(self, env, seed: int, hparams: dict, tb_dir=None):
         if not hasattr(self, "_env_id"):
@@ -255,7 +259,8 @@ class SkrlTrainer(TrainerSpec):
                 found[0].rename(ckpt_dir / "model.pt")
         write_meta(ckpt_dir, self.backend, self.algo, getattr(self, "_env_id", ""),
                    int(agent.observation_space.shape[0]), False,
-                   hparams=self._last_hparams)
+                   hparams=self._last_hparams,
+                   env_kwargs=getattr(self, "_env_kwargs", None))
 
     def load_policy(self, ckpt_dir: Path):
         import json as _json
@@ -263,7 +268,7 @@ class SkrlTrainer(TrainerSpec):
         import so101_envs  # noqa: F401  确保 env registry 已注册
 
         meta = _json.loads((Path(ckpt_dir) / "meta.json").read_text())
-        env = gym.make(meta["env_id"])
+        env = gym.make(meta["env_id"], **meta.get("env_kwargs", {}))
         hparams = meta.get("hparams", {})
         agent, _ = self._make_agent(env, seed=0, hparams=hparams)
         agent.load(Path(ckpt_dir) / "model.pt")

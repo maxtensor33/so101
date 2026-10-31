@@ -63,10 +63,18 @@ class RlInferNode(Node):
         self.declare_parameter("checkpoint", "")
         self.declare_parameter("camera", False)
         self.declare_parameter("rate", 10.0)
+        # mujoco:=true: 同一个 env 实例开 MuJoCo 交互窗口（render_mode="human"）
+        self.declare_parameter("mujoco", False)
+        # 按 Enter 重置 episode（pynput 全局监听; 无 pynput 时回退 stdin）
+        self.declare_parameter("reset_on_enter", True)
         env_name = str(self.get_parameter("env").value)
         # 支持最新 run 指针: checkpoint:=outputs/rl/<tag>/latest
         ckpt = resolve_ckpt_dir(Path(str(self.get_parameter("checkpoint").value)))
         camera = bool(self.get_parameter("camera").value)
+        self._mujoco = bool(self.get_parameter("mujoco").value)
+        reset_on_enter = bool(self.get_parameter("reset_on_enter").value)
+        self._reset_requested = False
+        self._listener = None
 
         meta = read_meta(ckpt)
         if meta["env_id"] != ENV_ID[env_name]:
@@ -78,9 +86,16 @@ class RlInferNode(Node):
 
         trainer = get_trainer(meta["backend"], meta["algo"])
         self.policy = trainer.load_policy(ckpt)
-        self.env = trainer.make_env(meta["env_id"], seed=None)
+        env_kwargs = dict(meta.get("env_kwargs", {}))
+        if self._mujoco:
+            env_kwargs["render_mode"] = "human"
+        self.env = trainer.make_env(meta["env_id"], seed=None, env_kwargs=env_kwargs)
         self.u = self.env.unwrapped
         self.obs, _ = self.env.reset(seed=0)
+        if self._mujoco:
+            self.env.render()  # 打开 viewer 并同步首帧
+        if reset_on_enter:
+            self._start_reset_listener()
         self._qadr = self.u._qpos_adr
         self._item_bodies = [b for b in TASK_BODIES[env_name]
                              if mujoco.mj_name2id(self.u.model, mujoco.mjtObj.mjOBJ_BODY, b) >= 0]
@@ -96,6 +111,13 @@ class RlInferNode(Node):
         self.timer = self.create_timer(1.0 / rate, self.tick)
 
     def tick(self):
+        if self._reset_requested:
+            self._reset_requested = False
+            self.obs, _ = self.env.reset()  # 随机 seed: 每次 Enter 换一个场景
+            self.get_logger().info("episode reset (Enter)")
+            if self._mujoco:
+                self.env.render()
+            return
         action = self.policy(self.obs)
         self.obs, _, _, _, info = self.env.step(action)
         js = JointState()
@@ -131,7 +153,45 @@ class RlInferNode(Node):
         if info.get("success"):
             self.get_logger().info("episode success!", throttle_duration_sec=5.0)
 
+    # ---------- Enter 重置监听 ----------
+    def _start_reset_listener(self):
+        """pynput 全局 Enter 监听（X11/Wayland 视环境）; 失败回退 stdin 行读取。"""
+        try:
+            from pynput import keyboard
+
+            self._listener = keyboard.Listener(on_press=self._on_key)
+            self._listener.start()
+        except Exception as exc:  # 无图形/权限受限: 仍可用 stdin Enter
+            self._listener = None
+            self.get_logger().warn(f"pynput Enter 监听不可用（回退 stdin）: {exc}")
+
+        import threading
+
+        threading.Thread(target=self._stdin_loop, daemon=True).start()
+
+    def _on_key(self, key):
+        try:
+            from pynput.keyboard import Key
+
+            if key == Key.enter:
+                self._reset_requested = True
+        except Exception:
+            pass
+
+    def _stdin_loop(self):
+        try:
+            for _line in sys.stdin:
+                self._reset_requested = True
+        except Exception:
+            pass
+
     def destroy_node(self):
+        if self._listener is not None:
+            try:
+                self._listener.stop()
+            except Exception:
+                pass
+            self._listener = None
         self.env.close()
         return super().destroy_node()
 

@@ -51,7 +51,8 @@ class ScriptExpertTeleop(Teleoperator):
         self._ik = None
         self._phase = "WAIT"
         self._step = 0
-        self._grip_hold = 0.0
+        # squint reach success 要求闭爪；全程闭爪（开爪到位再闭爪会移动指尖中点 TCP）
+        self._grip_hold = -1.0
 
     @property
     def action_features(self) -> dict[str, type]:
@@ -114,8 +115,12 @@ class ScriptExpertTeleop(Teleoperator):
             if np.linalg.norm(u.tcp_pos - goal) < TOL or self._step >= GO_STEPS_MAX:
                 self._phase = "SETTLE"
                 self._step = 0
+                self._grip_hold = -1.0  # squint reach success 要求夹爪闭合
             else:
-                q_ref, _ = self._ik.solve(q_arm, goal, n_iter=5)
+                q_ref, _ = self._ik.solve(
+                    q_arm, goal, n_iter=5,
+                    q_gripper=u.data.qpos[u._qpos_adr[5]],
+                    position_only=True)  # reach 不约束朝向
                 dq = np.clip(q_ref - q_arm, -self.config.max_dq, self.config.max_dq)
                 lo = u._ctrlrange[:5, 0]
                 hi = u._ctrlrange[:5, 1]

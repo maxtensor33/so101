@@ -1,0 +1,12 @@
+# SB3 SAC squint 对齐超参（--config squint 选择; 逐项对照 train_squint.py Args）
+# policy_lr=q_lr=alpha_lr=3e-4 / gamma=0.9 / tau=0.01 / batch=512 / buffer=1M / learning_starts=5k
+# 差异说明: squint 每迭代 256 次更新（1024 并行 env 摊薄）; 本地单环境保持 train_freq=1
+learning_rate: 0.0003
+buffer_size: 1000000
+batch_size: 512
+gamma: 0.9
+tau: 0.01
+train_freq: 1
+gradient_steps: 1
+learning_starts: 5000
+ent_coef: auto

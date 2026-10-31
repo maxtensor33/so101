@@ -18,7 +18,7 @@ import pytest
 import so101_envs  # noqa: F401  注册副作用
 
 ENV_ID = "SO101Reach-v1"
-OBS_DIM = 25
+OBS_DIM = 47  # reach（squint 对齐后的 state dim）
 
 
 def _train_hparams(algo):
@@ -173,6 +173,19 @@ def test_multi_env_contract(key, tmp_path):
     finally:
         vec.close() if hasattr(vec, "close") else None
         eval_env.close()
+
+
+def test_deploy_denormalize_delta_mode():
+    """squint delta 部署语义: 动作是增量, 需在上一拍 target 上积分 + ctrlrange 限幅。"""
+    from so101_rl.lerobot_deploy import DELTA_MAX, JOINT_LOWER, JOINT_UPPER, denormalize_action
+
+    target = np.zeros(6)
+    out = denormalize_action(np.ones(6), current_target=target, action_mode="delta")
+    assert np.allclose(out, DELTA_MAX)
+    out2 = denormalize_action(-np.ones(6), current_target=np.full(6, -1e9), action_mode="delta")
+    assert np.allclose(out2, JOINT_LOWER)
+    pos = denormalize_action(np.zeros(6), action_mode="position")
+    assert np.allclose(pos, (JOINT_LOWER + JOINT_UPPER) / 2)
 
 
 def test_eval_curve_png(tmp_path):

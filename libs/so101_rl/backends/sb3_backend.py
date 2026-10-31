@@ -62,12 +62,14 @@ class Sb3Trainer(TrainerSpec):
     def __init__(self, algo: str = "sac"):
         self.algo = algo
 
-    def make_env(self, env_id: str, seed=None):
-        """创建单 env（评估/推理用）。"""
+    def make_env(self, env_id: str, seed=None, env_kwargs: dict | None = None):
+        """创建单 env（评估/推理用）。env_kwargs 含 action_mode/domain_randomization 等。"""
         self._env_id = env_id
-        return gym.make(env_id)
+        self._env_kwargs = dict(env_kwargs or {})
+        return gym.make(env_id, **self._env_kwargs)
 
-    def make_vec_envs(self, env_id: str, seed: int = 0, n_envs: int = 1):
+    def make_vec_envs(self, env_id: str, seed: int = 0, n_envs: int = 1,
+                      env_kwargs: dict | None = None):
         """CPU 多环境: DummyVecEnv（单进程串行多 env）。
 
         sb3 官方文档: DummyVecEnv "usually faster than SubprocVecEnv"——
@@ -78,7 +80,8 @@ class Sb3Trainer(TrainerSpec):
         from stable_baselines3.common.vec_env import DummyVecEnv
 
         self._env_id = env_id
-        env_fns = [lambda: Monitor(gym.make(env_id)) for _ in range(n_envs)]
+        self._env_kwargs = dict(env_kwargs or {})
+        env_fns = [lambda: Monitor(gym.make(env_id, **self._env_kwargs)) for _ in range(n_envs)]
         return DummyVecEnv(env_fns)
 
     def make_model(self, env, seed: int, hparams: dict, tb_dir=None):
@@ -121,7 +124,8 @@ class Sb3Trainer(TrainerSpec):
         vec_env = model.get_vec_normalize_env()
         normalized = save_norm(vec_env, ckpt_dir) if vec_env is not None else False
         write_meta(ckpt_dir, self.backend, self.algo, getattr(self, "_env_id", ""),
-                   model.observation_space.shape[0], normalized)
+                   model.observation_space.shape[0], normalized,
+                   env_kwargs=getattr(self, "_env_kwargs", None))
 
     def load_policy(self, ckpt_dir: Path):
         """加载 -> 可调用 policy(obs) -> action(np.ndarray(6), [-1,1])。

@@ -35,9 +35,9 @@ def test_sb3_checker_accepts_our_env():
     try:
         check_env(env)
         obs, _ = env.reset(seed=0)
-        assert obs.shape == (25,)
+        assert obs.shape == (47,)
         obs, r, term, trunc, info = env.step(env.action_space.sample())
-        assert np_shape_ok(obs, (25,))
+        assert np_shape_ok(obs, (47,))
     finally:
         env.close()
 

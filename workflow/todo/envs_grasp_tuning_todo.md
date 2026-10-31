@@ -105,4 +105,21 @@ v1 pad box 手工换算出错同源）。几何结论一律以运行时 `d.geom_
 - [ ] 脚本专家 lift 连续 5 episode 成功率 ≥ 80%
 - [ ] leader 遥操 lift 可实际完成抓取-抬升演示
 
+## 2026-10-31 更新：lift 已按 squint 迁移，保持/穿模收敛
+
+`workflow/reports/lift_squint_migration.md`：物体改为 squint 尺寸（half 0.011–0.014,
+密度 200 → ~3g）、指尖摩擦回到 2.0、item 接触 `condim=4`（扭转摩擦）。真实夹持中心
+是**动态两指尖中点**（不是固定 `gripperframe` site）：25mm cube 对应夹爪目标约
+0~0.2 rad，全闭合会把方块挤进指尖。
+
+穿模根因与修复：
+- jaw 的 218 块凸分解被 MuJoCo 合成一个大凸包 → 只保留夹持面 `convex_37/38`
+  （`moving_jaw_pad.obj`）。
+- 3g 物体接触刚度过软 → item / table / floor / 手指碰撞体统一
+  `solref="0.001 1" solimp="0.99 0.999 0.0001"`；实测穿透 10–15mm → <1mm。
+- 回归：`test_grasp_holds_after_release`（30/30 保持 + 穿透 <0.5mm）；用户策略 10
+  episodes 手指穿透 ≤0.41mm，success 9/10（旧策略，需用新物理重训）。
+
+专家 IK 对准问题（本文件上文）仍待重做。
+
 相关: workflow/pitfalls/envs.md（"抓取行为不符合直觉"）、workflow/reports/envs_report.md

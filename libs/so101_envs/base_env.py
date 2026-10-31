@@ -20,7 +20,7 @@ import numpy as np
 from gymnasium import spaces
 
 from .randomize import RandomizationConfig
-from .utils import is_grasping, is_touching, is_static, mat2quat
+from .utils import is_grasping, is_touching, is_static
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 
@@ -32,6 +32,11 @@ REST_QPOS = np.array([0.0, 0.0, 0.0, np.pi / 2, -np.pi / 2, 60 * np.pi / 180])
 
 RENDER_SIZE = 128
 N_SUBSTEPS = 50
+# squint pd_joint_target_delta_pos: 每控制步 ctrl 增量上限（rad）
+DELTA_MAX = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.2])
+# squint TCP = 两指尖中点（URDF finger1_tip/finger2_tip 在对应 link 系的偏移）
+FINGER1_TIP_LOCAL = np.array([-0.002, 0.0, -0.092])   # gripper_link
+FINGER2_TIP_LOCAL = np.array([-0.01, -0.077, 0.02])   # moving_jaw_so101_v1_link
 
 
 class SO101BaseEnv(gymnasium.Env):
@@ -39,16 +44,22 @@ class SO101BaseEnv(gymnasium.Env):
 
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 10}
     SCENE_XML = None  # 子类必须指定 assets 下的场景文件名
+    TERMINATE_ON_SUCCESS = True  # squint 任务不因 success 终止（lift 子类置 False）
 
     def __init__(self, camera=False, render_mode=None, cfg=None, n_substeps=N_SUBSTEPS,
-                 viewer_ui=True, viewer_maximize=False, viewer_no_input=False):
+                 viewer_ui=True, viewer_maximize=False, viewer_no_input=False,
+                 domain_randomization=False, action_mode="position"):
         super().__init__()
         assert self.SCENE_XML is not None, "子类必须设置 SCENE_XML"
         assert render_mode in (None, "rgb_array", "human")
+        assert action_mode in ("position", "delta"), f"action_mode 非法: {action_mode}"
         self.camera = bool(camera)
         self.render_mode = render_mode
         self.cfg = cfg if cfg is not None else RandomizationConfig()
         self.n_substeps = int(n_substeps)
+        self.domain_randomization = bool(domain_randomization)
+        self.action_mode = action_mode
+        self._ctrl_target = None  # squint use_target=True: 控制器目标 qpos
 
         self.model = mujoco.MjModel.from_xml_path(str(ASSETS / self.SCENE_XML))
         self.data = mujoco.MjData(self.model)
@@ -66,6 +77,8 @@ class SO101BaseEnv(gymnasium.Env):
              for n in ROBOT_JOINTS]
         )
         self._tcp_sid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, "gripperframe")
+        self._gripper_bid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "gripper")
+        self._jaw_bid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "moving_jaw_so101_v1")
         self._step_count = 0
 
         self._init_spaces()
@@ -109,16 +122,29 @@ class SO101BaseEnv(gymnasium.Env):
 
     @property
     def tcp_pose(self):
-        """TCP 位姿 (pos3 + quat wxyz4), 取 gripperframe site。"""
-        sid = self._tcp_sid
-        return self.data.site_xpos[sid].copy(), mat2quat(self.data.site_xmat[sid])
+        """TCP 位姿 (pos3 + quat wxyz4): 两指尖中点 + gripper_link 朝向（squint）。"""
+        return self.tcp_pos, self.data.xquat[self._gripper_bid].copy()
 
     @property
     def tcp_pos(self):
-        return self.data.site_xpos[self._tcp_sid].copy()
+        """两指尖中点（随时间/夹爪角变化；squint agent.tcp_pos）。"""
+        Rg = self.data.xmat[self._gripper_bid].reshape(3, 3)
+        p1 = self.data.xpos[self._gripper_bid] + Rg @ FINGER1_TIP_LOCAL
+        Rj = self.data.xmat[self._jaw_bid].reshape(3, 3)
+        p2 = self.data.xpos[self._jaw_bid] + Rj @ FINGER2_TIP_LOCAL
+        return (p1 + p2) / 2.0
+
+    @property
+    def target_qpos(self):
+        """控制器目标 qpos（squint controller._target_qpos; position 模式下 = ctrl）。"""
+        if self._ctrl_target is None:
+            return self.data.ctrl.copy()
+        return self._ctrl_target.copy()
 
     def _get_state_obs(self):
-        qpos = self.data.qpos[self._qpos_adr]
+        qpos = self.data.qpos[self._qpos_adr].copy()
+        if self.domain_randomization and self.cfg.robot_qpos_noise_std > 0:
+            qpos += self.np_random.normal(0.0, self.cfg.robot_qpos_noise_std, size=6)
         qvel = self.data.qvel[self._qvel_adr]
         tcp_p, tcp_q = self.tcp_pose
         return np.concatenate([qpos, qvel, tcp_p, tcp_q]).astype(np.float64)
@@ -128,11 +154,12 @@ class SO101BaseEnv(gymnasium.Env):
         super().reset(seed=seed)
         rng = self.np_random
         mujoco.mj_resetData(self.model, self.data)
-        # 机器人: rest pose + 初始 qpos 噪声 (默认开)
-        q0 = REST_QPOS + rng.uniform(-1, 1, size=6) * self.cfg.initial_qpos_noise_scale
+        # 机器人: rest pose + 初始 qpos 噪声 (squint: rest + randn*scale, 默认开)
+        q0 = REST_QPOS + rng.normal(0.0, self.cfg.initial_qpos_noise_scale, size=6)
         q0 = np.clip(q0, self._ctrlrange[:, 0], self._ctrlrange[:, 1])
         self.data.qpos[self._qpos_adr] = q0
         self.data.ctrl[:] = q0
+        self._ctrl_target = q0.copy()
         self._reset_task(rng)
         self.data.qvel[:] = 0
         mujoco.mj_forward(self.model, self.data)
@@ -141,14 +168,24 @@ class SO101BaseEnv(gymnasium.Env):
 
     def step(self, action):
         action = np.asarray(action, dtype=np.float64)
-        ctrl = self.denormalize_action(action)
+        if self.action_mode == "delta":
+            # squint pd_joint_target_delta_pos: 归一化动作 -> ±DELTA_MAX 增量,
+            # 目标积分并钳在 ctrlrange（use_target=True 语义）
+            lo = self._ctrlrange[:, 0]
+            hi = self._ctrlrange[:, 1]
+            self._ctrl_target = np.clip(
+                self._ctrl_target + np.clip(action, -1.0, 1.0) * DELTA_MAX, lo, hi)
+            ctrl = self._ctrl_target
+        else:
+            ctrl = self.denormalize_action(action)
+            self._ctrl_target = ctrl.copy()
         self.data.ctrl[:] = ctrl
         for _ in range(self.n_substeps):
             mujoco.mj_step(self.model, self.data)
         self._step_count += 1
         info = self.evaluate()
         reward = float(self.compute_dense_reward(action, info))
-        terminated = bool(info.get("success", False))
+        terminated = bool(info.get("success", False) and self.TERMINATE_ON_SUCCESS)
         obs = self._get_obs()
         if self.render_mode == "human":
             self.render()
@@ -230,6 +267,59 @@ class SO101BaseEnv(gymnasium.Env):
         qadr = self.model.jnt_qposadr[self.model.body_jntadr[bid]]
         return self.data.qpos[qadr:qadr + 3].copy()
 
+    def free_body_pose(self, body):
+        """自由物体位姿 qpos[7] (pos3 + quat wxyz4)。"""
+        bid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body)
+        qadr = self.model.jnt_qposadr[self.model.body_jntadr[bid]]
+        return self.data.qpos[qadr:qadr + 7].copy()
+
+    # ---------- squint 物体几何/惯性（cube/can 共用） ----------
+    def sample_box_geometry(self, rng, half_range, density=None):
+        """采样 cube: 返回 (geom_size(3), half_z, mass, inertia(3))。DR 关取中点。"""
+        density = self.cfg.item_density if density is None else density
+        h = rng.uniform(*half_range) if self.domain_randomization else sum(half_range) / 2.0
+        side = 2.0 * h
+        mass = density * side ** 3
+        inertia = np.full(3, mass * side ** 2 / 6.0)
+        return np.array([h, h, h]), float(h), float(mass), inertia
+
+    def sample_cylinder_geometry(self, rng, radius_range, half_height_range, density=None):
+        """采样 can: 返回 (geom_size(2)=[r, half_h], half_z, mass, inertia(3))。"""
+        density = self.cfg.item_density if density is None else density
+        r = rng.uniform(*radius_range) if self.domain_randomization else sum(radius_range) / 2.0
+        hh = (rng.uniform(*half_height_range)
+              if self.domain_randomization else sum(half_height_range) / 2.0)
+        mass = density * np.pi * r ** 2 * (2.0 * hh)
+        inertia = np.array([
+            mass * (3.0 * r ** 2 + (2.0 * hh) ** 2) / 12.0,
+            mass * (3.0 * r ** 2 + (2.0 * hh) ** 2) / 12.0,
+            mass * r ** 2 / 2.0,
+        ])
+        return np.array([r, hh]), float(hh), float(mass), inertia
+
+    def apply_free_geometry(self, body, geom_name, size, mass, inertia):
+        """运行期改写自由物体 geom 尺寸/质量/惯性并重算常量（mj_setConst 会重置 data）。"""
+        gid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, geom_name)
+        bid = int(self.model.geom_bodyid[gid])
+        self.model.geom_size[gid][: len(size)] = size
+        self.model.body_mass[bid] = mass
+        self.model.body_inertia[bid] = inertia
+        self._recompute_constants()
+
+    def _recompute_constants(self):
+        """mj_setConst 重算 rbound/invweight 等；保存/恢复 data（setConst 会重置为默认态）。"""
+        qpos, qvel, ctrl, sim_time = (
+            self.data.qpos.copy(), self.data.qvel.copy(),
+            self.data.ctrl.copy(), self.data.time)
+        mocap_pos, mocap_quat = self.data.mocap_pos.copy(), self.data.mocap_quat.copy()
+        mujoco.mj_setConst(self.model, self.data)
+        self.data.qpos[:] = qpos
+        self.data.qvel[:] = qvel
+        self.data.ctrl[:] = ctrl
+        self.data.time = sim_time
+        self.data.mocap_pos[:] = mocap_pos
+        self.data.mocap_quat[:] = mocap_quat
+
     # ---------- 任务 hook (子类实现) ----------
     def _reset_task(self, rng):
         raise NotImplementedError
@@ -244,20 +334,22 @@ class SO101BaseEnv(gymnasium.Env):
     def _randomize_item(self, geom_name, rng):
         """任务类出生域采样后调用; 应用 rgba/摩擦随机化 (安全可变字段)。
 
+        squint 语义: domain_randomization=True 才按 cfg range 采样; 否则取 range 中点。
         rgba 从首次缓存的基色采样（非增量累积），保证同 seed 多次 reset 可复现。
         """
         cfg = self.cfg
         gid = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, geom_name)
-        if cfg.randomize_item_color:
+        if self.domain_randomization and cfg.randomize_item_color:
             if geom_name not in self._item_base_rgba:
                 self._item_base_rgba[geom_name] = np.array(self.model.geom_rgba[gid][:3])
             rgb = np.clip(
                 self._item_base_rgba[geom_name]
                 + rng.uniform(-1, 1, 3) * cfg.item_rgba_jitter, 0.0, 1.0)
             self.model.geom_rgba[gid][:3] = rgb
-        if cfg.item_friction_range[0] < cfg.item_friction_range[1]:
-            f = rng.uniform(*cfg.item_friction_range)
-            self.model.geom_friction[gid] = [f, 0.005, 0.0001]
+        lo, hi = cfg.item_friction_range
+        f = rng.uniform(lo, hi) if self.domain_randomization else (lo + hi) / 2.0
+        self.model.geom_friction[gid] = [f, 0.005, 0.0001]
+        self._item_friction = float(f)
 
     def _randomize_fixed_cam(self, rng):
         """fixed 相机位姿噪声（从基位姿采样, 防累积漂移）。"""

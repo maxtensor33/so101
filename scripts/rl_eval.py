@@ -32,7 +32,8 @@ def main():
     meta = read_meta(ckpt)
     trainer = get_trainer(meta["backend"], meta["algo"])
     policy = trainer.load_policy(ckpt)
-    env = trainer.make_env(meta["env_id"], seed=None)
+    env = trainer.make_env(meta["env_id"], seed=None,
+                           env_kwargs=meta.get("env_kwargs", {}))
 
     n_ok = 0
     for ep in range(args.episodes):

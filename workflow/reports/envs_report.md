@@ -89,6 +89,17 @@ patch_radius 接触模型。后续方向：
 - episode：reach/lift 50，place 75，stack 100 步（对齐 squint）
 - 动作：Box(-1,1,6) 归一化关节位置目标，10Hz 控制 / 500Hz 仿真
 
+## 2026-10-31 更新：8 环境已按 squint 迁移
+
+本文件上文的物体尺寸（4.4cm cube）、episode 长度（place 75 / stack 100）、
+以及“抓握保持失败”结论均已被取代。最新实现：
+
+- lift：`workflow/reports/lift_squint_migration.md`
+- reach / place / stack：`workflow/reports/envs_squint_migration.md`
+- 统一：2.2–2.8cm / 密度 200 物体、condim=4 + 硬接触、squint 奖励/观测/终止、
+  episode 50、delta 动作（RL）。
+- 脚本专家在新的出生域/物理下全部 0%，需按新尺寸重调（非 RL 验收项）。
+
 ## TDD 证据
 
 见 `.claude/tdd/envs.tdd.md`（RED→GREEN 映射表）。

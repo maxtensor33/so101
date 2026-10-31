@@ -23,19 +23,25 @@ CAMERA_IDS = [
     "SO101ReachCamera-v1", "SO101LiftCamera-v1", "SO101PlaceCamera-v1", "SO101StackCamera-v1",
 ]
 
-# reach state obs 布局: [qpos(6) qvel(6) tcp_pos(3) tcp_quat(4) | goal_pos(3) tcp_to_goal(3)]
-REACH_STATE_DIM = 25
+# reach state obs 布局（squint 对齐，47 维）:
+# [qpos(6) qvel(6) tcp_pos(3) tcp_quat(4) | goal(3) tcp_to_goal(3) item_pose(7)
+#  tcp_to_item(3) is_reached(1) clean_qpos(6) item_dim(3) friction(1) density(1)]
+REACH_STATE_DIM = 47
 SLICE_QPOS = slice(0, 6)
 SLICE_QVEL = slice(6, 12)
 SLICE_TCP_POS = slice(12, 15)
 SLICE_TCP_QUAT = slice(15, 19)
+SLICE_GOAL = slice(19, 22)
+SLICE_ITEM_POSE = slice(25, 32)
+SLICE_CLEAN_QPOS = slice(36, 42)
 
 
 def test_state_obs_shape():
-    """无相机 reach obs 为 25 维 float64 Box，切片布局锁定。"""
+    """无相机 reach obs 为 47 维 float64 Box，切片布局锁定。"""
     env = gym.make("SO101Reach-v1")
     try:
         obs, _ = env.reset(seed=0)
+        u = env.unwrapped
         assert obs.shape == (REACH_STATE_DIM,)
         assert obs.dtype == np.float64
         assert np.all(np.isfinite(obs))
@@ -43,6 +49,9 @@ def test_state_obs_shape():
         assert obs[SLICE_QVEL].shape == (6,)
         assert obs[SLICE_TCP_POS].shape == (3,)
         assert obs[SLICE_TCP_QUAT].shape == (4,)
+        assert np.allclose(obs[SLICE_GOAL], u._goal)
+        assert obs[SLICE_ITEM_POSE].shape == (7,)
+        assert np.allclose(obs[SLICE_CLEAN_QPOS], u.data.qpos[u._qpos_adr])
     finally:
         env.close()
 
@@ -95,7 +104,7 @@ def test_domain_randomization_applied():
     from so101_envs.reach import SO101ReachEnv
 
     cfg = RandomizationConfig(randomize_item_color=True, item_friction_range=(0.5, 1.5))
-    env = SO101ReachEnv(cfg=cfg)
+    env = SO101ReachEnv(cfg=cfg, domain_randomization=True)
     try:
         env.reset(seed=42)
         gid = mujoco.mj_name2id(env.model, mujoco.mjtObj.mjOBJ_GEOM, "item_geom")
@@ -115,7 +124,7 @@ def test_item_color_dr_reproducible_across_resets():
     from so101_envs.reach import SO101ReachEnv
 
     cfg = RandomizationConfig(randomize_item_color=True)
-    env = SO101ReachEnv(cfg=cfg)
+    env = SO101ReachEnv(cfg=cfg, domain_randomization=True)
     try:
         gid = mujoco.mj_name2id(env.model, mujoco.mjtObj.mjOBJ_GEOM, "item_geom")
         env.reset(seed=1)

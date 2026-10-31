@@ -56,12 +56,16 @@ class Expert:
         a[5] = 2 * (g - lo) / (hi - lo) - 1
         return a
 
-    def _go(self, target_pos, steps, open_=True, R_des=None, tol=0.006):
+    def _go(self, target_pos, steps, open_=True, R_des=None, tol=0.006,
+            position_only=False):
         """IK 位置伺服; 到位 (TCP 距目标 < tol) 提前结束。"""
         info = {}
         for _ in range(steps):
             q_arm = self.u.data.qpos[self.u._qpos_adr][:5]
-            q_ref, _ = self.ik.solve(q_arm, target_pos, R_des=R_des, n_iter=40)
+            q_ref, _ = self.ik.solve(
+                q_arm, target_pos, R_des=R_des, n_iter=40,
+                q_gripper=self.u.data.qpos[self.u._qpos_adr[5]],
+                position_only=position_only)
             a = self._arm_action(q_ref)
             a = self._grip(a, open_=open_)
             *_, info = self.env.step(a)
@@ -85,10 +89,12 @@ def run_reach(env, episodes):
     for ep in range(episodes):
         ex = Expert(env)
         env.reset(seed=100 + ep)
-        ex._wait(10)
+        # squint reach: success 要求闭爪 + TCP=指尖中点。闭爪会移动中点,
+        # 因此必须全程闭爪到达 goal（开爪到位再闭爪会把 TCP 移走）。
+        ex._wait(10, grip_open=False)
         goal = ex.u._goal.copy()
-        ex._go(goal, steps=40)
-        info = ex._wait(8)
+        ex._go(goal, steps=60, open_=False, position_only=True)
+        info = ex._wait(8, grip_open=False)
         results.append(info["success"])
     return results
 
@@ -138,7 +144,9 @@ def grasp_item(ex, item, grasp_dz=-0.01, close_fn=None):
     staging[:2] -= xy_dir * 0.10
     best_q, best_err = None, np.inf
     for seed in [np.zeros(5), *SEED_POOL]:
-        q_ref, err = ex.ik.solve(seed, staging, R_des=TOOL_DOWN_R, n_iter=300)
+        q_ref, err = ex.ik.solve(
+            seed, staging, R_des=TOOL_DOWN_R, n_iter=300,
+            q_gripper=ex.u.data.qpos[ex.u._qpos_adr[5]])
         if err < best_err:
             best_q, best_err = q_ref, err
         if err < 0.005:
@@ -174,7 +182,9 @@ def _servo_step(ex, env, target_pos, R_des=TOOL_DOWN_R):
     """单帧: 手臂向目标 IK 伺服一步, 夹爪通道保持当前值。返回 info。"""
     u = ex.u
     q_arm = u.data.qpos[u._qpos_adr][:5]
-    q_ref, _ = ex.ik.solve(q_arm, target_pos, R_des=R_des, n_iter=40)
+    q_ref, _ = ex.ik.solve(
+        q_arm, target_pos, R_des=R_des, n_iter=40,
+        q_gripper=u.data.qpos[u._qpos_adr[5]])
     lo, hi = u._ctrlrange[:5, 0], u._ctrlrange[:5, 1]
     dq = np.clip(q_ref - q_arm, -MAX_DQ, MAX_DQ)
     a = 2.0 * (q_arm + dq - lo) / (hi - lo) - 1.0
@@ -278,22 +288,18 @@ def run_stack(env, episodes):
         b_pos = ex.u.free_body_pos("itemB")
         ex._go(a_pos + [0, 0, 0.10], steps=15, open_=False)           # 提升 (保持闭合!)
         ex._go(b_pos + [0, 0, 0.11], steps=30, open_=False)           # B 上方
-        ex._go(b_pos + [0, 0, ex.u.HALF_A + ex.u.HALF_B + 0.004], steps=15, open_=False)  # 降到 B 顶
+        ex._go(b_pos + [0, 0, ex.u._item_a_half_z + ex.u._item_b_half_z + 0.004],
+               steps=15, open_=False)  # 降到 B 顶
         info = ex._wait(12, grip_open=True)              # 松爪
         results.append(info["success"])
     return results
 
 
+# squint 迁移后仅保留 reach 脚本专家（lift/place/stack 专家已失效/暂停,
+# 见 workflow/reports/envs_squint_migration.md）
 POLICIES = {
     "SO101Reach-v1": run_reach,
-    "SO101Lift-v1": run_lift,
-    "SO101Place-v1": run_place,
-    "SO101Stack-v1": run_stack,
-    # can 变体（run_* 直接读物体位置, 任务逻辑通用）
     "SO101ReachCan-v1": run_reach,
-    "SO101LiftCan-v1": run_lift,
-    "SO101PlaceCan-v1": run_place,
-    "SO101StackCan-v1": run_stack,
 }
 
 
@@ -305,7 +311,7 @@ def main():
                         help="MuJoCo viewer 可视化单 episode (需图形环境; 弹 viewer 窗口实时观看专家操作)")
     args = parser.parse_args()
     if args.view:
-        env_id = args.env if args.env != "all" else "SO101Lift-v1"
+        env_id = args.env if args.env != "all" else "SO101Reach-v1"
         env = gym.make(env_id, render_mode="human")
         try:
             results = POLICIES[env_id](env, 1)
@@ -322,12 +328,9 @@ def main():
             results = POLICIES[env_id](env, args.episodes)
             n_ok = sum(results)
             rate = n_ok / len(results)
-            # reach 验收线 >= 0.9; 其余 > 0 且稳定
+            # reach 验收线 >= 0.9（仅保留 reach 专家）
             print(f"{env_id:<22} {rate:>7.0%}  {n_ok}/{len(results)}")
-            if "Reach" in env_id:
-                all_ok &= rate >= 0.9
-            else:
-                all_ok &= rate > 0.0
+            all_ok &= rate >= 0.9
         finally:
             env.close()
     return 0 if all_ok else 1

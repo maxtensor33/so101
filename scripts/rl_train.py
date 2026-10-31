@@ -33,6 +33,12 @@ def main():
     parser.add_argument("--normalize", action="store_true", help="启用 VecNormalize（状态随 checkpoint 保存）")
     parser.add_argument("--n-envs", type=int, default=1, help="并行环境数（DummyVecEnv / gym.make_vec sync）")
     parser.add_argument("--no-tb", action="store_true", help="关闭 tensorboard（默认开启, 写 <out>/tb/）")
+    parser.add_argument("--config", default="squint",
+                        help="超参变体（叠加 configs/<backend>_<algo>_<variant>.yaml; 默认 squint）")
+    parser.add_argument("--action-mode", choices=["position", "delta"], default="delta",
+                        help="squint 默认 pd_joint_target_delta_pos; position 仅作 A/B 基线")
+    parser.add_argument("--domain-randomization", action=argparse.BooleanOptionalAction,
+                        default=True, help="squint 训练默认开启（物体尺寸/摩擦 + qpos 观测噪声）")
     parser.add_argument("--overrides", nargs="*", default=[], help="超参覆盖 key=val")
     args = parser.parse_args()
 
@@ -41,14 +47,23 @@ def main():
     tag = f"{args.backend}-{args.algo}-{args.env.removeprefix('SO101').removeprefix('-').lower()}"
     # 显式 --out 原样使用（用户自管）; 默认按 时间戳分层 + latest 指针, 不覆盖历史
     out_dir = Path(args.out) if args.out else new_run_dir(Path("outputs/rl"), tag)
-    hparams = load_defaults(args.backend, args.algo, configs_dir=Path(__file__).resolve().parents[1] / "libs" / "so101_rl" / "configs")
+    hparams = load_defaults(
+        args.backend, args.algo,
+        configs_dir=Path(__file__).resolve().parents[1] / "libs" / "so101_rl" / "configs",
+        variant=None if args.config in ("", "none") else args.config)
     for kv in args.overrides:
         k, v = kv.split("=", 1)
         hparams[k] = json.loads(v) if v.replace(".", "", 1).isdigit() else v
 
+    # env 语义配置随 checkpoint 落盘（推理侧必须同配置重建 env）
+    env_kwargs = {
+        "action_mode": args.action_mode,
+        "domain_randomization": args.domain_randomization,
+    }
     trainer = get_trainer(args.backend, args.algo)
-    env = trainer.make_vec_envs(args.env, seed=args.seed, n_envs=args.n_envs)
-    eval_env = trainer.make_env(args.env, seed=None)
+    env = trainer.make_vec_envs(args.env, seed=args.seed, n_envs=args.n_envs,
+                                env_kwargs=env_kwargs)
+    eval_env = trainer.make_env(args.env, seed=None, env_kwargs=env_kwargs)
     tb_dir = None if args.no_tb else out_dir / "tb"
     model = trainer.make_model(env, seed=args.seed, hparams=hparams, tb_dir=tb_dir)
     info = trainer.train(model, total_timesteps=args.steps, eval_env=eval_env,

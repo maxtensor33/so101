@@ -20,35 +20,82 @@ def mat2quat(R):
     return q
 
 
-def _pair_force(model, data, b1_id, b2_id):
-    """两 body 间接触法向力之和 (N)。参数为 body id。"""
-    total = 0.0
+def _pair_force(model, data, finger_id, item_id):
+    """finger 受到 item 的合力矢量 (N) 与指向指外的单位开合轴。
+
+    MuJoCo mj_contactForce 的力施加在 geom2 上（由 geom1 推 geom2）;
+    contact.frame[:,0] 法向由 geom1 指向 geom2。据此把每对接触换算到"物体对
+    手指的作用力"，并用同一批接触法向作为该指的开合轴（squint 双指方向判定的
+    mujoco 等价实现: 指系 y 轴随 URDF/MJCF 帧约定不同，不能直接照搬）。
+    """
+    force = np.zeros(3)
+    outward = np.zeros(3)
     for i in range(data.ncon):
         c = data.contact[i]
         g1 = int(c.geom1)
         g2 = int(c.geom2)
-        ids = {model.geom_bodyid[g1], model.geom_bodyid[g2]}
-        if ids == {b1_id, b2_id} and b1_id != b2_id:
-            f = np.zeros(6)
-            mujoco.mj_contactForce(model, data, i, f)
-            total += float(np.linalg.norm(f[:3]))
-    return total
+        ids = {int(model.geom_bodyid[g1]), int(model.geom_bodyid[g2])}
+        if ids != {finger_id, item_id} or finger_id == item_id:
+            continue
+        f = np.zeros(6)
+        mujoco.mj_contactForce(model, data, i, f)
+        normal = np.asarray(c.frame).reshape(3, 3)[:, 0]
+        if int(model.geom_bodyid[g2]) == finger_id:
+            # 手指是 geom2: 力 = +f, 法向由物体指向手指 = 指外方向
+            force += f[:3]
+            outward += normal
+        else:
+            # 手指是 geom1: 力 = -f, 法向由手指指向物体, 指外方向取反
+            force -= f[:3]
+            outward -= normal
+    return force, outward
 
 
 def _body_id(model, name):
     return mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, name)
 
 
-def is_grasping(model, data, item_body, min_force=_MIN_FORCE):
-    """双"指"对物体均有 >=min_force 接触力 -> 抓住。"""
+def is_grasping(model, data, item_body, min_force=_MIN_FORCE, max_angle_deg=110.0):
+    """双"指"对物体均有力学抓握 -> True（squint is_grasping 语义）。
+
+    每指: 接触合力 >= min_force, 且合力方向与指外开合轴夹角 <= max_angle_deg
+    （排除侧面推挤/切向接触的假抓握）。
+    """
     item = _body_id(model, item_body)
-    fixed = _pair_force(model, data, _body_id(model, "gripper"), item)
-    moving = _pair_force(model, data, _body_id(model, "moving_jaw_so101_v1"), item)
-    return bool(fixed >= min_force and moving >= min_force)
+    for finger_name in ("gripper", "moving_jaw_so101_v1"):
+        force, outward = _pair_force(model, data, _body_id(model, finger_name), item)
+        magnitude = float(np.linalg.norm(force))
+        if magnitude < min_force:
+            return False
+        axis = float(np.linalg.norm(outward))
+        if axis > 1e-9:
+            cos_angle = float(np.dot(force, outward) / (magnitude * axis))
+            angle = float(np.degrees(np.arccos(np.clip(cos_angle, -1.0, 1.0))))
+            if angle > max_angle_deg:
+                return False
+    return True
 
 
-def is_touching(model, data, geom_name, min_force=0.2):
-    """任一机器人 geom 与指定 geom 有 >=min_force 接触力。"""
+def is_touching_any(model, data, geom_names, min_force=0.2, bodies=ROBOT_BODIES):
+    """任意目标 geom 与指定 body 集合有 >=min_force 接触力。"""
+    gids = {mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, n) for n in geom_names}
+    gids.discard(-1)
+    for i in range(data.ncon):
+        c = data.contact[i]
+        g1 = int(c.geom1)
+        g2 = int(c.geom2)
+        if g1 in gids or g2 in gids:
+            other = g2 if g1 in gids else g1
+            if model.geom_bodyid[other] in bodies:
+                f = np.zeros(6)
+                mujoco.mj_contactForce(model, data, i, f)
+                if np.linalg.norm(f[:3]) >= min_force:
+                    return True
+    return False
+
+
+def is_touching(model, data, geom_name, min_force=0.2, bodies=ROBOT_BODIES):
+    """指定 body 集合内的机器人 geom 与目标 geom 有 >=min_force 接触力。"""
     gid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_GEOM, geom_name)
     if gid < 0:
         return False
@@ -59,7 +106,7 @@ def is_touching(model, data, geom_name, min_force=0.2):
         if gid not in (g1, g2):
             continue
         other = g2 if g1 == gid else g1
-        if model.geom_bodyid[other] in ROBOT_BODIES:
+        if model.geom_bodyid[other] in bodies:
             f = np.zeros(6)
             mujoco.mj_contactForce(model, data, i, f)
             if np.linalg.norm(f[:3]) >= min_force:
