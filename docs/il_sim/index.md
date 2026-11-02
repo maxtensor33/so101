@@ -56,6 +56,55 @@ uv run python scripts/il_sim_teleop.py --teleop keyboard --env reach
 uv run python scripts/il_sim_teleop.py --teleop expert --record --repo-id il_sim/reach_expert --episodes 10
 ```
 
+### RL 专家自动采集（checkpoint 作 demo 源）
+
+用训练好的 RL policy（如 `outputs/rl/lift-squint`）闭环驱动相机版 env 自动生成
+il_sim 数据集，避免人工遥操：
+
+```bash
+# 默认: 采集 lift（env 由 checkpoint meta.json 推导）, 只保存成功 episode,
+# 沿用 checkpoint 的 domain_randomization; 每 episode 50 步（env TimeLimit）后 reset
+uv run python scripts/il_sim_collect_rl.py \
+  --checkpoint outputs/rl/lift-squint \
+  --repo-id il_sim/lift_rl_expert --episodes 50
+
+# 失败也保存 / 关 viewer / 换 env / 关闭域随机化 / 加时间戳
+uv run python scripts/il_sim_collect_rl.py --checkpoint outputs/rl/lift-squint \
+  --episodes 50 --keep-failures --no-mujoco --no-rviz --no-dr --stamp
+```
+
+- **8 环境通用**（reach/lift/place/stack × cube/can）：相机版 env 由 checkpoint
+  `meta.json` 的 `env_id` 自动推导；`--env liftcan` 可手动覆盖。成功判定直接用各任务
+  `evaluate()["success"]`（8 个任务均 50 步截断、不因 success 提前终止）。
+- 动作语义：checkpoint 若训练于 `action_mode=delta`，`RLExpertTeleop`
+  （`--teleop.type=so101_rl_expert`）在采集侧按训练语义积分，但**落盘 action 恒为
+  绝对归一化关节目标**（与 `so101_il_sim_infer` 的 position env 一致）。
+- 数据集目录 `outputs/datasets/il_sim/<repo_id>`（默认不追加时间戳），可直接
+  `scripts/il_sim_train.py --repo-id <repo_id>`；重复 repo_id 会拒绝覆盖。
+- VQ-BeT 需单相机数据集：加 `--camera-keys fixed`；也可用官方 CLI 路径
+  `--teleop.type=so101_rl_expert --teleop.checkpoint=<ckpt>`（需自行保证 episode
+  时长与 env 截断对齐）。
+
+### 单相机数据集转换（VQ-BeT 对照）
+
+VQ-BeT 只支持 1 路图像输入。用同一份双相机数据派生单相机副本，便于 ACT/DP/VQ-BeT
+在同一数据上对照：
+
+```bash
+uv run python scripts/il_sim_dataset_single_camera.py \
+  --dataset-root outputs/datasets/il_sim/il_sim/lift_rl_expert
+
+# -> repo_id = il_sim/lift_rl_expert_single
+# -> root    = outputs/datasets/il_sim/il_sim/lift_rl_expert_single
+# 保留固定视角（默认 fixed；--keep wrist 保留腕部），视频默认重新编码
+```
+
+- `action/observation.state/task/fps/robot_type/feature names` 原样保留，只去掉多余相机列；
+  输出后脚本会校验帧数/episode 数与 action/state 数值一致。
+- `--no-video` 输出 PNG；`--video` 强制视频；`--dry-run` 只打印计划。
+- 转换后可直接训练 VQ-BeT：
+  `uv run python scripts/il_sim_train.py --policy vqbet --repo-id il_sim/lift_rl_expert_single --steps 10`
+
 ### launch 验收（ROS2）
 
 ```bash
@@ -82,7 +131,10 @@ lerobot-train \
   --dataset.repo_id=il_sim/reach_expert \
   --dataset.root=outputs/datasets/il_sim/il_sim/reach_expert \
   --policy.type=act --steps=100000 --batch-size=8 \
+  --policy.push_to_hub=false \
   --output_dir=outputs/il_sim/act_full
+# `--policy.push_to_hub=false` 必加：lerobot 默认训练结束后 push 到 HF hub，
+# 本地/镜像环境会 403 并让整个进程以失败退出（checkpoint 其实已写完）。
 # SmolVLA = TODO：需 smolvla_base 预训练权重（HF hub ~1GB+）+ 显存评估，见 workflow/todo/
 ```
 
@@ -91,8 +143,13 @@ lerobot-train \
 ```bash
 ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach \
   checkpoint:=outputs/il_sim/<policy>_<name>/checkpoints/<step>/pretrained_model \
-  [camera:=true] [rviz:=true] [rate:=10.0] [mujoco:=false]
+  [camera:=true] [rviz:=true] [rate:=10.0] [mujoco:=false] [reset_on_enter:=true]
 ```
+
+- **按 Enter 重置 episode**（与 `rl_infer` 同语义）：随机换场景并调用 `policy.reset()`
+  清空 ACT/DP/VQ-BeT 的观测/动作队列；`reset_on_enter:=false` 关闭监听。
+- `checkpoints/last` 是 lerobot 维护的软链（指向最新 checkpoint），可直接作为
+  `checkpoint:=` 参数。
 
 ## 已知限制与坑
 

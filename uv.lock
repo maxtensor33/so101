@@ -2888,6 +2888,17 @@ wheels = [
 ]
 
 [[package]]
+name = "nvidia-npp"
+version = "13.2.0.58"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/d3/94/63201ee8aa03419d118b8f7b32f86c4384a403b3970fdccf4ed17f42a636/nvidia_npp-13.2.0.58-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:58d00ff931e709e860f3a8058e7b37faabfd85d1da3ace7d379c7ad3f3412cc3", size = 170699104, upload-time = "2026-09-16T20:44:31.965Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/85/17/0b4faff67478a439dae5bd8ef9d6db13fe4609c7cc69c87af2b7053886c3/nvidia_npp-13.2.0.58-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:cf59284ad215a49e270a3763dbde3a060aabdd8f31b787b9f1192209ec6ae9e8", size = 261290267, upload-time = "2026-09-16T20:44:53.454Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/06/a9/1c1a16f86ad256a7bc0850440dbf0134ebdf36ce0426fa5d89912058d9b7/nvidia_npp-13.2.0.58-py3-none-win_amd64.whl", hash = "sha256:594e3d30bb5ae85591eaa9a6eeb9a414b663552aef2333fd1b92c8fe17ccc519", size = 256980004, upload-time = "2026-09-16T20:49:53.643Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/e8/6a/a0159bc068799103b4556fa8d0016b7765446d6be7468a72d52b8fb2ccc6/nvidia_npp-13.2.0.58-py3-none-win_arm64.whl", hash = "sha256:2365f3151ed12c378efbac74913ff011e31f097f43f98c1b5ef7cc202209d684", size = 164538670, upload-time = "2026-09-16T20:56:15.78Z" },
+]
+
+[[package]]
 name = "nvidia-nvjitlink"
 version = "13.0.88"
 source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
@@ -4158,6 +4169,7 @@ dependencies = [
     { name = "matplotlib" },
     { name = "mujoco" },
     { name = "numpy" },
+    { name = "nvidia-npp" },
     { name = "pin" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -4185,6 +4197,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.8" },
     { name = "mujoco", specifier = ">=3.2" },
     { name = "numpy", specifier = ">=2" },
+    { name = "nvidia-npp", specifier = ">=13.2.0.58" },
     { name = "pin", specifier = "==3.4.0" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-cov", specifier = ">=7.1.0" },

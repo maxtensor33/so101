@@ -1,7 +1,7 @@
 """il_sim_infer.launch.py — IL 推理验收入口（workflow/plan/il_sim.md Phase 5）。
 
 用法:
-    ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=outputs/il_sim/<run>/checkpoints/000010/pretrained_model [camera:=true] [rviz:=true]
+    ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=outputs/il_sim/<run>/checkpoints/000010/pretrained_model [camera:=true] [rviz:=true] [reset_on_enter:=true]
 """
 
 import os
@@ -19,6 +19,7 @@ def _launch_setup(context):
     camera = LaunchConfiguration("camera").perform(context).lower() in ("true", "1")
     mujoco = LaunchConfiguration("mujoco").perform(context).lower() in ("true", "1")
     rviz = LaunchConfiguration("rviz").perform(context).lower() in ("true", "1")
+    reset_on_enter = LaunchConfiguration("reset_on_enter").perform(context).lower() in ("true", "1")
 
     desc_dir = get_package_share_directory("so101_description")
     urdf_path = os.path.join(desc_dir, "urdf", "so101.urdf")
@@ -36,7 +37,8 @@ def _launch_setup(context):
             executable="il_sim_infer_node",
             output="screen",
             parameters=[
-                {"env": env, "checkpoint": checkpoint, "camera": camera, "mujoco": mujoco},
+                {"env": env, "checkpoint": checkpoint, "camera": camera, "mujoco": mujoco,
+                 "reset_on_enter": reset_on_enter},
             ],
         ),
     ]
@@ -56,5 +58,7 @@ def generate_launch_description():
         DeclareLaunchArgument("camera", default_value="true"),
         DeclareLaunchArgument("mujoco", default_value="true"),
         DeclareLaunchArgument("rviz", default_value="true"),
+        DeclareLaunchArgument("reset_on_enter", default_value="true",
+                              description="按 Enter 重置 episode（false 关闭 pynput/stdin 监听）"),
         OpaqueFunction(function=_launch_setup),
     ])

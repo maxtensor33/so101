@@ -20,6 +20,7 @@ dependencies = [
     "skrl>=1.4",
     "pin==3.4.0",
     "lerobot[all]==0.6.1",
+    "nvidia-npp>=13.2.0.58",
 ]
 
 # 默认源走清华 PyPI 镜像；torch 三件套来自阿里云 pytorch-wheels cu130 扁平目录

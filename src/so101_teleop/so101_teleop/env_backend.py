@@ -10,6 +10,7 @@ _env = None
 _reset_requested = False
 _reset_count = 0
 _latest_images: dict | None = None  # 主线程渲染缓存（EGL 上下文线程绑定, viz 线程只读）
+_latest_state = None  # 最近一帧 env state（robot.get_observation 缓存; RL teleop 复用）
 
 
 def set_active_env(env) -> None:
@@ -30,8 +31,10 @@ def get_active_env_or_none():
 
 
 def clear_active_env() -> None:
-    global _env
+    global _env, _latest_images, _latest_state
     _env = None
+    _latest_images = None
+    _latest_state = None
 
 
 def request_reset() -> None:
@@ -69,3 +72,17 @@ def set_latest_images(images: dict) -> None:
 
 def latest_images() -> dict | None:
     return _latest_images
+
+
+def set_latest_state(state) -> None:
+    global _latest_state
+    _latest_state = state
+
+
+def latest_state():
+    return _latest_state
+
+
+def clear_latest_state() -> None:
+    global _latest_state
+    _latest_state = None

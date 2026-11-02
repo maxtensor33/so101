@@ -74,17 +74,23 @@ class IlSimInferNode(Node):
         self.declare_parameter("camera", True)
         self.declare_parameter("rate", 10.0)
         self.declare_parameter("mujoco", True)
+        # 按 Enter 重置 episode（pynput 全局监听; 无 pynput 时回退 stdin）
+        self.declare_parameter("reset_on_enter", True)
         env_name = str(self.get_parameter("env").value)
         ckpt = Path(str(self.get_parameter("checkpoint").value)).expanduser()
         camera = bool(self.get_parameter("camera").value)
+        self._mujoco = bool(self.get_parameter("mujoco").value)
+        reset_on_enter = bool(self.get_parameter("reset_on_enter").value)
+        self._reset_requested = False
+        self._listener = None
 
         from so101_il_sim_infer.core import load_policy, make_obs_batch
 
-        self.get_logger().info(f"loading IL policy from {ckpt} (env=reach)")
+        self.get_logger().info(f"loading IL policy from {ckpt} (env={env_name})")
         self._make_obs_batch = make_obs_batch
         self.policy, self._pre, self._post = load_policy(ckpt)  # 设备在 load_policy 内对齐
 
-        render_mode = "human" if bool(self.get_parameter("mujoco").value) else None
+        render_mode = "human" if self._mujoco else None
         self.env = gym.make(
             ENV_ID[env_name],
             render_mode=render_mode,
@@ -105,12 +111,27 @@ class IlSimInferNode(Node):
         if camera:
             for cam in self._obs["rgb"]:
                 self.pub_imgs[cam] = self.create_publisher(Image, f"il/{cam}/image", 10)
+        if reset_on_enter:
+            self._start_reset_listener()
         rate = float(self.get_parameter("rate").value)
         self.timer = self.create_timer(1.0 / rate, self.tick)
         self._success_logged = False
 
     def tick(self):
         import numpy as np
+
+        if self._reset_requested:
+            self._reset_requested = False
+            self._obs, _ = self.env.reset()  # 随机 seed: 每次 Enter 换一个场景
+            # ACT/DP/VQ-BeT 内部有观测/动作队列, 必须清空, 否则新 episode 前几步会用旧场景 obs
+            try:
+                self.policy.reset()
+            except Exception:
+                pass
+            self.get_logger().info("episode reset (Enter)")
+            if self._mujoco:
+                self.env.render()
+            return
 
         batch = self._make_obs_batch(self._obs, u=self.u)
         with torch.no_grad():
@@ -151,6 +172,48 @@ class IlSimInferNode(Node):
             msg.data = img.tobytes()
             pub.publish(msg)
 
+    # ---------- Enter 重置监听（与 rl_infer 同语义） ----------
+    def _start_reset_listener(self):
+        """pynput 全局 Enter 监听（X11/Wayland 视环境）; 失败回退 stdin 行读取。"""
+        try:
+            from pynput import keyboard
+
+            self._listener = keyboard.Listener(on_press=self._on_key)
+            self._listener.start()
+        except Exception as exc:  # 无图形/权限受限: 仍可用 stdin Enter
+            self._listener = None
+            self.get_logger().warn(f"pynput Enter 监听不可用（回退 stdin）: {exc}")
+
+        import threading
+
+        threading.Thread(target=self._stdin_loop, daemon=True).start()
+
+    def _on_key(self, key):
+        try:
+            from pynput.keyboard import Key
+
+            if key == Key.enter:
+                self._reset_requested = True
+        except Exception:
+            pass
+
+    def _stdin_loop(self):
+        try:
+            for _line in sys.stdin:
+                self._reset_requested = True
+        except Exception:
+            pass
+
+    def destroy_node(self):
+        if self._listener is not None:
+            try:
+                self._listener.stop()
+            except Exception:
+                pass
+            self._listener = None
+        self.env.close()
+        return super().destroy_node()
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -160,8 +223,11 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node.env.close()
-        rclpy.shutdown()
+        node.destroy_node()
+        try:
+            rclpy.shutdown()
+        except Exception:
+            pass  # SIGTERM/外部 shutdown 时 rclpy 可能已关闭
 
 
 if __name__ == "__main__":

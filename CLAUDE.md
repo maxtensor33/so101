@@ -55,11 +55,21 @@ ros2 launch so101_teleop teleop.launch.py teleop:=expert record:=false [env:=rea
 uv run python scripts/il_sim_leader_probe.py [--invert <关节>]
 uv run python scripts/il_sim_teleop.py --teleop leader [--record] [--env reach] [--invert <关节>]
 
+# il_sim: RL 专家自动采集（8 环境通用: reach/lift/place/stack × cube/can; env 由 checkpoint
+#   meta 推导, --env liftcan 可覆盖; 默认只保存成功 episode, 沿用 checkpoint 的 domain_randomization,
+#   每 episode 50 步后手工 reset; VQ-BeT 单相机加 --camera-keys fixed; 数据可直接训练）
+uv run python scripts/il_sim_collect_rl.py --checkpoint outputs/rl/lift-squint \
+  --repo-id il_sim/lift_rl_expert --episodes 50 [--env liftcan] [--keep-failures] [--no-mujoco]
+
+# il_sim: 双相机 dataset -> 单相机（VQ-BeT 对照; 默认保留 fixed 视角, 新 repo/目录名后缀 _single）
+uv run python scripts/il_sim_dataset_single_camera.py \
+  --dataset-root outputs/datasets/il_sim/il_sim/lift_rl_expert [--keep fixed] [--no-video] [--dry-run]
+
 # il_sim: 训练（小网络冒烟; 全量迁移见 docs/il_sim/index.md; VQ-BeT 需单相机数据集）
 uv run python scripts/il_sim_train.py --policy act --repo-id il_sim/reach_expert --steps 10
 
 # il_sim: 推理（lerobot policy 驱动 env, MuJoCo 与 RViz 同步）
-ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=outputs/il_sim/<run>/checkpoints/<step>/pretrained_model [rviz:=true] [mujoco:=false]
+ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=outputs/il_sim/<run>/checkpoints/<step>/pretrained_model [rviz:=true] [mujoco:=false] [reset_on_enter:=true]
 
 # mtc: MoveIt Task Constructor pick-and-place（纯 RViz 模式; mujoco/gz 后端暂停见 workflow/todo/）
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz [execute:=false] [rviz:=true]

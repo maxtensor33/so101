@@ -3,6 +3,11 @@
 **状态**: 已移除，待重做 · **创建**: 2026-10-31 · **来源**:
 `workflow/problems/il_sim_lift_expert_glm-5-3-flash-261030.md`（2026-10-30 交接）
 
+> **2026-11-02 追加**：lift 数据采集已改用 RL 专家自动采集
+> （`scripts/il_sim_collect_rl.py` + `so101_rl_expert` teleop，加载
+> `outputs/rl/lift-squint` 闭环，默认只保存成功 episode）。本条（重做脚本专家）
+> 不再是 lift demo 的阻塞项，保留为「无 RL checkpoint 时的备选」。
+
 ## 结论（2026-10-31）
 
 按要求移除 `src/so101_teleop/so101_teleop/teleoperators/expert.py` 中的 lift 抓取管线

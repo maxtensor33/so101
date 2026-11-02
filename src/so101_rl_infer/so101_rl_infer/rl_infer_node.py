@@ -52,6 +52,11 @@ TASK_BODIES = {
     "lift": ["item"],
     "place": ["item", "bin"],
     "stack": ["itemA", "itemB"],
+    # can 变体（任务物体/底座换罐; body 名与 cube 版一致）
+    "reachcan": ["item", "goal_site"],
+    "liftcan": ["item"],
+    "placecan": ["item", "bin"],
+    "stackcan": ["itemA", "itemB"],
 }
 JOINT_NAMES = ["shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper"]
 
@@ -97,7 +102,7 @@ class RlInferNode(Node):
         if reset_on_enter:
             self._start_reset_listener()
         self._qadr = self.u._qpos_adr
-        self._item_bodies = [b for b in TASK_BODIES[env_name]
+        self._item_bodies = [b for b in TASK_BODIES.get(env_name, ["item"])
                              if mujoco.mj_name2id(self.u.model, mujoco.mjtObj.mjOBJ_BODY, b) >= 0]
 
         self.pub_js = self.create_publisher(JointState, "joint_states", 10)

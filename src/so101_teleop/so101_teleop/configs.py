@@ -35,3 +35,6 @@ class SimSO101RobotConfig(RobotConfig):
     viewer_no_input: bool = True
     # keyboard 模式: 成功到达即自动重置场景（成功后下一帧边界 env.reset）
     auto_reset_on_success: bool = False
+    # 域随机化（RL checkpoint 的 env_kwargs 保真: 出生/尺寸/摩擦/观测噪声）。
+    # 采集时按 checkpoint meta.json 传入；il_sim 推理端默认关（观测干净）。
+    domain_randomization: bool = False

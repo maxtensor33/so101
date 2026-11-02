@@ -68,6 +68,7 @@ class SimSO101Robot(Robot):
             viewer_ui=self.config.viewer_ui,
             viewer_maximize=self.config.viewer_maximize,
             viewer_no_input=self.config.viewer_no_input,
+            domain_randomization=self.config.domain_randomization,
         )
         self._env.reset(seed=self.config.seed)
         from .env_backend import set_active_env
@@ -84,6 +85,16 @@ class SimSO101Robot(Robot):
             self._env.close()
             self._env = None
 
+    def reset_env(self, seed: int | None = None) -> None:
+        """显式重置场景（逐 episode 采集脚本用；帧边界 reset 握手见 request_reset）。"""
+        if self._env is None:
+            raise RuntimeError(f"{self} is not connected")
+        self._env.reset(seed=seed if seed is not None else self.config.seed)
+        from .env_backend import bump_reset_count, clear_latest_state
+
+        clear_latest_state()
+        bump_reset_count()
+
     def configure(self) -> None:
         pass
 
@@ -96,13 +107,17 @@ class SimSO101Robot(Robot):
 
     def get_observation(self) -> dict[str, object]:
         env_obs = self._env.unwrapped._get_obs()
-        qpos = np.asarray(env_obs["state"][:6])
+        state = np.asarray(env_obs["state"])
+        qpos = state[:6]
         qpos_norm = self._env.unwrapped.normalize_qpos(qpos)
         obs: dict[str, object] = {f"{m}.pos": float(v) for m, v in zip(JOINT_NAMES, qpos_norm)}
         for cam in self._cameras:
             obs[cam] = np.asarray(env_obs["rgb"][cam])
-        from .env_backend import set_latest_images
+        from .env_backend import set_latest_state, set_latest_images
 
+        # 同一帧的 RL policy 观测与数据集 observation.state 共用这一份 state
+        # （避免二次 _get_obs 重复渲染相机 / 多消耗一次 DR 观测噪声采样）
+        set_latest_state(state)
         set_latest_images({cam: obs[cam] for cam in self._cameras})
         return obs
 
