@@ -1,5 +1,8 @@
 # SO-ARM101 URDF ↔ MuJoCo XML 对齐报告
 
+- URDF: `models/so101_torque.urdf`
+- XML: `models/so101_new_calib_torque.xml`
+
 | 检查项 | 结果 | 详情 |
 |---|---|---|
 | joint_list | PASS | 6 joints aligned: ['shoulder_pan', 'shoulder_lift', 'elbow_flex', 'wrist_flex', 'wrist_roll', 'gripper'] |

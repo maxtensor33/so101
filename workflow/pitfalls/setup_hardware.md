@@ -1,4 +1,4 @@
-# setup-hardware — 实机控制方向坑与关键约定
+# setup_hardware — 实机控制方向坑与关键约定
 
 来源会话: workflow/plan/setup_hardware.md (2026-10-29, setup 分支)。
 

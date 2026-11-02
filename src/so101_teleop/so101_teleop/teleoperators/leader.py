@@ -24,7 +24,7 @@ from ..constants import JOINT_NAMES
 from ..env_backend import get_active_env_or_none, reset_count
 
 # 与 so101_system.cpp so101JointLimits / setup_capture_named_pose.py 同源
-# (shoulder_lift ±1.91986 手动估计, workflow/todo/to_real_joint_calibration.md)
+# (shoulder_lift ±1.91986 手动估计, workflow/todo/setup_hardware_joint_calibration_todo.md)
 JOINT_LIMITS = {
     "shoulder_pan": (-1.91986, 1.91986),
     "shoulder_lift": (-1.91986, 1.91986),

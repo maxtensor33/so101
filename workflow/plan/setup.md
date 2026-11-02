@@ -1,7 +1,7 @@
 # Plan: SO-ARM101 ROS2 + MuJoCo/Gazebo + MoveIt2 + Pinocchio 项目搭建
 
 **日期**: 2026-10-20
-**状态**: 已完成（2026-10-20，证据见 .claude/tdd/setup.tdd.md）
+**状态**: 已完成（2026-10-20，证据见 workflow/tdd/setup.tdd.md）
 **复杂度**: Medium（约 4~6 小时）
 
 ## 需求重述
@@ -56,7 +56,7 @@ uv 与 ROS 的兼容策略：`uv venv --system-site-packages`，使 uv 虚拟环
 - **验证**: `uv run python -c "import pinocchio, mujoco; print(pinocchio.__version__, mujoco.__version__)"`
 
 ### Phase 2：URDF ↔ MuJoCo XML 对齐验证（核心交付物）
-脚本 `scripts/verify_model_alignment.py`，逐项对比：
+脚本 `scripts/setup_verify_model_alignment.py`，逐项对比：
 
 1. **关节清单**：名称、顺序、类型（hinge↔revolute）、轴（MuJoCo XML 中各关节 axis 均为 `0 0 1`，但 body quat 已把轴旋转到各关节实际方向——需还原到 URDF 坐标系对比）
 2. **关节限位**：MuJoCo `range` ↔ URDF `limit lower/upper`（`gripper` 关节 URDF 与 XML 的正负号方向需重点核对）
@@ -103,7 +103,10 @@ Phase 1 → Phase 2 → Phase 3 → Phase 4（Phase 2 结果决定 Phase 3 用�
 | MuJoCo XML mesh 路径为相对路径，ros2_control 加载时 cwd 不对 | 中 | `models/` 内改用绝对路径由 CMake/launch 注入，或 launch 设置 `MUJOCO` 资源目录 |
 
 ## 验收
-- [ ] `uv run python scripts/verify_model_alignment.py` 输出对齐报告（全部 PASS 或明确列出修正项）
+> 清单为计划时预设, 未逐项勾选——完成状态以 `workflow/tdd/setup.tdd.md` +
+> `workflow/reports/alignment_report{,_torque}.md` 为准（下方脚本名以现行
+> `scripts/setup_verify_model_alignment.py` 为准）。
+- [ ] `uv run python scripts/setup_verify_model_alignment.py` 输出对齐报告（全部 PASS 或明确列出修正项）
 - [ ] `sim:=none/gazebo/mujoco` 三种模式 launch 均可启动并在 RViz 正常显示
 - [ ] git 提交历史覆盖各 Phase，uv.lock 入库
 

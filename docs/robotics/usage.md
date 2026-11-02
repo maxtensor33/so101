@@ -4,16 +4,18 @@
 
 | 命令 | 说明 |
 |---|---|
-| `colcon build --symlink-install` | 构建全部 colcon 包（7 个） |
-| `uv run pytest` | 全量测试（220 passed） |
+| `colcon build --symlink-install` | 构建全部 colcon 包（`src/` 下各包） |
+| `uv run pytest` | 全量测试（数字随测试演进, 以实际输出为准） |
 | `uv run python scripts/setup_verify_model_alignment.py` | 位置版 URDF↔MJCF 对齐 → `workflow/reports/alignment_report.md` |
-| `uv run python scripts/setup_verify_model_alignment.py --torque` | 力矩版对齐 → `workflow/reports/alignment_report_torque.md` |
+| `uv run python scripts/setup_verify_model_alignment.py --torque` | 力矩版对齐 → `workflow/reports/alignment_report_torque.md`（默认分文件, 防覆盖） |
 | `bash scripts/clean_ros.sh` | 清理 demo 残留进程（每轮测试前必做） |
 
 ## 仿真 + MoveIt（so101_bringup）
 
 ```bash
 ros2 launch so101_bringup demo.launch.py sim:=none|gazebo|mujoco [moveit:=true] [rviz:=false] [gz_gui:=false]
+# 实机 / 数字孪生（详见 docs/hardware/）
+ros2 launch so101_bringup demo.launch.py sim:=none real:=true [twin:=false] [port:=/dev/ttyACM0] [calibration_file:=<yaml>]
 ```
 
 | 参数 | 默认 | 说明 |
@@ -22,6 +24,10 @@ ros2 launch so101_bringup demo.launch.py sim:=none|gazebo|mujoco [moveit:=true] 
 | `moveit` | `false` | 附加 move_group + MoveIt RViz |
 | `rviz` | `true` | 基础 RViz |
 | `gz_gui` | `true` | gazebo 模式 GUI |
+| `real` | `false` | 实机模式（true 时 sim:=gazebo 不支持） |
+| `twin` | `true` | 实机被控 + MuJoCo 镜像数字孪生（real:=true 时有效） |
+| `port` | `/dev/ttyACM0` | 实机串口 |
+| `calibration_file` | `so101_hardware/config/motor_calibration.yaml` | 电机标定 YAML |
 
 ## draw cube 验收
 

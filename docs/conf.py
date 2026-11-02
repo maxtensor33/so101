@@ -11,8 +11,7 @@ extensions = [
 ]
 myst_heading_anchors = 3
 
-templates_path = ["_templates"]
-exclude_patterns = ["_build", "img"]
+exclude_patterns = ["_build"]
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = []

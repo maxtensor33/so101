@@ -25,6 +25,7 @@ ComputeIK）：MTC 0.1.8 + 5-dof 臂上容器调度是深水区（place 侧 Conn
 
 ```bash
 # 纯 RViz 模式（当前主线）：mock 硬件 + 规划 + 执行动画
+# 注意: launch 默认 sim:=mujoco（已暂停的后端）——必须显式 sim:=rviz
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz
 # 节点任务完成后保持存活（keep_running），RViz 面板可反复回放; Ctrl+C 结束
 
@@ -50,7 +51,7 @@ uv run python scripts/mtc_probe_pick_poses.py
   `T_gframe_goal = T_mjaw_goal ∘ inv(T_gframe→mjaw)`。
 - 标准 MTC stage 链（树状 Introspection）暂停，见
   `workflow/todo/mtc_sim_backends_todo.md` 附加节（含 5 个已修 bug 与剩余卡点）。
--RViz 模式的"夹住"是 planning scene attach 语义（无物理）；cube 动画由
+- RViz 模式的"夹住"是 planning scene attach 语义（无物理）；cube 动画由
   Introspection 的 solution 轨迹驱动。
 - C++ 改动后 `colcon build --packages-select so101_mtc_pick_place --cmake-clean-first`
   （symlink-install 增量判断对本包不可靠）。

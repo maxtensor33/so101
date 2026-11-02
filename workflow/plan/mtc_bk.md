@@ -1,5 +1,10 @@
 # Plan: SO-ARM101 MoveIt Task Constructor (MTC) Pick and Place
 
+> **归档**（2026-11 文档整理）：本文件为归档备份，**含原 `plan/mtc.md` 与
+> `plan/mtc_fix.md` 两份计划全文**（原文件已删，文内对它们的引用均指本文件）。
+> 现行计划见 `workflow/plan/mtc_rviz.md`；`workflow/tdd/mtc.tdd.md` 从未产出
+> （中止方向），夹持几何证据在 `workflow/tdd/mtc_fix.tdd.md`。
+
 > 参考: `~/Third/Projects/github/UR3_ROS2_PICK_AND_PLACE/ur_mtc_pick_place_demo`
 > 验收: `mtc_pick_and_place` — RViz 显示 MTC 规划，MuJoCo **与** Gazebo 双后端仿真执行
 
@@ -41,19 +46,19 @@
 | 抓取位姿生成 | 同上 `:1335-1349` | GeneratePose + ComputeIK(setIKFrame=gripper_frame) + 多候选 fallback |
 | 包结构 | `src/so101_moveit_config` | ament_cmake + MoveItConfigsBuilder |
 | launch 复用 | `src/so101_bringup/launch/demo.launch.py` | include move_group.launch.py，OpaqueFunction 分支 |
-| 可达性探测 | `scripts/draw_cube_viewer.py::solve_path` | 探测脚本先验证再写死配置 |
+| 可达性探测 | `scripts/robotics_draw_cube_viewer.py::solve_path` | 探测脚本先验证再写死配置 |
 | TDD | `tests/` | pytest RED→GREEN；C++ 侧以编译级测试 |
 
 ## 实施阶段
 
 ### Phase 0：spike + 可达性探测（消解 HIGH 风险）
-- 编写探测脚本 `scripts/probe_pick_poses.py`：用 libs/so101_robotics 的 IK
+- 编写探测脚本 `scripts/mtc_probe_pick_poses.py`：用 libs/so101_robotics 的 IK
   探测「桌面高度 cube 抓取位姿（预抓取/抓取/提拉）+ place 位姿」在关节限位内
   全可达的 cube 摆位（复用 draw cube 探测方法论）。
 - 物理夹持 spike：在 MuJoCo 中手动闭合 gripper 压住 cube，验证摩擦夹持能否
   提拉离面；不行则调整 cube 尺寸/摩擦/夹持目标开度，记录结论。
 - 验证 MTC 头文件/库可链接（最小 CMakeLists 试编译一个 task）。
-- 验证: `uv run python scripts/probe_pick_poses.py` 全 PASS 输出可达摆位。
+- 验证: `uv run python scripts/mtc_probe_pick_poses.py` 全 PASS 输出可达摆位。
 
 ### Phase 1：pick 场景（MuJoCo + Gazebo）+ 夹持配置
 - **MuJoCo**: 新增 `src/so101_sim/mujoco/scene_pick.xml`：scene.xml + 可抓取
@@ -99,7 +104,7 @@
 - 判定: 订阅/读取 cube 位姿对比 pick 与 place 区域（mujoco: 状态接口/脚本；
   gz: ros_gz_bridge 桥接 pose 或 gz topic）。
 - 产出 `reports/mtc_pick_place_report.md`（两后端分别记录）+
-  `.claude/tdd/mtc.tdd.md`。
+  `workflow/tdd/mtc.tdd.md`。
 - 验收标准: MTC 规划成功（RViz 可见 solutions）；**两个后端**中 cube 从 pick
   位被夹起、经空中平移、放入 place 位（位移 > 8 cm），全程无翻倒/掉落；
   规划-执行闭环无人干预一条命令完成。
@@ -109,7 +114,7 @@
 | 文件 | 动作 | 说明 |
 |---|---|---|
 | `plan/mtc.md` | CREATE | 本计划 |
-| `scripts/probe_pick_poses.py` | CREATE | Phase 0 可达性探测 |
+| `scripts/mtc_probe_pick_poses.py` | CREATE | Phase 0 可达性探测 |
 | `src/so101_sim/mujoco/scene_pick.xml` | CREATE | MuJoCo pick 场景（cube + place 标记） |
 | `src/so101_bringup/worlds/pick_place.sdf` | CREATE | Gazebo pick world（table + cube + place 标记） |
 | `tests/test_scene_pick.py` | CREATE | 双场景测试 |
@@ -139,13 +144,13 @@
 
 ## Acceptance
 
-- [ ] `scripts/probe_pick_poses.py` 探测输出全可达摆位（Phase 0 产物）
+- [ ] `scripts/mtc_probe_pick_poses.py` 探测输出全可达摆位（Phase 0 产物）
 - [ ] `colcon build` 6 包全过（新增 so101_mtc_pick_place）
 - [ ] `ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=mujoco`
       与 `sim:=gazebo` 均一条命令完成：RViz 可见 MTC solutions（Introspection
       逐 stage），仿真中 cube 被 pick→place 实际搬运成功（双后端分别验收）
 - [ ] `reports/mtc_pick_place_report.md`（双后端分别记录）+
-      `.claude/tdd/mtc.tdd.md` 产出
+      `workflow/tdd/mtc.tdd.md` 产出
 - [ ] commit 前征得用户同意（工作流约定）
 
 
@@ -221,7 +226,7 @@
 - **Gazebo**: 补上遗留验收（economy 会话未验证）——sim:=gazebo 全流程，
   DetachableJoint attach/detach 生效。
 - 更新 `reports/mtc_pick_place_report.md`（若不存在则新建）与
-  `.claude/tdd/mtc.tdd.md`。
+  `workflow/tdd/mtc.tdd.md`。
 - 验收标准: ① cube 尺寸 ≤ 3cm ② 夹起后 cube 位于两指之间（目测/数据）③ 全程
   无穿模帧 ④ 落点距 place 目标 < 3cm ⑤ 双后端 SUCCESS。
 
@@ -231,15 +236,15 @@
 |---|---|---|
 | `plan/mtc_fix.md` | CREATE | 本计划 |
 | `tests/test_grasp_geometry.py` | CREATE | R1 夹持几何测试 |
-| `scripts/probe_grasp_geometry.py` | CREATE | R1 诊断/校准脚本 |
-| `scripts/probe_pick_poses.py` | UPDATE | 加自碰撞校验 |
+| `scripts/mtc_probe_grasp_geometry.py` | CREATE | R1 诊断/校准脚本 |
+| `scripts/mtc_probe_pick_poses.py` | UPDATE | 加自碰撞校验 |
 | `src/so101_sim/mujoco/scene_pick.xml` | UPDATE | cube 3cm |
 | `src/so101_bringup/worlds/pick_place.sdf` | UPDATE | cube 3cm |
 | `src/so101_mtc_pick_place/src/mtc_pick_place_node.cpp` | UPDATE | cube_size 默认值 + 新关节解 |
 | `src/so101_mtc_pick_place/src/grasp_attach_plugin.cpp` | UPDATE | ideal_rel_pose |
 | `tests/test_scene_pick.py` | UPDATE | 断言同步 |
 | `reports/mtc_pick_place_report.md` | CREATE/UPDATE | R4 验收 |
-| `.claude/tdd/mtc.tdd.md` | CREATE/UPDATE | TDD 证据 |
+| `workflow/tdd/mtc.tdd.md` | CREATE/UPDATE | TDD 证据 |
 
 ## Risks
 

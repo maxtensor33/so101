@@ -14,7 +14,7 @@
 - `scripts/mtc_smoke.sh`、`scripts/mtc_attach_semantics.py`（mujoco spike）
 - `reports/mtc_pick_place_report.md`（mujoco 端验收记录）
 
-## 恢复前必读的遗留缺口（.claude/tdd/mtc_fix.tdd.md §4）
+## 恢复前必读的遗留缺口（workflow/tdd/mtc_fix.tdd.md §4）
 
 1. 指尖穿地板 ~23mm（SO-101 指刃比带中点低 45mm，贴地 top-grasp 必然过深；
    兜底=垫块抬高 cube）

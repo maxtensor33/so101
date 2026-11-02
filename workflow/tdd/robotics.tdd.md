@@ -20,7 +20,7 @@
 | 2 | ik（DLS/自适应阻尼/随机重启）/dynamics（rnea/crba/aba） | `uv run pytest tests/test_robotics_ik.py tests/test_robotics_dynamics.py` | PASS；M(q) 双引擎一致 < 1e-9 |
 | 3 | trajectory（quintic/梯形/min-jerk）/control（pd_g/computed torque/阻抗）/constraints/sim | `uv run pytest tests/test_robotics_trajectory.py tests/test_robotics_control.py` | PASS |
 | 4 | `so101_robotics_torque_app`（xacro/launch/rviz/torque_control_node/draw_cube_node） | `colcon build` + 冒烟 | PASS；effort 接口实测可用（HIGH 风险消解） |
-| 5 | draw cube 验收 + `reports/draw_cube_report.md` + `scripts/draw_cube_viewer.py` | 冒烟 3 次 + position 基线 | torque RMS 3.06~3.18mm（<5mm 达标），position 基线 9.67mm |
+| 5 | draw cube 验收 + `reports/draw_cube_report.md` + `scripts/robotics_draw_cube_viewer.py` | 冒烟 3 次 + position 基线 | torque RMS 3.06~3.18mm（<5mm 达标），position 基线 9.67mm |
 
 ## Test specification
 

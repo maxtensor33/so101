@@ -121,6 +121,9 @@ Phase 0 → 1 → 2 → 3 → 4 → 5（线性；Phase 3 依赖真机在场，1/
 
 ## 验收
 
+> 清单为计划时预设, 未逐项勾选——完成状态以 `workflow/tdd/il_sim_leader.tdd.md` +
+> `workflow/reports/il_sim_leader_report.md` 为准（真机遥操/采集项由用户执行）。
+
 - [ ] `uv run pytest` 全绿（含新增 leader 测试）
 - [ ] `--teleop.type=so101_leader_sim` 在 il_sim_teleop.py 与 il_sim_record.py 两条路径均可用
 - [ ] 探针确认关节方向表并记录（含 invert 决策）

@@ -1,7 +1,9 @@
 # Plan: SO101 Gymnasium 环境集（mujoco 内核 + ros2/rviz 可视化）— reach/lift/place/stack，供 RL/IL 使用
 
 **日期**: 2026-10-21
-**状态**: 待确认
+**状态**: 已实施（证据: workflow/tdd/envs.tdd.md + workflow/reports/envs_report.md 及 squint 迁移报告×2;
+2026-10-31 squint 迁移后部分验收标准已更新, 见报告更新节。下方验收清单为计划时预设, 未逐项勾选——
+完成状态以 tdd/reports 为准）
 **复杂度**: Large（约 12~16 小时）
 **参考**: `~/Third/Projects/github/so101/squint`（ManiSkill/SAPIEN 实现，任务定义/奖励/相机思路来源）
 
@@ -27,7 +29,7 @@
 | 项 | 状态 |
 |---|---|
 | 现有 MJCF | `src/so101_sim/mujoco/so101_new_calib.xml` 全部为 `<position class="sts3215">` actuator，forcerange=±3.35 Nm（舵机上限）——env 可直接复用位置 actuator 思路 |
-| 上游副本 | `models/so101_new_calib.xml` + `scripts/verify_model_alignment.py`（9 tests）已建立 URDF↔XML 对齐验证模式 |
+| 上游副本 | `models/so101_new_calib.xml` + `scripts/setup_verify_model_alignment.py`（9 tests）已建立 URDF↔XML 对齐验证模式 |
 | Pinocchio | `ros-jazzy-pinocchio`（系统 site-packages，venv 已配好） |
 | squint 结构 | `envs/base_random_env.py`（ThirdCamera/WristCamera 两相机基类 + DR config）、`envs/robot/so101.py`（TCP=双指 tip 中点、is_grasping 按接触力+方向角）、4 任务 env（evaluate/dense_reward 各自实现） |
 | squint 相机 | third: look_at [0.6,0.3,0.3]→[0.3,0,0.05] 每步加噪；wrist: 挂 gripper_link，基座偏移 (-0.005,0.050,-0.059)、欧拉 (-90°,91°,-35.31°)、FOV 71° |
@@ -162,11 +164,11 @@ so101/
 
 ### Phase 4：pinocchio IK + 脚本专家验收（4 env 端到端）
 - **Action**: `ik.py`：pinocchio 数值 IK（DLS/伪逆，关节限位裁剪）——仅服务于脚本专家
-  与未来任务空间接口；`scripts/run_expert.py`：对每个 env 跑脚本策略（reach 用 IK 到 goal，
+  与未来任务空间接口；`scripts/envs_run_expert.py`：对每个 env 跑脚本策略（reach 用 IK 到 goal，
   lift/place/stack 用 IK + 开合夹爪状态机），记录 success rate
 - **测试先行**: `test_envs_tasks.py` 增 IK 冒烟用例（给定可达位姿，IK 收敛且 FK 复核）
 - **Mirror**: `libs/so101_robotics/ik.py` 的算法思路（只参考算法，不 import）
-- **Validate**: `uv run python scripts/run_expert.py --env all --episodes 10`
+- **Validate**: `uv run python scripts/envs_run_expert.py --env all --episodes 10`
   （目标：reach ≥ 90%，lift/place/stack > 0% 且稳定复现）
 - **调参点**: 位置 actuator kp/kd、夹爪摩擦（gripper links friction≈2.0，squint 同款）、
   接触 condim——写入 `reports/envs_report.md`
@@ -191,7 +193,7 @@ so101/
 | 类别 | 来源 | 模式 |
 |---|---|---|
 | 库结构 | `libs/so101_robotics/` | 纯 Python 无 ROS 库 + uv wheel + sys.path 自举（viz 节点同法导入 so101_envs） |
-| 模型对齐 | `scripts/verify_model_alignment.py` | URDF↔MJCF 关节/限位对齐测试（Phase 0 TDD） |
+| 模型对齐 | `scripts/setup_verify_model_alignment.py` | URDF↔MJCF 关节/限位对齐测试（Phase 0 TDD） |
 | 任务定义 | `squint/envs/reach.py` 等 | evaluate()/compute_dense_reward() 分离；spawn_box 出生随机化 |
 | 相机 | `squint/envs/base_random_env.py` | third/wrist 基座位姿与噪声参数直接沿用 |
 | grasp 判定 | `squint/envs/robot/so101.py` | 双指接触力 + 方向角；TCP=双指 tip 中点 |

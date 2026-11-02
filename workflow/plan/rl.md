@@ -1,9 +1,10 @@
 # Plan: SO101 RL 训练与推理（sb3/skrl 双后端 + ROS2 推理 + lerobot 部署接口）
 
 **日期**: 2026-10-22
-**状态**: 待确认
+**状态**: 已实施（证据: workflow/tdd/rl.tdd.md + workflow/reports/rl_report.md;
+下方验收清单为计划时预设, 未逐项勾选——完成状态以 tdd/reports 为准）
 **复杂度**: Large（约 10~14 小时）
-**前置**: plan/envs.md 已完成并合并 main（`libs/so101_envs` 8 个 gymnasium id，reach 专家 100%）
+**前置**: plan/envs.md 已完成并合并 main（`libs/so101_envs` 注册 id 见 docs/envs/index.md, reach 专家 100%）
 
 ## 需求重述
 
@@ -25,7 +26,7 @@
 
 | 项 | 状态 |
 |---|---|
-| 环境库 | `libs/so101_envs`：state obs 25/29/33/35 维 + 相机版 Dict obs；动作 Box(-1,1,6)；10Hz 控制/500Hz 仿真；state env 1429 steps/s（训练可行性已验证） |
+| 环境库 | `libs/so101_envs`：state obs 维度随 squint 迁移更新（reach 47 / lift 52 / place 57 / stack 57, 见 docs/envs/index.md）+ 相机版 Dict obs；动作 Box(-1,1,6)；10Hz 控制/500Hz 仿真；训练可行性已验证 |
 | reach 可解性 | 脚本专家 100% success（5/5），奖励含 1−tanh(5d) 密集项，RL 可学 |
 | lift/place/stack | 抓取保持已知问题（reports/envs_report.md），RL 可训练但成功率预期低——rl 先以 reach 验收 |
 | venv 约束 | `--system-site-packages` + `numpy<2`；torch 2.x 兼容 numpy 1.26 ✓；sb3≥2.4 支持 gymnasium 1.x ✓；skrl≥1.4 支持 gymnasium ✓ |
@@ -161,14 +162,14 @@ so101/
 - **Validate**: pytest + 文档评审（真机验收待硬件）
 
 ### Phase 6：sim2sim gz 验证 TODO（仅文档）
-- **Action**: `docs/rl_sim2sim_gz_todo.md`：gz 验证 runbook 占位——待办清单
+- **Action**: `workflow/todo/rl_sim2sim_gz_todo.md`：gz 验证 runbook 占位——待办清单
   （MJCF→URDF/SDF 差异、gz_ros2_control 链路、策略对 obs 的敏感性评估），
   标记 TODO 不实现
 - **Validate**: 文档评审
 
 ### Phase 7：文档 + 报告 + TDD 证据
 - **Action**: `reports/rl_report.md`（训练曲线、eval success rate、推理演示记录、
-  超参与耗时基准）；CLAUDE.md 增补 rl 常用命令与约定；TDD 证据 `.claude/tdd/rl.tdd.md`
+  超参与耗时基准）；CLAUDE.md 增补 rl 常用命令与约定；TDD 证据 `workflow/tdd/rl.tdd.md`
 - **Validate**: `uv run pytest`（全套）+ `colcon build --symlink-install` 通过
 
 ## Pattern Grounding（镜像现有模式）
@@ -177,7 +178,7 @@ so101/
 |---|---|---|
 | 训练库 | `libs/so101_envs/` | 纯 Python 无 ROS 库 + uv wheel + hatch packages 注册 |
 | ROS 包 | `src/so101_envs_viz/` | ament_python + data_files lib wrapper + OpaqueFunction launch + Reliable QoS |
-| 环境使用 | `scripts/check_env.py` | `import so101_envs` 注册副作用 + gym.make |
+| 环境使用 | `scripts/envs_check_env.py` | `import so101_envs` 注册副作用 + gym.make |
 | checkpoint 约定 | （新增） | 目录制：`model.{zip\|pt}` + `meta.json`(backend/algo/env/obs_dim) + `vecnormalize.pkl` |
 | 测试 | `tests/` + pytest | 契约测试 + 冒烟；短训练 smoke 不超 10s |
 | 脚本命名 | `scripts/`（本计划约定） | `<项目名>_<功能>.py`：rl_train / envs_check_env / robotics_draw_cube_viewer |
@@ -218,4 +219,4 @@ so101/
 - [ ] gz 验证 TODO 文档就位（不实现）
 - [ ] scripts 命名符合 `<项目名>_<功能>.py` 约定，旧引用（CLAUDE.md/docs/reports/plan）已同步
 - [ ] `uv run pytest` 全套 + `colcon build` 全绿；commit 由用户手动执行
-- [ ] `reports/rl_report.md` + `.claude/tdd/rl.tdd.md` 记录证据
+- [ ] `reports/rl_report.md` + `workflow/tdd/rl.tdd.md` 记录证据

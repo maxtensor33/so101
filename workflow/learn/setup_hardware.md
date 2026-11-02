@@ -78,7 +78,7 @@ move_group 与 controller_manager——轨迹半路夭折、力矩半途断掉�
 
 ## 三、遗留与后续
 
-- `workflow/todo/to_real_joint_calibration.md`：lift ±1.91986 是手动估计，
+- `workflow/todo/setup_hardware_joint_calibration_todo.md`：lift ±1.91986 是手动估计，
   其余关节软限位未逐关节真机验证（6 处同步位置已列）
 - move_group 退出时偶发 segfault（MoveIt 2.12 析构竞态）——不影响控制，未处理
 - gripper 方向未经真机确认，`--invert` 开关备用

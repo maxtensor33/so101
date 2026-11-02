@@ -1,5 +1,9 @@
 # MTC Pick and Place 修复记录 (deepseek-v4-1-flash-economy 会话)
 
+> **已结案**（2026-11 文档整理）：mujoco/gz 双后端方向已暂停（本会话打通的 mujoco
+> 端成果与遗留缺口见 `workflow/todo/mtc_sim_backends_todo.md`），现行方向为纯 RViz
+> 扁平链（`workflow/plan/mtc_rviz.md`）。文内 `plan/mtc.md` 已并入 `workflow/plan/mtc_bk.md`。
+
 日期: 2026-10-21 · 计划: `plan/mtc.md` · 分支: main
 承接: `problems/mtc_glm-5-3-flash-260828.md`、`problems/mtc_deepseek-v4-flash-260425.md`
 
@@ -50,7 +54,7 @@ place object: start interface (←) of 'place state' does not match mine (→)
 
 **根因 A(最致命的隐藏 bug): probe 的 grasp 关节解是自碰撞的**
 
-- `scripts/probe_pick_poses.py` 的 IK 只用 pinocchio 关节限位, **不做自碰撞检查**。
+- `scripts/mtc_probe_pick_poses.py` 的 IK 只用 pinocchio 关节限位, **不做自碰撞检查**。
 - 原解 `grasp=[0.7612,-0.1760,1.4566,0.2903,-0.7610]` 在 MuJoCo 中
   `gripper_link` / `moving_jaw` 与 `shoulder_link` 穿透(≈0.4mm~3mm);
   MoveIt 在 `attach cube` 阶段也直接报 `gripper_link colliding with shoulder_link`。
@@ -198,14 +202,14 @@ uv run pytest -q                                                          # 127 
    或延迟释放到爪完全张开/机械臂 retreat 之后。
 3. **抓取瞬间 cube 的视觉跳变**: 由于以"规划时的初始 cube 位姿"附着, attach 瞬间 cube
    会从被推走的位置跳回理想位置(4~6cm)。功能正确, 但视觉上不自然。
-4. **probe 脚本仍不检查自碰撞**: `scripts/probe_pick_poses.py` 会继续输出自碰撞解。
+4. **probe 脚本仍不检查自碰撞**: `scripts/mtc_probe_pick_poses.py` 会继续输出自碰撞解。
    建议加入 MuJoCo 自碰撞过滤(本轮的可行分支是手工脚本搜出来的), 并补充相应 pytest。
 5. **与 plan/mtc.md 的结构偏差**: 计划里指定的
    `Connect + SerialContainer[GeneratePose/ComputeIK/approach]` 结构没有保留;
    当前是扁平链。若必须还原原结构, 需要重新解决"place 侧 Connect 不触发"的调度问题。
 6. **RViz 未验证**: 本轮所有冒烟都是 `rviz:=false`; `rviz/mtc_pick_place.rviz` 与
    MTC Introspection 面板尚未实际打开确认。
-7. **验收产物缺失**: `reports/mtc_pick_place_report.md`、`.claude/tdd/mtc.tdd.md` 尚未产出。
+7. **验收产物缺失**: `reports/mtc_pick_place_report.md`、`workflow/tdd/mtc.tdd.md` 尚未产出。
 8. **无 cpp 测试**: C++ 侧仍只有编译 + 端到端冒烟, 没有 gtest。
 9. **未提交**: 所有改动在工作区, 未 commit。
 10. 小问题: `retreat` 仍是 Cartesian `MoveRelative`(cube 已 detach, 风险低, 但同样存在

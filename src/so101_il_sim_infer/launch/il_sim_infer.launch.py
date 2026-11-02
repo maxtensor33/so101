@@ -20,6 +20,7 @@ def _launch_setup(context):
     mujoco = LaunchConfiguration("mujoco").perform(context).lower() in ("true", "1")
     rviz = LaunchConfiguration("rviz").perform(context).lower() in ("true", "1")
     reset_on_enter = LaunchConfiguration("reset_on_enter").perform(context).lower() in ("true", "1")
+    rate = float(LaunchConfiguration("rate").perform(context))
 
     desc_dir = get_package_share_directory("so101_description")
     urdf_path = os.path.join(desc_dir, "urdf", "so101.urdf")
@@ -38,7 +39,7 @@ def _launch_setup(context):
             output="screen",
             parameters=[
                 {"env": env, "checkpoint": checkpoint, "camera": camera, "mujoco": mujoco,
-                 "reset_on_enter": reset_on_enter},
+                 "reset_on_enter": reset_on_enter, "rate": rate},
             ],
         ),
     ]
@@ -60,5 +61,7 @@ def generate_launch_description():
         DeclareLaunchArgument("rviz", default_value="true"),
         DeclareLaunchArgument("reset_on_enter", default_value="true",
                               description="按 Enter 重置 episode（false 关闭 pynput/stdin 监听）"),
+        DeclareLaunchArgument("rate", default_value="10.0",
+                              description="控制频率 Hz（透传节点 rate 参数）"),
         OpaqueFunction(function=_launch_setup),
     ])

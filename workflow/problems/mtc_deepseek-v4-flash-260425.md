@@ -1,5 +1,8 @@
 # MTC Pick and Place 调试问题交接 (deepseek-v4-flash 会话)
 
+> **已结案**（2026-11 文档整理）：mujoco/gz 双后端方向已暂停，现行方向为纯 RViz
+> 扁平链（`workflow/plan/mtc_rviz.md`）。文内 `plan/mtc.md` 已并入 `workflow/plan/mtc_bk.md`。
+
 日期: 2026-10-21 · 计划: `plan/mtc.md` · 分支: main · 测试: 127 passed(未新增)
 承接: `problems/mtc_glm-5-3-flash-260828.md`(上一会话交接, 原始卡点 = move to pick/place 的 Connect 0 解)
 
@@ -25,7 +28,7 @@
 
 ## 二、决定性探针数据(move_group `/plan_kinematic_path` 直发关节约束)
 
-`scripts/probe_pick_poses.py` 的关节解在 **move_group**(`/tmp/ompl_probe2.py` / `/tmp/ompl_probe3.py`)
+`scripts/mtc_probe_pick_poses.py` 的关节解在 **move_group**(`/tmp/ompl_probe2.py` / `/tmp/ompl_probe3.py`)
 从 home 实况 start 的 OMPL 可达性:
 
 | 目标(关节解) | cube 仅爪放行 | cube 全放行 | 说明 |

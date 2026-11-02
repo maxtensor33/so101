@@ -1,7 +1,8 @@
 # Plan: SO-ARM101 机器人学学习栈（ros2 + mujoco + rviz）— FK/Jacobian/IK/动力学/轨迹/控制 → draw cube
 
 **日期**: 2026-10-20
-**状态**: 待确认
+**状态**: 已实施（证据: workflow/tdd/robotics.tdd.md + workflow/reports/alignment_report{,_torque}.md、
+draw_cube_report.md; 下方验收清单为计划时预设, 未逐项勾选——完成状态以 tdd/reports 为准）
 **复杂度**: Large（约 12~18 小时）
 **参考**: `~/Third/Projects/github/mujoco-robotics-lab/lab-2-Ur5e-robotics-lab`（A/B/C 模块化教学结构）
 
@@ -27,7 +28,7 @@
 | ros2_control 接口 | `so101.ros2_control.xacro` 当前只声明 `command_interface: position` |
 | Pinocchio | `ros-jazzy-pinocchio`（系统 site-packages，venv `--system-site-packages` + numpy<2 已配好） |
 | MuJoCo Python | uv venv 内 3.x（对齐验证脚本已在用） |
-| 对齐验证 | `scripts/verify_model_alignment.py` 9/9 PASS，FK max_pos=0.0025mm |
+| 对齐验证 | `scripts/setup_verify_model_alignment.py` 9/9 PASS，FK max_pos=0.0025mm |
 | 参考 lab 结构 | `src/a1..a5`（基础）+ `b1..b3`（轨迹/控制/约束）+ `c1..c3`（集成/ROS 桥/draw cube）+ `ur5e_common.py`/`mujoco_sim.py` 共享层 |
 | lab draw cube 做法 | DLS IK + quintic 关节轨迹 + MuJoCo 位置舵机加重力补偿与速度前馈；**cube 是轨迹目标（画线），不是抓取实体** |
 
@@ -107,7 +108,7 @@ so101/
 6. 扩展 `verify_model_alignment.py`（或加 `--torque` 开关）验证 torque MJCF 与
    torque URDF 的关节/限位/FK 对齐（运动学层应 100% 一致，仅 actuator 不同）。
 
-**验证**: `uv run pytest`（新增 torque 对齐测试）；`uv run python scripts/verify_model_alignment.py --torque` 全 PASS。
+**验证**: `uv run pytest`（新增 torque 对齐测试）；`uv run python scripts/setup_verify_model_alignment.py --torque` 全 PASS。
 
 ### Phase 1：`libs/so101_robotics` 库骨架 + FK + Jacobian（对标 A2/A3）
 1. 根 `pyproject.toml` 增加包配置（hatch `packages = ["libs/so101_robotics"]` 或
@@ -196,7 +197,7 @@ quintic 轨迹 RMS < 阈值）；matplotlib 出对比图（生成物放 `reports
 | 计划风格 | `plan/setup.md` | 需求重述 → 环境事实 → 结构 → Phase（含验证）→ 风险 |
 | ROS 节点/launch | `src/so101_bringup/launch/demo.launch.py:29` | OpaqueFunction + TimerAction 延迟 spawner/rviz |
 | 测试 | `tests/test_alignment.py` | pytest + conftest（venv `--system-site-packages`）；参考 lab 用 unittest，本项目**改用 pytest** 对齐现状 |
-| FK 交叉验证 | `scripts/verify_model_alignment.py` | Pinocchio vs MuJoCo 数值对比（非参数 diff）|
+| FK 交叉验证 | `scripts/setup_verify_model_alignment.py` | Pinocchio vs MuJoCo 数值对比（非参数 diff）|
 | 错误处理 | 对齐脚本 FAIL→列表输出 | 验证器收集全部偏差再统一报告 |
 
 ## 依赖与兼容

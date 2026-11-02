@@ -1,7 +1,8 @@
 # Plan: SO101 il_sim —— 模仿学习（仿真数据采集/训练/推理）
 
 **日期**: 2026-10-23
-**状态**: 待确认
+**状态**: 已实施（证据: workflow/tdd/il_sim.tdd.md + workflow/reports/il_sim_report.md;
+下方验收清单为计划时预设, 未逐项勾选——完成状态以 tdd/reports 为准）
 **复杂度**: Large（约 12~16 小时）
 **前置**: envs 与 rl 已合并 main（相机版环境 SO101ReachCamera-v1、rl_infer 模式可镜像）
 
@@ -164,7 +165,7 @@ so101/
 ### Phase 6：文档 + 报告 + TDD 证据
 - **Action**: `docs/il_sim/index.md` 更新（落地版：命令/数据格式/训练迁移指引）；
   `reports/il_sim_report.md`（采集验收数据/四策略冒烟结论/SmolVLA 可行性结论）；
-  CLAUDE.md 增补；`.claude/tdd/il_sim.tdd.md`
+  CLAUDE.md 增补；`workflow/tdd/il_sim.tdd.md`
 - **Validate**: `uv run pytest` 全套 + colcon build
 
 ## Pattern Grounding（镜像现有模式）
@@ -217,4 +218,4 @@ so101/
 - [ ] `so101_il_sim_infer` ROS2 推理：MuJoCo 与 RViz 同步可视化（策略驱动 reach）
 - [ ] 迁移训练指引文档（用户在别的机器执行全量训练的命令）
 - [ ] `uv run pytest` 全套 + colcon build 全绿；commit 由用户手动执行
-- [ ] `reports/il_sim_report.md` + `.claude/tdd/il_sim.tdd.md` 证据留档
+- [ ] `reports/il_sim_report.md` + `workflow/tdd/il_sim.tdd.md` 证据留档

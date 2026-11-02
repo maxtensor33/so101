@@ -42,7 +42,7 @@ DEFAULT_SRDF = REPO_ROOT / "src/so101_moveit_config/config/so101.srdf"
 DEFAULT_PORT = "/dev/ttyACM0"
 
 # 与 C++ 插件 so101JointLimits 同源 (D2: 本仓库 URDF 限位)
-# shoulder_lift ±1.91986 为手动估计 (todo/to_real_joint_calibration.md), 原导出值 ±1.74533
+# shoulder_lift ±1.91986 为手动估计 (todo/setup_hardware_joint_calibration_todo.md), 原导出值 ±1.74533
 JOINT_LIMITS = {
     "shoulder_pan": (-1.91986, 1.91986),
     "shoulder_lift": (-1.91986, 1.91986),

@@ -1,6 +1,8 @@
 # Todo: envs 抓取物理调优（lift/place/stack 穿模与保持失败）
 
-**状态**: 待办 · **创建**: 2026-10-29 · **来源**: il_sim_leader 遥操实测 + `scripts/il_sim_grasp_diagnose.py` 诊断
+**状态**: 已完成（2026-10-30 根因定位 + squint 碰撞网格迁移已验证, 测试全绿;
+2026-10-31 后续 8 环境 squint 全量迁移见 `workflow/reports/lift_squint_migration.md`、
+`envs_squint_migration.md`） · **创建**: 2026-10-29 · **来源**: il_sim_leader 遥操实测 + `scripts/il_sim_grasp_diagnose.py` 诊断
 
 ## 2026-10-30 突破: 根因定位 + squint 碰撞网格迁移（已验证）
 

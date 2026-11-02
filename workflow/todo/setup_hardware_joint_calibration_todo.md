@@ -27,10 +27,10 @@
 
 1. [ ] 力矩失能逐关节测量物理极限（`setup_capture_named_pose.py --monitor` + 手动掰到两端，记录 raw 值）
 2. [ ] 把每关节 raw 端点经标定换算成 URDF rad，与现有限位对比（重点 lift/elbow/wrist_roll/gripper）
-3. [ ] 修正上表 6 处限位（如与 ±1.91986 估计不符），同步更新 `workflow/pitfalls/setup-hardware.md`
+3. [ ] 修正上表 6 处限位（如与 ±1.91986 估计不符），同步更新 `workflow/pitfalls/setup_hardware.md`
 4. [ ] 方向校验：`--monitor` + `ros2 run so101_sim mujoco_twin.py` 逐关节确认同向；
        反向关节在标定转换加 `--invert <关节>`
-5. [ ] MoveIt 端到端验收（pitfalls/setup-hardware.md H7 清单），在
+5. [ ] MoveIt 端到端验收（pitfalls/setup_hardware.md H7 清单），在
        `workflow/reports/setup_hardware.md` 追加真机验收节
 
 ## 验收标准

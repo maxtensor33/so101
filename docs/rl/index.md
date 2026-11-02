@@ -4,7 +4,7 @@
      编写; 命令表带 AUTO-GENERATED 标记, 改 CLI 后请同步 -->
 
 本文覆盖 SO101 RL 的完整动线：训练 → 评估 → 推理可视化 → 部署接口。
-环境集见 `libs/so101_envs`（8 个 gymnasium id），训练库见 `libs/so101_rl`。
+环境集见 `libs/so101_envs`（16 个 gymnasium id：4 任务 × {state,camera} × {cube,can}），训练库见 `libs/so101_rl`。
 
 ## Quick Start
 
@@ -13,9 +13,10 @@
 uv run python scripts/rl_train.py --backend sb3 --algo sac \
     --env SO101Reach-v1 --steps 200000
 
-# 2. 看曲线 / tensorboard
-uv run python -c "import webbrowser; ..."   # 或直接打开:
-tensorboard --logdir outputs/rl/sb3-sac-reach-v1/latest/tb
+# 2. 看曲线 / tensorboard（<tag>/latest 是文本指针文件, 不是目录:
+#    tensorboard 需要指向 tag 目录（含各时间戳 run）或先 cat latest 取真实路径）
+tensorboard --logdir outputs/rl/sb3-sac-reach-v1
+# 或单 run: tensorboard --logdir "$(cat outputs/rl/sb3-sac-reach-v1/latest)"
 
 # 3. 评估（--ckpt 支持 <tag>/latest 指针, 自动解析最新 run）
 uv run python scripts/rl_eval.py --ckpt outputs/rl/sb3-sac-reach-v1/latest --episodes 10
@@ -41,13 +42,18 @@ ros2 launch so101_rl_infer rl_infer.launch.py env:=reach \
 | `--steps` | `200000` | 总环境步数（多环境时按 env 计数） |
 | `--n-envs` | `1` | 并行环境数（见下节） |
 | `--eval-freq` | `10000` | eval success 评估间隔（同步写 TB） |
+| `--config` | `squint` | 超参变体，叠加 `configs/<backend>_<algo>_squint.yaml`；`none` 关闭 |
+| `--action-mode` | `delta` | squint 配方 delta 动作；`position` 仅作 A/B 基线 |
+| `--domain-randomization` | 开 | `--no-domain-randomization` 关闭（物体尺寸/摩擦 + qpos 观测噪声） |
+| `--seed` | `0` | 随机种子 |
 | `--out` | 自动 | 显式指定则原样使用；默认 `outputs/rl/<tag>/<时间戳>/` |
 | `--normalize` | 关 | 启用 VecNormalize（状态随 checkpoint 存/载，**推理必须同载**） |
 | `--no-tb` | — | 关闭 tensorboard |
 | `--overrides` | — | 超参覆盖，如 `--overrides lr=0.001 batch_size=128` |
 
-算法默认超参在 `libs/so101_rl/configs/<backend>_<algo>.yaml`，
-优先级：代码内置 < yaml < `--overrides`。
+算法默认超参在 `libs/so101_rl/configs/<backend>_<algo>.yaml`，`--config squint`
+（默认）再叠加 `<backend>_<algo>_squint.yaml` 变体层；优先级：
+代码内置 < 基础 yaml < variant yaml < `--overrides`。
 
 ## 多环境
 
@@ -69,7 +75,7 @@ uv run python scripts/rl_train.py --backend sb3 --algo ppo --n-envs 16 --steps 4
 | 产物 | 位置 | 用法 |
 |---|---|---|
 | eval 曲线 | `<run>/curve.png` | 每次训练自动生成（success rate vs steps） |
-| tensorboard | `<run>/tb/` | `tensorboard --logdir outputs/rl/<tag>/latest/tb`；含 `eval/success_rate` |
+| tensorboard | `<run>/tb/` | `tensorboard --logdir outputs/rl/<tag>`（`<tag>/latest` 是文本指针，`cat` 后可用作单 run 路径）；含 `eval/success_rate` |
 | checkpoint | `<run>/model.{zip\|pt}` + `meta.json`（backend/algo/env_id/obs_dim 校验） | `rl_eval` / `rl_infer` 自动识别后端 |
 
 评估独立于训练：`rl_eval --ckpt <tag>/latest --episodes 10` 逐 episode 打印
@@ -100,8 +106,9 @@ ros2 launch so101_rl_infer rl_infer.launch.py env:=reach \
 - 训练"没动静"先查三件事：进度条是否在动（sb3 函数式 callback 返回值）、
   TB 是否有事件（skrl 的 `experiment.directory` 必须在 agent 构造前设置）、
   内存是否打爆（多环境 OOM 杀 GUI 不报错）。
-- lift/place/stack 环境可训练，但抓取保持有已知物理问题（见
-  `workflow/reports/envs_report.md`），成功率预期低——reach 验收后再扩展。
+- lift/place/stack 训练前先读 squint 迁移报告（`workflow/reports/lift_squint_migration.md`、
+  `envs_squint_migration.md`）：抓取物理已修复、RL 默认 delta 动作 + squint 超参
+  （`--config squint` 默认开）；长训仍建议先 reach 验收再扩展。
 - 长训前先跑 `--steps 2000 --n-envs 4` 冒烟，确认动线全通再上大预算。
 - 部署真机：`libs/so101_rl/lerobot_deploy.py` 定义了协议与适配器
   （零 lerobot 依赖），真机接线 TODO 见类内文档。

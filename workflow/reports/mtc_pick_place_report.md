@@ -1,6 +1,8 @@
 # MTC Pick and Place 验收报告 — 夹持质量修复 (R 系列)
 
-> 日期: 2026-10-21 | 计划: `plan/mtc_fix.md` | TDD 证据: `.claude/tdd/mtc_fix.tdd.md`
+> 日期: 2026-10-21 | 计划: `plan/mtc_fix.md`（全文已并入 `workflow/plan/mtc_bk.md`） | TDD 证据: `workflow/tdd/mtc_fix.tdd.md`
+> **状态**: 历史验收记录（mujoco/gz 双后端方向已暂停，现行方向见 `workflow/plan/mtc_rviz.md`；
+> 文中 `workflow/tdd/mtc.tdd.md` 从未产出）
 
 ## 结论
 
@@ -43,8 +45,8 @@
 
 ## 工件
 
-- 校准脚本: `scripts/probe_grasp_geometry.py`（`uv run python scripts/probe_grasp_geometry.py`）
-- 摆位/自碰撞探测: `scripts/probe_pick_poses.py`（`--cube-size 0.02` 默认）
-- attach 语义 spike: `scripts/attach_semantics.py`（镜像插件语义 + 验收指标打印）
+- 校准脚本: `scripts/mtc_probe_grasp_geometry.py`（`uv run python scripts/mtc_probe_grasp_geometry.py`）
+- 摆位/自碰撞探测: `scripts/mtc_probe_pick_poses.py`（`--cube-size 0.02` 默认）
+- attach 语义 spike: `scripts/mtc_attach_semantics.py`（镜像插件语义 + 验收指标打印）
 - 关键常量: `close_angle=-0.02`、`open=1.0`、
   `ideal_rel_pose=[-0.019618,-0.048269,0.0188, 0.707071,-0.707071,-0.007071,0.007071]`

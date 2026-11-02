@@ -1,6 +1,12 @@
 # Plan: MTC 纯 RViz 专注开发（mujoco/gz 全部暂停）
 
-> 承接: `plan/mtc_bk.md`（旧双后端计划归档）、`.claude/tdd/mtc_fix.tdd.md`
+> **状态**: 已实施（证据: workflow/tdd/mtc_rviz.tdd.md + workflow/reports/mtc_rviz_report.md）。
+> **计划偏离**: Phase 1 原定"标准 MTC stage 链节点"，实施中经三次会话实证深水区后
+> **改道复用既有扁平链**（预求解关节解 + ModifyPlanningScene attach）——偏离记录见
+> `workflow/learn/mtc_rviz.md` 与 `workflow/reports/mtc_rviz_report.md`；下方验收清单为
+> 计划时预设, 未逐项勾选。
+>
+> 承接: `plan/mtc_bk.md`（旧双后端计划归档）、`workflow/tdd/mtc_fix.tdd.md`
 > （mujoco 端成果与遗留缺口）
 > 用户决策: **mujoco 与 gazebo 都不用**——整个 pick-and-place 在 RViz 的 MTC
 > 下完成（planning scene 虚拟场景 + MTC 规划 + RViz 内回放/执行）；
@@ -15,7 +21,7 @@
    `grasp_attach_plugin` 等仿真产物不删除，记入 main 风格
    `todo/mtc_sim_backends_todo.md` 待办（含遗留缺口与恢复条件）。
 3. **架构回归正统 MTC**：现有 `mtc_pick_place_node.cpp` 是"预求解关节解扁平链"
-   （为绕过 mujoco 夹持物理的 hack，见 `.claude/tdd/mtc_fix.tdd.md` §陈旧测试同步）。
+   （为绕过 mujoco 夹持物理的 hack，见 `workflow/tdd/mtc_fix.tdd.md` §陈旧测试同步）。
    纯 RViz 模式**没有夹持物理问题**，直接用标准 MTC stage 链
    （参考 `~/Third/Projects/github/UR3_ROS2_PICK_AND_PLACE/ur_mtc_pick_place_demo`
    的 `mtc_node.cpp`：CurrentState → open → Connect → pick 容器
@@ -31,9 +37,9 @@
 |---|---|
 | mtc 分支 = `301e006`（基于 30c4842），落后 main 2 commit（fcefe40 docs 重构 + ef0769b il_sim） | `git log main...mtc` |
 | MTC 依赖已装: ros-jazzy-moveit-task-constructor-{core,msgs,visualization,capabilities} 0.1.8 | `plan/mtc_bk.md` 勘察 |
-| SRDF: `arm` group（chain→gripper_frame_link）、`gripper` group（单 joint）、`end_effector`；gripper 方向已修正 open=1.0/closed=-0.02 | `.claude/tdd/mtc_fix.tdd.md` |
+| SRDF: `arm` group（chain→gripper_frame_link）、`gripper` group（单 joint）、`end_effector`；gripper 方向已修正 open=1.0/closed=-0.02 | `workflow/tdd/mtc_fix.tdd.md` |
 | 现节点为预求解扁平链（非 stage 链）；标准 stage 链参考项目 1662 行可精简移植 | 同上 + mtc_bk.md |
-| 可达摆位已探测过（12/28 可行组合，含自碰撞过滤），夹持几何已校准（standoff 27.9mm、close_angle=-0.02）——**这些纯运动学结论对 RViz 模式直接可用** | `.claude/tdd/mtc_fix.tdd.md` R1/R2 |
+| 可达摆位已探测过（12/28 可行组合，含自碰撞过滤），夹持几何已校准（standoff 27.9mm、close_angle=-0.02）——**这些纯运动学结论对 RViz 模式直接可用** | `workflow/tdd/mtc_fix.tdd.md` R1/R2 |
 | `demo.launch.py sim:=none moveit:=true`（mock 硬件 + move_group + RViz）main 已可用 | main CLAUDE.md:21 |
 | planning scene 已有 cube CollisionObject 发布逻辑（常量位姿）可复用 | `mtc_pick_place_node.cpp` |
 | 工作树已删（未提交）：`plan/mtc.md`、`plan/mtc_fix.md`、`todo/todo.md`（内容并入 `plan/mtc_bk.md`） | `git status` |
@@ -89,7 +95,7 @@
 
 ### Phase 3：收尾
 - `reports/mtc_rviz_report.md`（RViz 模式验收 + 与 mujoco 端成果关系说明）；
-  `.claude/tdd/mtc_rviz.tdd.md`；CLAUDE.md 增补命令条目；docs/ Sphinx 增 mtc 页
+  `workflow/tdd/mtc_rviz.tdd.md`；CLAUDE.md 增补命令条目；docs/ Sphinx 增 mtc 页
   （对齐 main 结构）。
 - `uv run pytest` 全量 + `colcon build` 全绿。
 - commit 前征得用户同意。
@@ -106,14 +112,14 @@
 | `src/so101_mtc_pick_place/launch/*.launch.py` | UPDATE | RViz-only 入口 |
 | `src/so101_mtc_pick_place/rviz/*.rviz` | UPDATE | MotionPlanning + Introspection 布局 |
 | `tests/test_mtc_package.py` | UPDATE | rviz 节点/stage 链断言 |
-| `reports/mtc_rviz_report.md`、`.claude/tdd/mtc_rviz.tdd.md` | CREATE | 收尾证据 |
+| `reports/mtc_rviz_report.md`、`workflow/tdd/mtc_rviz.tdd.md` | CREATE | 收尾证据 |
 | `CLAUDE.md`、`docs/**` | UPDATE | 对齐 main 结构增补 |
 
 ## 不删除（暂停保留，见 todo）
 
 `src/so101_sim/mujoco/scene_pick.xml`、`src/so101_bringup/worlds/pick_place.sdf`、
 `src/so101_mtc_pick_place/src/{mtc_pick_place_node,grasp_attach_plugin}.cpp`、
-`scripts/mtc_smoke.sh`、`scripts/attach_semantics.py`、`reports/mtc_pick_place_report.md`。
+`scripts/mtc_smoke.sh`、`scripts/mtc_attach_semantics.py`、`reports/mtc_pick_place_report.md`。
 
 ## Risks
 
@@ -140,5 +146,5 @@
 - [ ] 一条命令 RViz-only：MTC solution 全 stage SUCCESS（Introspection 树可见），
       轨迹动画完整演示 pick→place（cube attach 后随末端移动、place 后释放）
 - [ ] `uv run pytest` 全量 + `colcon build` 全绿
-- [ ] `reports/mtc_rviz_report.md` + `.claude/tdd/mtc_rviz.tdd.md` 产出
+- [ ] `reports/mtc_rviz_report.md` + `workflow/tdd/mtc_rviz.tdd.md` 产出
 - [ ] commit 前征得用户同意

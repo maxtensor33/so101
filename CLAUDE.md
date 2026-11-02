@@ -14,7 +14,7 @@ colcon build --symlink-install
 # Python 测试（全量回归）
 uv run pytest
 
-# URDF↔MuJoCo 对齐验证 CLI（输出 workflow/reports/alignment_report.md）
+# URDF↔MuJoCo 对齐验证 CLI（位置版输出 alignment_report.md; --torque 输出 alignment_report_torque.md, 默认分文件）
 uv run python scripts/setup_verify_model_alignment.py
 
 # 启动 demo（三种仿真 + 可选 MoveIt）
@@ -31,7 +31,7 @@ uv run python scripts/envs_check_env.py --id SO101Lift-v1 [--steps 30] [--render
 
 # rl: 训练/评估（sb3/skrl 双后端; torch 走系统安装, uv 不重复装）
 uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Reach-v1 --steps 200000
-uv run python scripts/rl_eval.py --ckpt outputs/rl/sb3-sac-reach --episodes 10
+uv run python scripts/rl_eval.py --ckpt outputs/rl/sb3-sac-reach-v1/latest --episodes 10
 # rl: lift（严格对齐 squint: delta 控制 / 2.2-2.8cm 密度200 物体 / squint SAC 超参; 默认即此配置）
 uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Lift-v1 \
   --steps 1500000 --eval-freq 20000 --n-envs 4 --out outputs/rl/lift-squint
@@ -39,7 +39,7 @@ uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Lift-v1 \
 
 # rl: ROS2 推理可视化（加载 checkpoint 驱动 env, RViz 订阅; mujoco:=true 开同一 env 的 MuJoCo 窗口;
 #      默认 Enter 重置 episode, reset_on_enter:=false 关闭）
-ros2 launch so101_rl_infer rl_infer.launch.py env:=reach checkpoint:=outputs/rl/sb3-sac-reach [camera:=true] [rviz:=true] [mujoco:=true] [reset_on_enter:=true]
+ros2 launch so101_rl_infer rl_infer.launch.py env:=reach checkpoint:=outputs/rl/sb3-sac-reach-v1/latest [camera:=true] [rviz:=true] [mujoco:=true] [reset_on_enter:=true]
 
 # il_sim: 采集（官方 lerobot-record 薄封装; expert/keyboard; episode 自动重置; 默认弹 MuJoCo 窗口, 关闭用 --robot.render=false）
 uv run python scripts/il_sim_record.py --robot.type=so101_sim --teleop.type=so101_expert \
@@ -75,7 +75,7 @@ ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=out
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz [execute:=false] [rviz:=true]
 uv run python scripts/mtc_probe_pick_poses.py   # 可达性探测（摆位/校准变更后）
 
-# hardware: 实机控制（workflow/plan/setup_hardware.md; 真机验收清单见 workflow/pitfalls/setup-hardware.md H7）
+# hardware: 实机控制（workflow/plan/setup_hardware.md; 真机验收清单见 workflow/pitfalls/setup_hardware.md H7）
 uv run python scripts/setup_convert_lerobot_calibration.py [--invert gripper]  # LeRobot 标定 JSON → motor_calibration.yaml
 uv run python scripts/setup_capture_named_pose.py   # 力矩失能手摆 → 命名姿势 → SRDF group_state + named_poses.yaml（真机）
 ros2 launch so101_bringup demo.launch.py sim:=none real:=true    # 纯实机（无零位要求, 从当前位置起步）
@@ -88,14 +88,14 @@ uv run python scripts/envs_view_env.py --id SO101Reach-v1 [--cam fixed] [--rando
 # envs: gymnasium 标准 human 渲染（render_mode 透传, 同样弹 mujoco viewer 窗口）
 uv run python -c "import gymnasium as gym, so101_envs; env = gym.make('SO101Reach-v1', render_mode='human'); env.reset(seed=0); [env.step([0.0]*6) for _ in range(100)]; env.close()"
 
-# envs: 脚本专家（squint 迁移后需按新尺寸/出生域重调; 当前仅 reach 近点可解）
+# envs: 脚本专家（仅 reach/can 在 CLI; squint 迁移后 reach 100%, 其余专家已移出）
 uv run python scripts/envs_run_expert.py --env all --episodes 5
 
 # envs: RViz 可视化（env:=reach|lift|place|stack, camera:=true 开双相机图像）
 ros2 launch so101_envs_viz env_viz.launch.py [env:=reach] [camera:=false] [rviz:=true]  
 
 # MuJoCo viewer 版 draw cube（无 ROS, lab-2 风格, 500Hz 内环）
-uv run python scripts/robotics_robotics_draw_cube_viewer.py
+uv run python scripts/robotics_draw_cube_viewer.py
 
 # 清理残留进程（每轮测试前必做, 防止旧进程向 /robot_description 发布污染）
 bash scripts/clean_ros.sh
@@ -119,14 +119,14 @@ bash scripts/clean_ros.sh
 - `src/so101_hardware` — 实机 ros2_control 插件（workflow/plan/setup_hardware.md）：C++ SystemInterface + vendor SCServo SDK；标定 YAML 驱动电机 ID/量程，rad↔raw 全行程线性映射，无零位要求；`scripts/setup_convert_lerobot_calibration.py` 生成标定、`scripts/setup_capture_named_pose.py` 采集命名姿势
 - `src/so101_robotics_torque_app` — 力矩学习 app：torque_control_node + draw_cube_node + draw_cube.launch.py
 - `tests/` + `scripts/setup_verify_model_alignment.py` — URDF↔XML 对齐验证（TDD）
-- `scripts/robotics_robotics_draw_cube_viewer.py` — MuJoCo viewer 版 draw cube（lab-2 c3 风格 user_scn 覆盖层）
-- `workflow/` — 开发流程工件（非运行时, 约定见 workflow/README.md）：`plan/` 各方向原始计划、`tdd/` TDD 证据（setup/robotics/envs/rl/il_sim/mtc）、`reports/` 验收报告、`todo/` 暂停待办、`learn/` 经验复盘、`problems/` 跨会话调试交接、`reviews/` 评审记录
-- `workflow/reports/` — 对齐验证与 draw cube 验收报告
+- `scripts/robotics_draw_cube_viewer.py` — MuJoCo viewer 版 draw cube（lab-2 c3 风格 user_scn 覆盖层）
+- `workflow/` — 开发流程工件（非运行时, 约定见 workflow/README.md）：`plan/` 各方向原始计划、`tdd/` TDD 证据（setup/robotics/envs/rl/il_sim/il_sim_leader/mtc/setup_hardware 变体）、`reports/` 验收报告（全方向, 含 squint 迁移）、`todo/` 暂停待办、`learn/` 经验复盘、`problems/` 跨会话调试交接（结案带横幅）、`pitfalls/` 按方向坑（单源进 docs 站）、`reviews/` 评审记录
+- `workflow/reports/` — 各方向验收报告；对齐验证分位置版（`alignment_report.md`）与力矩版（`alignment_report_torque.md`, `--torque` 默认分文件防覆盖）
 
 ## 关键约定与坑
 
 - **所有 git commit 必须先征得用户同意，不得擅自提交**
 - 其余约定与坑**按方向分类**放在 `workflow/pitfalls/`（索引见其 README）：
-  general（环境/colcon/pytest）/ setup（URDF·对齐）/ robotics / mtc / envs / rl / il_sim；
+  general（环境/colcon/pytest）/ setup（URDF·对齐）/ setup_hardware（实机）/ robotics / mtc / envs / rl / il_sim；
   ros2 集成类另见 skill: ros2-jazzy-sim-integration-pitfalls
 - 方向原始计划在 `workflow/plan/`，TDD 证据在 `workflow/tdd/`，暂停待办在 `workflow/todo/`

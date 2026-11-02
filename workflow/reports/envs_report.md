@@ -1,5 +1,10 @@
 # SO101 Envs 验收报告（plan/envs.md Phase 6）
 
+> **部分已被取代**（2026-10-31 squint 迁移）：下文的物体尺寸（4.4cm cube）、
+> episode 长度、"抓握保持失败"结论均已过时——最新结论见文末"2026-10-31 更新"节
+> 与 `workflow/reports/lift_squint_migration.md`、`envs_squint_migration.md`。
+> 本文件保留作历史诊断记录。
+
 **日期**: 2026-10-21/22
 **分支**: `envs`（未提交，commit 由用户手动执行）
 
@@ -11,7 +16,7 @@
 | MJCF 资产 | `libs/so101_envs/assets/`（so101_env.xml + 4 场景，自含 STL） |
 | ROS2/RViz 可视化包 | `src/so101_envs_viz/`（viz_node + env_viz.launch.py + rviz 配置） |
 | pinocchio IK | `libs/so101_envs/ik.py`（DLS + 限位裁剪 + tool-down 姿态模式） |
-| 脚本专家 | `scripts/run_expert.py`（4 任务状态机 + 多种子 IK） |
+| 脚本专家 | `scripts/envs_run_expert.py`（4 任务状态机 + 多种子 IK） |
 | 测试 | `tests/test_envs_{align,api,spaces,tasks,ik}.py`（5 个文件） |
 
 ## 测试结果
@@ -32,7 +37,7 @@ uv run pytest tests/test_envs_align.py tests/test_envs_api.py tests/test_envs_sp
 env_checker：4 个无相机 id 全过。带相机 id 因 EGL 渲染位级噪声（±1 像素）
 不走位级确定性检查，由 `test_camera_obs_is_dict_space` 以 ±1 容差覆盖。
 
-## 脚本专家验收（`uv run python scripts/run_expert.py --env all --episodes 5`）
+## 脚本专家验收（`uv run python scripts/envs_run_expert.py --env all --episodes 5`）
 
 | env | 结果 | 验收线 |
 |---|---|---|
@@ -102,4 +107,4 @@ patch_radius 接触模型。后续方向：
 
 ## TDD 证据
 
-见 `.claude/tdd/envs.tdd.md`（RED→GREEN 映射表）。
+见 `workflow/tdd/envs.tdd.md`（RED→GREEN 映射表）。

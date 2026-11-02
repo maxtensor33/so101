@@ -40,7 +40,7 @@
 ## 覆盖与已知缺口
 
 - C++ 插件逻辑验证 = colcon 编译 + 源码契约测试（无 gtest，沿仓库既有约定）；真机时序（read/write 与 JTC 打架、initial-move 锁）**未真机验证**
-- 真机验收 = 用户执行，checklist 见 `workflow/pitfalls/setup-hardware.md` H7；本会话刻意未驱动实机（只读采集未执行）
+- 真机验收 = 用户执行，checklist 见 `workflow/pitfalls/setup_hardware.md` H7；本会话刻意未驱动实机（只读采集未执行）
 - xacro 渲染测试依赖 ROS 环境，无 xacro 时自动 skip（hermetic 性让位于真实覆盖）
 
 ## Merge evidence

@@ -1,6 +1,7 @@
 # Minimal makefile for Sphinx documentation (参考 stable-baselines3)
+# sphinx 在 pyproject 的 docs dependency-group; 经 uv run 确保已 sync（免手动 uv sync --group docs）
 SPHINXOPTS    ?=
-SPHINXBUILD   = sphinx-build
+SPHINXBUILD   = uv run --group docs sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = _build
 

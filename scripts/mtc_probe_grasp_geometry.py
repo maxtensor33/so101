@@ -13,7 +13,7 @@
   - 开口随 grip 增大; grip 下限附近过闭合 (指面重叠)
 
 用法:
-    uv run python scripts/probe_grasp_geometry.py
+    uv run python scripts/mtc_probe_grasp_geometry.py
 纯函数 (finger_midpoint/ideal_cube_pose) 有 pytest 覆盖。
 """
 

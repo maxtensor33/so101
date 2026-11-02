@@ -1,5 +1,9 @@
 # Local Review: plan/robotics.md 全部未提交变更
 
+> 注：本文为 2026-10-21 时点快照，文内脚本名为当时的旧名
+> （`verify_model_alignment.py` → 现 `setup_verify_model_alignment.py`，
+> `draw_cube_viewer.py` → 现 `robotics_draw_cube_viewer.py`）。
+
 **Reviewed**: 2026-10-21
 **Scope**: 30 个变更文件（8 tracked + 22 untracked），+~2700 行
 **Decision**: **APPROVE with comments**（0 CRITICAL / 0 HIGH / 6 MEDIUM / 7 LOW）
@@ -60,5 +64,5 @@ None
 Modified: CLAUDE.md, plan/robotics.md, pyproject.toml, scripts/verify_model_alignment.py,
 src/so101_sim/urdf/so101.ros2_control.xacro, tests/conftest.py, uv.lock, .coverage
 Added: libs/so101_robotics/(9), src/so101_robotics_torque_app/(全部), scripts/draw_cube_viewer.py,
-tests/(8), models/*_torque*(2), src/so101_sim/(3), reports/(2), .claude/tdd/robotics.tdd.md
+tests/(8), models/*_torque*(2), src/so101_sim/(3), reports/(2), workflow/tdd/robotics.tdd.md
 Junk: MUJOCO_LOG.TXT（建议删除+ignore）

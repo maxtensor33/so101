@@ -24,7 +24,7 @@
 | 5 | Phase 3: 相机版（成对双相机） | `test_envs_spaces.py::test_camera_obs_is_dict_space` ×4 | RED（未注册 Camera id） | 46 passed（api+spaces） |
 | 6 | Phase 3: DR 生效 | `test_envs_spaces.py::test_domain_randomization_applied` | （随套件 RED） | passed |
 | 7 | Phase 4: pinocchio IK | `test_envs_ik.py` 3 例 | 3 error（ModuleNotFound） | 3 passed |
-| 8 | Phase 4: 专家端到端 | `scripts/run_expert.py` | —（验收脚本） | reach 5/5；lift/place/stack 0%（见下） |
+| 8 | Phase 4: 专家端到端 | `scripts/envs_run_expert.py` | —（验收脚本） | reach 5/5；lift/place/stack 0%（见下） |
 | 9 | Phase 5: ROS2 可视化 | headless 话题验证 | bin/ 布局 ros2 run 失败 | /joint_states、双相机图像、物体 TF 全部发布 |
 | 10 | Phase 6: 报告+文档 | 全套 pytest + colcon build | — | 86 passed；colcon build 通过 |
 
@@ -43,8 +43,8 @@
 | 9 | place: 物体入 bin → in_bin & success | `test_place_item_in_bin_success` | 构造 | PASS |
 | 10 | stack: A 摞 B 上 → on_top & success | `test_stack_A_on_B_success` | 构造 | PASS |
 | 11 | IK: 可达目标收敛 <1-2mm、解在限位内 | `tests/test_envs_ik.py` | 单元 | PASS |
-| 12 | 专家 reach ≥90% | `scripts/run_expert.py` | E2E | PASS (100%) |
-| 13 | 专家 lift/place/stack 稳定成功 | `scripts/run_expert.py` | E2E | **FAIL (0%)，已知问题** |
+| 12 | 专家 reach ≥90% | `scripts/envs_run_expert.py` | E2E | PASS (100%) |
+| 13 | 专家 lift/place/stack 稳定成功 | `scripts/envs_run_expert.py` | E2E | **FAIL (0%)，已知问题** |
 
 ## 覆盖率与已知缺口
 
@@ -54,7 +54,7 @@
   `reports/envs_report.md`），不影响环境 obs/reward/evaluate 语义。
 - 校验命令（实际执行）：
   - `uv run pytest tests/test_envs_align.py tests/test_envs_api.py tests/test_envs_spaces.py tests/test_envs_tasks.py tests/test_envs_ik.py` → 86 passed
-  - `uv run python scripts/run_expert.py --env all --episodes 5` → reach 100%，其余 0%
+  - `uv run python scripts/envs_run_expert.py --env all --episodes 5` → reach 100%，其余 0%
   - `colcon build --symlink-install --packages-select so101_envs_viz` → 通过
   - `ros2 run so101_envs_viz viz_node -p camera:=true` → 话题验证通过
 

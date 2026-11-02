@@ -20,6 +20,7 @@ def _launch_setup(context):
     record = LaunchConfiguration("record").perform(context).lower() in ("true", "1")
     env = LaunchConfiguration("env").perform(context)
     rviz = LaunchConfiguration("rviz").perform(context).lower() in ("true", "1")
+    mujoco = LaunchConfiguration("mujoco").perform(context).lower() in ("true", "1")
     repo_id = LaunchConfiguration("repo_id").perform(context)
     episodes = LaunchConfiguration("episodes").perform(context)
     reset_time_s = LaunchConfiguration("reset_time_s").perform(context)
@@ -34,7 +35,8 @@ def _launch_setup(context):
         executable="robot_state_publisher",
         parameters=[{"robot_description": robot_description}],
     )
-    teleop_args = ["--teleop", teleop, "--env", env]
+    teleop_args = ["--teleop", teleop, "--env", env,
+                   "--mujoco" if mujoco else "--no-mujoco"]
     if record:
         teleop_args += ["--record", "--repo-id", repo_id, "--episodes", episodes]
         if reset_time_s != "-1":
@@ -62,6 +64,8 @@ def generate_launch_description():
         DeclareLaunchArgument("record", default_value="false"),
         DeclareLaunchArgument("env", default_value="reach"),
         DeclareLaunchArgument("rviz", default_value="true"),
+        DeclareLaunchArgument("mujoco", default_value="true",
+                              description="MuJoCo viewer 窗口（false 关闭, 无显示环境用）"),
         DeclareLaunchArgument("repo_id", default_value="il_sim/reach_expert"),
         DeclareLaunchArgument("reset_time_s", default_value="-1",
                               description="-1=自动(expert 0 / keyboard 5)"),

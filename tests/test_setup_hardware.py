@@ -257,7 +257,7 @@ class TestXacroRender:
         env = dict(os.environ)
         # 强制本项目 install 优先: 用户 shell 可能同时挂着参考工作区
         # (lerobot-ros-moveit 与本项目有同名包 so101_description/so101_hardware,
-        #  AMENT_PREFIX_PATH 顺序会让 $(find) 解析到参考项目, 见 pitfalls/setup-hardware.md)
+        #  AMENT_PREFIX_PATH 顺序会让 $(find) 解析到参考项目, 见 pitfalls/setup_hardware.md)
         # 注意 ament 索引按 per-package 前缀搜索, 必须逐包列出 (裸 install/ 无索引)
         repo = Path(__file__).resolve().parents[1]
         our_prefixes = [

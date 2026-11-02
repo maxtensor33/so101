@@ -62,5 +62,5 @@ uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Lift-v1 \
 
 ## TDD 证据与复盘
 
-- TDD 证据：`.claude/tdd/rl.tdd.md`
+- TDD 证据：`workflow/tdd/rl.tdd.md`
 - 经验复盘（收获/坑/重来改进，glm-5.3-flash 撰写）：`learn/rl.md`

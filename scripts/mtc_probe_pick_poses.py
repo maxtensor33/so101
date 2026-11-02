@@ -7,7 +7,7 @@ DLS IK (6D, Q_REF 温启动) 验证, 输出可行的 (pick, place) 组合。
 纯函数 (grasp_pose/candidate_picks/...) 有 pytest 覆盖
 (tests/test_probe_pick_poses.py); 全量扫描耗时, 作为脚本运行:
 
-    uv run python scripts/probe_pick_poses.py [--cube-size 0.04]
+    uv run python scripts/mtc_probe_pick_poses.py [--cube-size 0.04]
 """
 
 import argparse
@@ -25,7 +25,7 @@ from so101_robotics import common, ik
 Q_INIT = np.array([0.0, 0.8, -1.5, 0.7, 0.0, 0.3])  # draw cube 验证过的收臂参考
 CUBE_HALF = 0.01  # 默认 2cm cube 的半高 (R2: 4cm -> 2cm, cube 底面在地面 z=0)
 
-# R1 实测理想夹持位姿 (scripts/probe_grasp_geometry.py calibrate, cube 2cm):
+# R1 实测理想夹持位姿 (scripts/mtc_probe_grasp_geometry.py calibrate, cube 2cm):
 # cube 理想中心相对动爪 (EE) body 的位姿 [x,y,z,qw,qx,qy,qz],
 # cube 朝向对齐 gripper frame, 与两指面等距 (留 1mm 间隙)。
 # 旧摆位把 EE 放 cube 正上方 —— cube 从未处于两指面之间, 是 "贴一边提起"

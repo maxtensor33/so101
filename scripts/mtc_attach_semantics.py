@@ -12,7 +12,7 @@
   release 当 ref > release_threshold。
 
 用法:
-    uv run python scripts/attach_semantics.py   # 打印验收指标
+    uv run python scripts/mtc_attach_semantics.py   # 打印验收指标
 """
 
 import importlib.util

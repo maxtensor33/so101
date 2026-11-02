@@ -1,5 +1,9 @@
 # il_sim Lift 专家调试问题交接 (glm-5.3 会话)
 
+> **状态**（2026-11 文档整理）：lift 抓取物理随后已修复（squint 迁移,
+> `workflow/todo/envs_grasp_tuning_todo.md` 已完成）；teleop lift 专家已移除,
+> 脚本专家仅保留 reach/can——本文的 lift 专家调试路线**不再适用**, 仅作历史根因记录。
+
 日期: 2026-10-30 · 计划: `plan/envs.md` / `plan/il_sim_leader.md` · 分支: il_sim · 相关 todo: `todo/envs_grasp_tuning_todo.md`
 
 ## 任务背景
@@ -37,7 +41,7 @@ episode 计数逻辑有 bug（相位检测漏计，报 0/0 无效），仅知 16
 按要求将 `src/so101_teleop/.../teleoperators/expert.py` 中的 lift 抓取管线
 （第三版生成器 + 相关常量/分派）**整体移除**；`ScriptExpertTeleop` 恢复为
 reach-only 状态机（非 reach 环境为零动作保持兜底）。后续重做、根因记录与
-验收计划归档至 `workflow/todo/il_sim_expert_lift.md`。
+验收计划归档至 `workflow/todo/il_sim_expert_lift_todo.md`。
 
 交接前定位的关键根因（留档，重做时勿重蹈）：teleop 转录版 `servo_step_action`
 把夹爪通道写死 **0.0**，而 envs `_servo_step` 读当前夹爪角 `normalize_qpos(qpos)[5]`；

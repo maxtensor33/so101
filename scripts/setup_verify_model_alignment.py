@@ -196,13 +196,28 @@ def run_verification(urdf_path, xml_path, n_samples=N_SAMPLES, seed=0):
     return results
 
 
-def write_report(results, out_path):
-    """写出 Markdown 对齐报告。"""
+def write_report(results, out_path, urdf=None, xml=None):
+    """写出 Markdown 对齐报告（含模型路径标识，防位置/力矩两版互相覆盖混淆）。"""
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     lines = [
         "# SO-ARM101 URDF ↔ MuJoCo XML 对齐报告",
         "",
+    ]
+    if urdf is not None or xml is not None:
+        # 相对仓库根路径，避免报告里出现机器相关绝对路径
+        def _rel(p):
+            p = Path(p)
+            try:
+                return p.relative_to(REPO_ROOT)
+            except ValueError:
+                return p
+        lines += [
+            f"- URDF: `{_rel(urdf)}`",
+            f"- XML: `{_rel(xml)}`",
+            "",
+        ]
+    lines += [
         "| 检查项 | 结果 | 详情 |",
         "|---|---|---|",
     ]
@@ -225,16 +240,21 @@ def main():
     parser.add_argument("--n-samples", type=int, default=N_SAMPLES)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument(
-        "--out", type=Path, default=REPO_ROOT / "workflow" / "reports" / "alignment_report.md")
+        "--out", type=Path, default=None,
+        help="报告输出路径; 默认位置版 alignment_report.md / 力矩版 alignment_report_torque.md"
+             "（分文件防互相覆盖）")
     args = parser.parse_args()
     if args.torque:
         urdf = args.urdf or DEFAULT_URDF_TORQUE
         xml = args.xml or DEFAULT_XML_TORQUE
+        default_out = REPO_ROOT / "workflow" / "reports" / "alignment_report_torque.md"
     else:
         urdf = args.urdf or DEFAULT_URDF
         xml = args.xml or DEFAULT_XML
+        default_out = REPO_ROOT / "workflow" / "reports" / "alignment_report.md"
+    out_path = args.out or default_out
     results = run_verification(urdf, xml, n_samples=args.n_samples, seed=args.seed)
-    out = write_report(results, args.out)
+    out = write_report(results, out_path, urdf=urdf, xml=xml)
     for r in results:
         print(f"[{'PASS' if r.passed else 'FAIL'}] {r.name}: {r.detail}")
     print(f"报告已写入 {out}")

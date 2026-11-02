@@ -1,7 +1,7 @@
 # Plan: setup_hardware — SO-ARM101 实机控制模块（hardware 插件 + 数字孪生 + 命名姿势采集）
 
 **日期**: 2026-10-29
-**状态**: 已完成（证据: workflow/tdd/setup_hardware.tdd.md + workflow/reports/setup_hardware.md; 真机验收待用户执行, 清单见 workflow/pitfalls/setup-hardware.md H7）
+**状态**: 已完成（证据: workflow/tdd/setup_hardware.tdd.md + workflow/reports/setup_hardware.md; 真机验收待用户执行, 清单见 workflow/pitfalls/setup_hardware.md H7）
 **复杂度**: High
 **参考项目**: `/home/maxtensor/Third/Projects/github/so101/lerobot-ros-moveit`（Neoxra/lerobot-ros-moveit，其 `so101_hardware` 为经过真机验证的 C++ 插件）
 **分支策略**: 先 `git checkout setup && git merge main`（setup 是 main 的祖先，快进合并，无冲突），之后全部工作在 setup 分支进行
@@ -78,7 +78,7 @@ tests/conftest.py                             # UPDATE: 新增路径常量
 CLAUDE.md                                     # UPDATE: 命令区新增条目
 workflow/tdd/setup_hardware.tdd.md            # 新增: TDD 证据
 workflow/reports/setup_hardware.md            # 新增: 验收报告
-workflow/pitfalls/setup-hardware.md           # 新增: 踩坑记录（按 pitfalls 索引惯例）
+workflow/pitfalls/setup_hardware.md           # 新增: 踩坑记录（按 pitfalls 索引惯例）
 ```
 
 ## 实施阶段
@@ -140,6 +140,9 @@ Phase 0 → 1 → 2 → 4 → 5 → 7（线性主线）；Phase 3 仅依赖 1（
 | 真机验收无法在本会话完成（无实机时） | 中 | mock 全流程替代验证（插件加载、launch 接线、twin 冒烟），真机步骤写成 checklist 由用户执行，报告如实标注未验证项 |
 
 ## 验收
+
+> 清单为计划时预设, 未逐项勾选——完成状态以 `workflow/tdd/setup_hardware.tdd.md` +
+> `workflow/reports/setup_hardware.md` 为准（真机项见报告"真机验收"节与 H7 清单）。
 
 - [ ] `colcon build --symlink-install` 全量通过（含新包 so101_hardware）
 - [ ] `uv run pytest` 全绿（原 9 tests + 新增 setup_hardware 测试）

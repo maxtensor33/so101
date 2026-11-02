@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--steps", type=int, default=200_000)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--eval-freq", type=int, default=10_000)
-    parser.add_argument("--out", default=None, help="checkpoint 目录（默认 outputs/rl/<backend>-<algo>-<env>, 已 gitignore）")
+    parser.add_argument("--out", default=None, help="显式 checkpoint 目录; 默认 outputs/rl/<tag>/<时间戳>/ + latest 指针（已 gitignore）")
     parser.add_argument("--normalize", action="store_true", help="启用 VecNormalize（状态随 checkpoint 保存）")
     parser.add_argument("--n-envs", type=int, default=1, help="并行环境数（DummyVecEnv / gym.make_vec sync）")
     parser.add_argument("--no-tb", action="store_true", help="关闭 tensorboard（默认开启, 写 <out>/tb/）")

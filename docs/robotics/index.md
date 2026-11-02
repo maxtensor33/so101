@@ -8,7 +8,7 @@
 
 - `libs/so101_robotics/`——无 ROS 依赖学习库：
   `common/fk/jacobian/ik/dynamics/trajectory/control/constraints/sim`
-- `so101_robotics_torque_app/`——ROS 链路（torque_control_node 100Hz +
+- `src/so101_robotics_torque_app/`——ROS 链路（torque_control_node 100Hz +
   draw_cube_node + launch/rviz）
 - `scripts/robotics_draw_cube_viewer.py`——MuJoCo viewer 版（500Hz 内环，无 ROS）
 
@@ -16,6 +16,14 @@
 
 - {doc}`architecture`——模型体系（xxx_torque）、力矩控制分层、实测基准、lab-2 对照
 - {doc}`usage`——draw_cube launch 全参数、viewer 用法、运行时检查
+
+```{toctree}
+:caption: robotics 详情
+:maxdepth: 1
+
+architecture
+usage
+```
 
 ## 与其他方向的关系
 

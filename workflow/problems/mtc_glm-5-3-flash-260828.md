@@ -1,5 +1,9 @@
 # MTC Pick and Place 调试问题交接 (glm-5.3 会话)
 
+> **已结案**（2026-11 文档整理）：mujoco/gz 双后端方向已暂停（见
+> `workflow/todo/mtc_sim_backends_todo.md`），现行方向为纯 RViz 扁平链
+> （`workflow/plan/mtc_rviz.md`）。文内 `plan/mtc.md` 已并入 `workflow/plan/mtc_bk.md`。
+
 日期: 2026-10-21 · 计划: `plan/mtc.md` · 分支: main · 测试: 127 passed
 
 ## 任务背景
@@ -14,7 +18,7 @@ Phase 0~3 已完成，Phase 4 端到端验收卡在 MTC 规划链的最后一个
 | 组件 | 说明 |
 |---|---|
 | 双后端场景 | `src/so101_sim/mujoco/scene_pick.xml`（位置版 + cube）；`src/so101_bringup/worlds/pick_place.sdf`（gz world） |
-| 可行摆位（TDD 探测） | `scripts/probe_pick_poses.py`，**"EE frame x 竖直"姿态族**（5-dof 臂唯一可行族，"tool z 朝下"0/8 全灭） |
+| 可行摆位（TDD 探测） | `scripts/mtc_probe_pick_poses.py`，**"EE frame x 竖直"姿态族**（5-dof 臂唯一可行族，"tool z 朝下"0/8 全灭） |
 | 摆位数据 | PICK_CUBE=[0.117,-0.077,0.02] PLACE_CUBE=[0.125,0.063,0.02]（yaw=-33°方位），关节解见下 |
 | C++ 包 | `src/so101_mtc_pick_place`（MTC 节点 + mujoco 抓取 plugin，编译通过） |
 | 抓取语义 | **kinematic attach**（Python 验证 100%：携带跟随误差 0.0mm、释放正常落物）。物理夹持与 weld equality 都实测不可靠（见下） |
@@ -141,7 +145,7 @@ src/so101_mtc_pick_place/src/mtc_pick_place_node.cpp      # MTC stage 链
 src/so101_mtc_pick_place/src/grasp_attach_plugin.cpp      # kinematic attach
 src/so101_mtc_pick_place/config/controllers_pick.yaml     # plugin 参数
 src/so101_mtc_pick_place/launch/mtc_pick_place.launch.py  # 双后端组装
-scripts/probe_pick_poses.py                               # 可达性探测
+scripts/mtc_probe_pick_poses.py                               # 可达性探测
 ```
 
 ## 测试状态

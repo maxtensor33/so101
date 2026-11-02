@@ -1,7 +1,7 @@
 # TDD 证据报告: SO-ARM101 项目搭建
 
 **日期**: 2026-10-20
-**源计划**: [plan/setup.md](../../plan/setup.md)
+**源计划**: [plan/setup.md](../plan/setup.md)
 **TDD 循环**: RED `479e301` → GREEN `7f148f2` → refactor（合入 GREEN 提交）→ Phase 3/4 `ac9369b`
 
 ## 用户旅程（源自计划）
@@ -18,7 +18,7 @@
 - **保证**: 验证脚本运行环境可复现（uv.lock 入库）。
 
 ### Phase 2: URDF ↔ MuJoCo XML 对齐验证（核心 TDD 循环）
-- **执行摘要**: 先写 9 个 pytest（tests/test_alignment.py），RED（ModuleNotFoundError），再实现 scripts/verify_model_alignment.py 转 GREEN，重构移除死代码。
+- **执行摘要**: 先写 9 个 pytest（tests/test_alignment.py），RED（ModuleNotFoundError），再实现 scripts/setup_verify_model_alignment.py 转 GREEN，重构移除死代码。
 - **验证命令**: `uv run pytest`（9 passed, cov 88%）；CLI 生成 reports/alignment_report.md
 - **RED 证据**:
   ```
@@ -27,7 +27,7 @@
 - **GREEN 证据**:
   ```
   9 passed in 0.36s
-  scripts/verify_model_alignment.py     160     19    88%
+  scripts/setup_verify_model_alignment.py     160     19    88%
   ```
 - **CLI 结果**:
   ```

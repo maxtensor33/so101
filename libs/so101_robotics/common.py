@@ -20,7 +20,7 @@ MODELS_DIR = REPO_ROOT / "models"
 DEFAULT_URDF = MODELS_DIR / "so101_torque.urdf"
 DEFAULT_XML = MODELS_DIR / "so101_new_calib_torque.xml"
 
-# URDF link 名 ↔ MuJoCo body 名 (与 scripts/verify_model_alignment.py 保持一致)
+# URDF link 名 ↔ MuJoCo body 名 (与 scripts/setup_verify_model_alignment.py 保持一致)
 LINK_BODY_MAP = {
     "base_link": "base",
     "shoulder_link": "shoulder",

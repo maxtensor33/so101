@@ -52,7 +52,7 @@ def convert(calib: dict, invert_joints: set[str] | None = None) -> dict:
 # 限位跨度体检 (1 tick = 360/4096 度), 偏差 >10% 判为不完整标定。
 JOINT_TRAVEL_DEG = {
     "shoulder_pan": 2 * 110.0,
-    # lift ±1.91986 手动估计 (todo/to_real_joint_calibration.md), 原导出 ±1.74533 (200°)
+    # lift ±1.91986 手动估计 (todo/setup_hardware_joint_calibration_todo.md), 原导出 ±1.74533 (200°)
     "shoulder_lift": 2 * 110.0,
     "elbow_flex": 2 * 96.8,
     "wrist_flex": 2 * 95.0,
