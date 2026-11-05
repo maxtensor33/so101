@@ -78,6 +78,7 @@ private:
   // Parameters
   std::string port_;
   std::string calibration_file_;
+  int baud_ = 1000000;
   std::string initial_positions_file_;
 
   // Joint state

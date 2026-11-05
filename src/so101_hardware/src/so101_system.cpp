@@ -59,6 +59,12 @@ SO101SystemHardware::on_init(const hardware_interface::HardwareInfo& info) {
   // Get calibration file parameter
   calibration_file_ = info_.hardware_parameters["calibration_file"];
 
+  // 串口波特率: lerobot 标定的 STS3215 默认 1M, 115200 会导致总线无响应 (2026-11-05 真机排查)
+  baud_ = 1000000;
+  if (info_.hardware_parameters.count("baud") && !info_.hardware_parameters.at("baud").empty()) {
+    baud_ = std::stoi(info_.hardware_parameters.at("baud"));
+  }
+
   // Get initial positions file parameter
   initial_positions_file_ = info_.hardware_parameters["initial_positions_file"];
 
@@ -121,7 +127,7 @@ SO101SystemHardware::on_configure(const rclcpp_lifecycle::State& /*previous_stat
   }
 
   // Initialize servo driver
-  if (!servo_driver_.begin(115200, port_.c_str())) {
+  if (!servo_driver_.begin(baud_, port_.c_str())) {
     RCLCPP_ERROR(
         rclcpp::get_logger("SO101SystemHardware"),
         "Failed to connect to motor bus on port %s. Check connection and permissions.",

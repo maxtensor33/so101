@@ -18,3 +18,10 @@
 
 补充: 首次真机联调时若某关节方向反了，重新运行
 `uv run python scripts/setup_convert_lerobot_calibration.py --invert <关节名>` 并重启即可，无需改 C++。
+
+## 2026-11-05 追加（实机联调, il_sim_develop 方向带入）
+
+- **H7 前置阻塞已解: 插件波特率写死 115200 → 总线无响应**。lerobot 标定的 STS3215 两臂实际工作在 **1M**（`lerobot/motors/feetech/feetech.py:44 DEFAULT_BAUDRATE = 1_000_000`; 用 `FeetechMotorsBus.connect(handshake=True)` 双端口验证全电机 PING 通）。修复: `baud` 改为 ros2_control hardware 参数（xacro 宏默认 1000000）, `so101_system.cpp` 读参 `begin(baud_, ...)`。参考项目抄来的 115200 是其臂改过波特率的特例。
+- **端口默认陷阱**: demo.launch.py `port` 缺省 `/dev/ttyACM0` = **leader**（follower=ACM1, lerobot 遥操实测确认）。实机控制 follower 必须显式给 port; 推荐用 `/dev/serial/by-id/`（本机: follower=usb-1a86_USB_Single_Serial_5B14033553-if00, leader=...5B61037334...; ttyACM 编号随插拔漂移, by-id 稳定）。
+- **标定真源确认**: `~/.cache/huggingface/lerobot/calibration/robots/so_follower/R12552801.json`（2026-10-29, lerobot 0.6.1 写入目录）是当前 follower 标定, 与 `motor_calibration.yaml` 数值一致; `so101_follower/` 下同名文件是 2026-04-12 旧标定（已过时）。
+- **裸 FeetechMotorsBus 探测 API**: `connect(handshake=True)` 即含全电机 PING（通信验证够用）; `sync_read` 需先注册标定（裸 bus 会报 "has no calibration registered", 非通信故障）。
