@@ -71,6 +71,13 @@ uv run python scripts/il_sim_train.py --policy act --repo-id il_sim/reach_expert
 # il_sim: 推理（lerobot policy 驱动 env, MuJoCo 与 RViz 同步）
 ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=outputs/il_sim/<run>/checkpoints/<step>/pretrained_model [rviz:=true] [mujoco:=false] [reset_on_enter:=true]
 
+# il_sim_develop: 实机 IL 部署开发（lerobot policy 驱动真机; real:=true 底座内置; estop 发布 Empty 到
+#   /il_sim_develop/estop 即停发; Enter=homing 回 rest; confirm_step:=true 逐单步; 相机内置 cv2 节点 top->fixed/wrist;
+#   端口默认 follower by-id（leader=ACM0 陷阱见 pitfalls）; 设备映射改 config/cameras.yaml;
+#   RViz 布局沿用 envs 双相机版, 开关 gui:=false（rviz 为兼容别名）;
+#   真机 checklist 见 workflow/reports/il_sim_develop.md）
+ros2 launch so101_il_sim_develop il_sim_develop.launch.py checkpoint:=outputs/il_sim/<run>/checkpoints/<step>/pretrained_model [env:=reach] [camera_keys:=fixed,wrist] [rate:=10.0] [confirm_step:=false] [gui:=true]
+
 # mtc: MoveIt Task Constructor pick-and-place（纯 RViz 模式; mujoco/gz 后端暂停见 workflow/todo/）
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz [execute:=false] [rviz:=true]
 uv run python scripts/mtc_probe_pick_poses.py   # 可达性探测（摆位/校准变更后）
@@ -115,6 +122,7 @@ bash scripts/clean_ros.sh
 - `src/so101_rl_infer` — RL 推理节点：加载 checkpoint 驱动 env，发布 /joint_states、/rl/{fixed,wrist}/image
 - `src/so101_teleop` — lerobot Robot/Teleoperator 协议适配层（workflow/plan/il_sim.md）：SimSO101Robot（so101_envs 相机版后端）+ expert/keyboard teleop + ros_viz；`scripts/il_sim_record.py`/`il_sim_teleop.py` 采集/遥操 CLI
 - `src/so101_il_sim_infer` — IL 推理包（镜像 rl_infer）：checkpoint 加载（policy/pre/post 三元组）+ env 驱动 + ROS 话题
+- `src/so101_il_sim_develop` — il_sim 实机部署开发包（workflow/plan/il_sim_develop.md）：il_sim_develop_node（obs 桥 + estop + homing + confirm_step）+ 内置 cv2 相机节点 + launch；复用 il_sim_infer.core；`il_real` 命名空间留给后续正式实机包
 - `src/so101_mtc_pick_place` — MTC pick-and-place（workflow/plan/mtc_rviz.md）：扁平 stage 链节点（mtc_pick_place_node）+ kinematic attach 插件（仿真后端用）+ sim:=rviz|mujoco|gazebo launch（后两者暂停）
 - `src/so101_hardware` — 实机 ros2_control 插件（workflow/plan/setup_hardware.md）：C++ SystemInterface + vendor SCServo SDK；标定 YAML 驱动电机 ID/量程，rad↔raw 全行程线性映射，无零位要求；`scripts/setup_convert_lerobot_calibration.py` 生成标定、`scripts/setup_capture_named_pose.py` 采集命名姿势
 - `src/so101_robotics_torque_app` — 力矩学习 app：torque_control_node + draw_cube_node + draw_cube.launch.py

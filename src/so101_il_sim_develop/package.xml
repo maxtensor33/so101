@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>so101_il_sim_develop</name>
+  <version>0.1.0</version>
+  <description>il_sim 策略实机部署开发包（lerobot policy + 实机相机 + ros2_control; 命名预留 il_real 给后续正式实机包）</description>
+  <maintainer email="maxtensor@163.com">maxtensor</maintainer>
+  <license>MIT</license>
+
+  <depend>rclpy</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>trajectory_msgs</depend>
+
+  <exec_depend>ros2launch</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

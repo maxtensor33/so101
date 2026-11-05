@@ -1,0 +1,10 @@
+# 相机设备映射配置（机器相关: /dev/videoN 与 USB 插入顺序有关, 换机/重插后在此修正）。
+# 设备值: 纯数字=索引, 或 /dev/videoN 路径。节点名与 launch 内相机节点一一对应。
+il_sim_cam_fixed:
+  ros__parameters:
+    device: "/dev/video0"
+
+il_sim_cam_wrist:
+  ros__parameters:
+    device: "/dev/video2"
+
