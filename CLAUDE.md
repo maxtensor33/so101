@@ -87,7 +87,8 @@ ros2 run so101_camera_calibration camera_intrinsic_calibration_node --ros-args \
   -p image_topic:=/real/fixed/image_raw -p output_dir:=outputs/calibration/fixed   # Viser UI :8080
 ros2 launch so101_camera_calibration camera_calibration.launch.py camera:=eye_in_hand \
   intrinsic_yaml:=outputs/calibration/wrist/camera_cal.yaml [mode:=auto] [port:=<follower by-id>]
-# envs 相机定制（sim 渲染=真机视野; gym.make(..., camera_calib="outputs/calibration/envs_camera_calib.yaml")）
+# envs 相机定制（sim 渲染=真机视野; 标定默认开启, 默认 outputs/calibration/envs_camera_calib.yaml,
+#   缺文件回退未标定; gym.make(..., camera_calib=False) 关闭, 传路径用自定义标定））
 
 # mtc: MoveIt Task Constructor pick-and-place（纯 RViz 模式; mujoco/gz 后端暂停见 workflow/todo/）
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz [execute:=false] [rviz:=true]

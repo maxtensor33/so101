@@ -51,7 +51,11 @@ gym.register(id="SO101StackCanCamera-v1", entry_point="so101_envs.stack:SO101Sta
 
 
 def make_env_for_test(camera_calib=None):
-    """测试/冒烟便捷构造: Reach 相机版（不 reset, 仅加载 model）。"""
+    """测试/冒烟便捷构造: Reach 相机版（不 reset, 仅加载 model）。
+
+    camera_calib=None（缺省）= 标定默认开启（默认路径 outputs/calibration/envs_camera_calib.yaml,
+    缺文件静默回退）; camera_calib=False = 显式关闭。
+    """
     from .reach import SO101ReachEnv
 
     return SO101ReachEnv(camera=True, camera_calib=camera_calib)

@@ -341,21 +341,55 @@ class TestEnvsCameraCalib:
         assert np.allclose(env.model.cam_pos[cid_wrist], calib["wrist"]["pos"])
         assert env.model.cam_fovy[cid_wrist] == pytest.approx(71.0)
 
-    def test_none_keeps_default(self, tmp_path):
-        """camera_calib=None 与现行为逐字段一致（回归保证）。"""
+    def test_off_keeps_default(self, tmp_path):
+        """camera_calib=False 显式关闭, 与未标定 MJCF 逐字段一致（回归保证）。"""
         import mujoco
         import so101_envs
 
-        from so101_envs.camera_calib import apply_camera_calib
-
-        e0 = so101_envs.make_env_for_test()
-        e1 = so101_envs.make_env_for_test(camera_calib=None)
+        e0 = so101_envs.make_env_for_test(camera_calib=False)
+        e1 = so101_envs.make_env_for_test(camera_calib=False)
         for name in ("fixed_cam", "wrist_cam"):
             c0 = mujoco.mj_name2id(e0.model, mujoco.mjtObj.mjOBJ_CAMERA, name)
             c1 = mujoco.mj_name2id(e1.model, mujoco.mjtObj.mjOBJ_CAMERA, name)
             assert np.allclose(e0.model.cam_pos[c0], e1.model.cam_pos[c1])
             assert np.allclose(e0.model.cam_quat[c0], e1.model.cam_quat[c1])
             assert e0.model.cam_fovy[c0] == e1.model.cam_fovy[c1]
+
+    def test_default_on(self):
+        """标定默认开启: None 缺省解析默认 YAML, 相机字段与文件一致。"""
+        import yaml
+        import mujoco
+        import so101_envs
+
+        from so101_envs.camera_calib import DEFAULT_CAMERA_CALIB, resolve_camera_calib
+
+        path = resolve_camera_calib(None)
+        if path is None:
+            pytest.skip(f"默认标定文件缺失: {DEFAULT_CAMERA_CALIB}")
+        calib = yaml.safe_load(path.read_text())
+        env = so101_envs.make_env_for_test()
+        for cam in ("fixed", "wrist"):
+            cid = mujoco.mj_name2id(env.model, mujoco.mjtObj.mjOBJ_CAMERA, f"{cam}_cam")
+            assert np.allclose(env.model.cam_pos[cid], calib[cam]["pos"])
+            assert env.model.cam_quat[cid] == pytest.approx(calib[cam]["quat_wxyz"], abs=1e-9)
+            assert env.model.cam_fovy[cid] == pytest.approx(calib[cam]["fovy"])
+
+    def test_resolve_camera_calib(self, tmp_path, monkeypatch):
+        """resolve_camera_calib: None=默认路径(缺文件 None), falsy=None, str=Path。"""
+        from so101_envs.camera_calib import DEFAULT_CAMERA_CALIB, resolve_camera_calib
+
+        # CWD 相对命中
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "outputs" / "calibration").mkdir(parents=True)
+        (tmp_path / DEFAULT_CAMERA_CALIB).write_text("fixed: {}\n")
+        assert resolve_camera_calib(None) == tmp_path / DEFAULT_CAMERA_CALIB
+        assert resolve_camera_calib(False) is None
+        assert resolve_camera_calib("none") is None
+        assert resolve_camera_calib("some/custom.yaml") == Path("some/custom.yaml")
+        # 默认文件缺失（改默认常量避开项目根兜底命中） → 回退未标定
+        monkeypatch.setattr(
+            "so101_envs.camera_calib.DEFAULT_CAMERA_CALIB", "nope/missing.yaml")
+        assert resolve_camera_calib(None) is None
 
     def test_load_validates_keys(self, tmp_path):
         import yaml

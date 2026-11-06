@@ -4,7 +4,10 @@
 覆写 model.cam_pos/cam_quat/cam_fovy（**MJCF 相机父 body 系**: fixed_cam 挂 world 即全局,
 wrist_cam 挂 body "gripper"(= URDF gripper_link)。注意不是手眼的 gripper_frame_link(TCP),
 二者间的固定变换由 export_envs_camera_calib.py 负责换算）。
-None/缺省 = 现行为完全不变（回归保证）。
+
+默认开启: camera_calib=None（缺省）走 resolve_camera_calib 自动解析默认路径
+DEFAULT_CAMERA_CALIB（先 CWD 相对, 再项目根相对）；文件缺失则保持未标定
+（静默回退, 回归保证）。显式关闭传 camera_calib=False；显式路径缺文件即报错。
 """
 
 from __future__ import annotations
@@ -15,6 +18,41 @@ import numpy as np
 import yaml
 
 CAMERAS = ("fixed", "wrist")
+
+# 标定默认开启: 默认汇总 YAML 位置（相对项目根/CWD）
+DEFAULT_CAMERA_CALIB = "outputs/calibration/envs_camera_calib.yaml"
+
+
+def resolve_camera_calib(camera_calib) -> Path | None:
+    """解析 camera_calib 参数为标定 YAML 路径。
+
+    - None: 默认开启, 解析 DEFAULT_CAMERA_CALIB（CWD 相对优先, 再沿安装位置
+      祖先目录查找命中项目根; 文件缺失返回 None, 保持未标定, 不阻断
+      非实机标定场景）
+    - falsy (False/""/"none"): 显式关闭, 返回 None
+    - 其余: 原样返回 Path（缺文件由 load_camera_calib 报错）
+    """
+    if camera_calib is None:
+        for c in _default_candidates():
+            if c.is_file():
+                return c
+        return None
+    if not camera_calib or str(camera_calib).lower() in ("none", "off"):
+        return None
+    return Path(camera_calib)
+
+
+def _default_candidates() -> list[Path]:
+    """默认标定路径候选: CWD 相对优先, 再沿 __file__ 祖先目录查找
+    （wheel 安装于 site-packages 时逐级向上可命中项目根/, 兜底任意 CWD）。"""
+    cands = [Path.cwd() / DEFAULT_CAMERA_CALIB]
+    cands += [anc / DEFAULT_CAMERA_CALIB for anc in Path(__file__).resolve().parents]
+    out, seen = [], set()
+    for c in cands:
+        if c not in seen:
+            seen.add(c)
+            out.append(c)
+    return out
 
 
 def load_camera_calib(path: str | Path) -> dict:

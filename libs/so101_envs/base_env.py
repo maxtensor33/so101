@@ -66,11 +66,14 @@ class SO101BaseEnv(gymnasium.Env):
 
         self.model = mujoco.MjModel.from_xml_path(str(ASSETS / self.SCENE_XML))
         self.data = mujoco.MjData(self.model)
-        if camera_calib is not None:
-            # 标定结果覆写相机（Phase 4）; 须在 _randomize_fixed_cam 基位缓存前
-            from .camera_calib import apply_camera_calib
+        # 标定默认开启: None = 默认路径 outputs/calibration/envs_camera_calib.yaml
+        # （缺文件静默回退）; False = 显式关闭; str/Path = 指定文件。
+        # 标定覆写须在 _randomize_fixed_cam 基位缓存前完成。
+        from .camera_calib import apply_camera_calib, resolve_camera_calib
 
-            apply_camera_calib(self.model, camera_calib)
+        self.camera_calib = resolve_camera_calib(camera_calib)
+        if self.camera_calib is not None:
+            apply_camera_calib(self.model, self.camera_calib)
 
         self._qpos_adr = np.array(
             [self.model.jnt_qposadr[mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, n)]
