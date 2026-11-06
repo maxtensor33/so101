@@ -48,12 +48,15 @@ class SO101BaseEnv(gymnasium.Env):
 
     def __init__(self, camera=False, render_mode=None, cfg=None, n_substeps=N_SUBSTEPS,
                  viewer_ui=True, viewer_maximize=False, viewer_no_input=False,
-                 domain_randomization=False, action_mode="position"):
+                 domain_randomization=False, action_mode="position", camera_calib=None,
+                 render_size=None):
         super().__init__()
         assert self.SCENE_XML is not None, "子类必须设置 SCENE_XML"
         assert render_mode in (None, "rgb_array", "human")
         assert action_mode in ("position", "delta"), f"action_mode 非法: {action_mode}"
         self.camera = bool(camera)
+        # 渲染分辨率 (H, W): 缺省 RENDER_SIZE 正方形; 标定对照等场景用实机尺寸 (480, 640)
+        self._render_hw = tuple(render_size) if render_size else (RENDER_SIZE, RENDER_SIZE)
         self.render_mode = render_mode
         self.cfg = cfg if cfg is not None else RandomizationConfig()
         self.n_substeps = int(n_substeps)
@@ -63,6 +66,11 @@ class SO101BaseEnv(gymnasium.Env):
 
         self.model = mujoco.MjModel.from_xml_path(str(ASSETS / self.SCENE_XML))
         self.data = mujoco.MjData(self.model)
+        if camera_calib is not None:
+            # 标定结果覆写相机（Phase 4）; 须在 _randomize_fixed_cam 基位缓存前
+            from .camera_calib import apply_camera_calib
+
+            apply_camera_calib(self.model, camera_calib)
 
         self._qpos_adr = np.array(
             [self.model.jnt_qposadr[mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_JOINT, n)]
@@ -98,7 +106,7 @@ class SO101BaseEnv(gymnasium.Env):
         state_dim = 19 + self.TASK_OBS_DIM
         state_box = spaces.Box(-np.inf, np.inf, shape=(state_dim,), dtype=np.float64)
         if self.camera:
-            rgb_box = spaces.Box(0, 255, shape=(RENDER_SIZE, RENDER_SIZE, 3), dtype=np.uint8)
+            rgb_box = spaces.Box(0, 255, shape=(*self._render_hw, 3), dtype=np.uint8)
             self.observation_space = spaces.Dict(
                 {"state": state_box, "rgb": spaces.Dict({"fixed": rgb_box, "wrist": rgb_box})}
             )
@@ -237,7 +245,7 @@ class SO101BaseEnv(gymnasium.Env):
     # ---------- 相机渲染 (Phase 3 主用, Phase 1 仅 rgb_array) ----------
     def _get_renderer(self):
         if self._renderer is None:
-            self._renderer = mujoco.Renderer(self.model, RENDER_SIZE, RENDER_SIZE)
+            self._renderer = mujoco.Renderer(self.model, *self._render_hw)
         return self._renderer
 
     def _render_camera(self, cam_name):

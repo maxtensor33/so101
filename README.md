@@ -1,5 +1,13 @@
 # SO101 All In One
 
+## 致谢与引用
+
+- **相机标定**（`src/so101_camera_calibration`）: 内参/手眼方法学迁移自
+  [so101-ros-physical-ai](https://github.com/dmlevi/so101-ros-physical-ai)（Apache-2.0, © 2026 Dmitri Manajev）。
+  本项目改动: 生成器共享模块化、弃 cv_bridge（numpy2 兼容）、手眼采集端重写
+  （leader 遥操/JTC 自动模式替代原 IK 服务）、标定结果接入 envs 相机定制。
+  求解与验证方法学（ChArUco + Park/Horaud 双解一致性）沿用原项目。
+
 基于 **ROS2 Jazzy** 的 SO-ARM101 桌面机械臂工作区，按研究方向划分：
 **robotics**（力矩控制教学）→ **mtc**（pick-and-place）→ **envs**（gymnasium 环境集）
 → **rl**（强化学习）→ **il_sim / il_real**（模仿学习）→ **hardware**（实机控制）。

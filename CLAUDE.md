@@ -78,6 +78,17 @@ ros2 launch so101_il_sim_infer il_sim_infer.launch.py env:=reach checkpoint:=out
 #   真机 checklist 见 workflow/reports/il_sim_develop.md）
 ros2 launch so101_il_sim_develop il_sim_develop.launch.py checkpoint:=outputs/il_sim/<run>/checkpoints/<step>/pretrained_model [env:=reach] [camera_keys:=fixed,wrist] [rate:=10.0] [confirm_step:=false] [gui:=true]
 
+# camera_calibration: 相机内参/手眼标定（迁移自 so101-ros-physical-ai; 中文详解 docs/hardware/camera_calibration.md）
+uv run python src/so101_camera_calibration/scripts/gen_charuco_intrinsic.py   # A4 板生成（handeye 同理; 打印要求见 docs）
+uv run python src/so101_camera_calibration/scripts/export_envs_camera_calib.py \
+  --handeye outputs/calibration/handeye_eye_in_hand.yaml --intrinsic outputs/calibration/wrist/camera_cal.yaml \
+  --handeye outputs/calibration/handeye_eye_to_hand.yaml  --intrinsic outputs/calibration/fixed/camera_cal.yaml
+ros2 run so101_camera_calibration camera_intrinsic_calibration_node --ros-args \
+  -p image_topic:=/real/fixed/image_raw -p output_dir:=outputs/calibration/fixed   # Viser UI :8080
+ros2 launch so101_camera_calibration camera_calibration.launch.py camera:=eye_in_hand \
+  intrinsic_yaml:=outputs/calibration/wrist/camera_cal.yaml [mode:=auto] [port:=<follower by-id>]
+# envs 相机定制（sim 渲染=真机视野; gym.make(..., camera_calib="outputs/calibration/envs_camera_calib.yaml")）
+
 # mtc: MoveIt Task Constructor pick-and-place（纯 RViz 模式; mujoco/gz 后端暂停见 workflow/todo/）
 ros2 launch so101_mtc_pick_place mtc_pick_place.launch.py sim:=rviz [execute:=false] [rviz:=true]
 uv run python scripts/mtc_probe_pick_poses.py   # 可达性探测（摆位/校准变更后）

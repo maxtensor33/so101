@@ -4,6 +4,8 @@ real:=true control base + built-in cv2 cameras (fixed/top) + policy node + optio
 Physical top camera -> training key "fixed"; wrist -> "wrist".
 """
 
+from pathlib import Path
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition
@@ -36,16 +38,24 @@ NODE_PARAMS = {
 }
 
 
+# 相机设备 YAML 加载优先级: cameras.local.yaml（gitignore, 本机私有）> cameras.yaml（模板）
+# local 在源码树内解析（install 符号链接回源文件, 改动即时生效, 无需重构建）
+def _cameras_yaml() -> str:
+    _cfg = Path(__file__).resolve().parent.parent / "config"
+    return str(_cfg / "cameras.local.yaml") if (_cfg / "cameras.local.yaml").is_file() \
+        else str(_cfg / "cameras.yaml")
+
+
 # 设备映射在 config/cameras.yaml 按节点名配置（机器相关, 随 USB 插入顺序漂移）；
 # camera_key/fps 由 launch 注入, device 只从 yaml 读。
-def _camera(key):
+def _camera(key, cameras_yaml):
     return Node(
         package="so101_il_sim_develop",
         executable="il_sim_camera_node",
         name=f"il_sim_cam_{key}",
         output="screen",
         parameters=[
-            [FindPackageShare("so101_il_sim_develop"), "/config/cameras.yaml"],
+            cameras_yaml,
             {"camera_key": key, "fps": LaunchConfiguration("cam_fps")},
         ],
     )
@@ -102,8 +112,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         *LAUNCH_ARGS,
-        _camera("fixed"),
-        _camera("wrist"),
+        _camera("fixed", _cameras_yaml()),
+        _camera("wrist", _cameras_yaml()),
         base,
         il_sim_node,
         rviz,

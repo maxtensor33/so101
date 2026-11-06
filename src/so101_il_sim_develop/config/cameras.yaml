@@ -1,5 +1,8 @@
-# 相机设备映射配置（机器相关: /dev/videoN 与 USB 插入顺序有关, 换机/重插后在此修正）。
-# 设备值: 纯数字=索引, 或 /dev/videoN 路径。节点名与 launch 内相机节点一一对应。
+# 相机设备映射模板（机器无关）。加载优先级:
+#   1. launch 参数 cameras_yaml 显式指定
+#   2. ~/.so101/cameras.yaml （机器私有, 不入库; 推荐: 用 /dev/v4l/by-id/ 稳定路径免 USB 漂移）
+#   3. 本模板默认值
+# 节点名: il_sim_cam_fixed(顶部, 训练 key "fixed") / il_sim_cam_wrist(腕部, key "wrist")
 il_sim_cam_fixed:
   ros__parameters:
     device: "/dev/video0"
@@ -7,4 +10,3 @@ il_sim_cam_fixed:
 il_sim_cam_wrist:
   ros__parameters:
     device: "/dev/video2"
-

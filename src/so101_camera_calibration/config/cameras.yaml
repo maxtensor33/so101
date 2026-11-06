@@ -1,0 +1,12 @@
+# 相机设备映射模板（机器无关）。加载优先级:
+#   1. launch 参数 cameras_yaml 显式指定
+#   2. ~/.so101/cameras.yaml （机器私有, 不入库; 推荐: 用 /dev/v4l/by-id/ 稳定路径免 USB 漂移）
+#   3. 本模板默认值
+# 节点名: il_sim_cam_fixed(顶部, 训练 key "fixed") / il_sim_cam_wrist(腕部, key "wrist")
+il_sim_cam_fixed:
+  ros__parameters:
+    device: "/dev/video0"
+
+il_sim_cam_wrist:
+  ros__parameters:
+    device: "/dev/video2"

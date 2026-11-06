@@ -1,6 +1,6 @@
 # Todo: setup_hand_eye_calibration — 实机相机手眼标定
 
-> 状态: 待办（2026-11-04 由 il_sim_develop 方向拆出）。触发条件: il_sim 全量模型真机验收前（或任何需要"图像 ↔ 机械臂基坐标系"映射的工作）需要先完成相机标定。
+> 状态: **已立项落地**（2026-11-05, 方案选型落定为「lerobot 生态工具/MoveIt」之外的 OpenCV calibrateHandEye 自研路线——见 `workflow/plan/setup_camera_calibration.md`; 实现于 `src/so101_camera_calibration`）。原待办正文保留如下。触发条件: il_sim 全量模型真机验收前（或任何需要"图像 ↔ 机械臂基坐标系"映射的工作）需要先完成相机标定。
 
 ## 需求
 

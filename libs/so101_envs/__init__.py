@@ -48,3 +48,10 @@ gym.register(id="SO101PlaceCanCamera-v1", entry_point="so101_envs.place:SO101Pla
              kwargs={"camera": True}, max_episode_steps=50)
 gym.register(id="SO101StackCanCamera-v1", entry_point="so101_envs.stack:SO101StackCanEnv",
              kwargs={"camera": True}, max_episode_steps=50)
+
+
+def make_env_for_test(camera_calib=None):
+    """测试/冒烟便捷构造: Reach 相机版（不 reset, 仅加载 model）。"""
+    from .reach import SO101ReachEnv
+
+    return SO101ReachEnv(camera=True, camera_calib=camera_calib)
