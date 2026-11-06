@@ -1,12 +1,5 @@
 # SO101 All In One
 
-## 致谢与引用
-
-- **相机标定**（`src/so101_camera_calibration`）: 内参/手眼方法学迁移自
-  [so101-ros-physical-ai](https://github.com/dmlevi/so101-ros-physical-ai)（Apache-2.0, © 2026 Dmitri Manajev）。
-  本项目改动: 生成器共享模块化、弃 cv_bridge（numpy2 兼容）、手眼采集端重写
-  （leader 遥操/JTC 自动模式替代原 IK 服务）、标定结果接入 envs 相机定制。
-  求解与验证方法学（ChArUco + Park/Horaud 双解一致性）沿用原项目。
 
 基于 **ROS2 Jazzy** 的 SO-ARM101 桌面机械臂工作区，按研究方向划分：
 **robotics**（力矩控制教学）→ **mtc**（pick-and-place）→ **envs**（gymnasium 环境集）
@@ -99,6 +92,7 @@ bash scripts/clean_ros.sh
 - 训练/学习库：[stable-baselines3](https://github.com/DLR-RM/stable-baselines3) · [skrl](https://github.com/skrl-dev/skrl) · [lerobot](https://github.com/huggingface/lerobot)
 - ROS 生态：[ros2_control](https://control.ros.org/) · [MoveIt2](https://moveit.picknik.ai/) · [Gazebo Harmonic](https://gazebosim.org/) · [MoveIt Task Constructor](https://github.com/moveit/moveit_task_constructor)
 - 仿真/数学：[MuJoCo](https://mujoco.readthedocs.io/) · [Pinocchio](https://gepettowww.laas.fr/software/pinocchio/)
+- 相机、手眼标定：[so101-ros-physical-ai](https://github.com/dmlevi/so101-ros-physical-ai)
 
 ## 许可
 
