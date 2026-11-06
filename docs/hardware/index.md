@@ -35,6 +35,25 @@ ros2 launch so101_bringup demo.launch.py sim:=mujoco real:=true [moveit:=true] [
 # 注意: real:=true + sim:=gazebo 不支持（launch 直接报错退出）
 ```
 
+## 相机标定（内参 + 手眼）
+
+标定结果用于 sim2real 视野对齐（envs `camera_calib`）和部署侧静态 TF。
+完整步骤、`compare_views` 视野对照、坐标系约定与故障排查见
+{doc}`camera_calibration`。
+
+```bash
+# 内参/手眼标定 → envs 相机定制 → 视野对照（详见 camera_calibration 文档）
+uv run python src/so101_camera_calibration/scripts/export_envs_camera_calib.py \
+  --handeye outputs/calibration/handeye_eye_in_hand.yaml --intrinsic outputs/calibration/wrist/camera_cal.yaml \
+  --handeye outputs/calibration/handeye_eye_to_hand.yaml  --intrinsic outputs/calibration/fixed/camera_cal.yaml
+ros2 launch so101_camera_calibration compare_views.launch.py
+```
+
+```{toctree}
+:hidden:
+camera_calibration
+```
+
 ## 真机验收清单（H7，由用户执行）
 
 低速、避开人员、随时准备断电：

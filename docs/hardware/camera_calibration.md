@@ -88,10 +88,41 @@ ros2 launch so101_camera_calibration camera_calibration.launch.py \
 - **manual 模式**（自动姿势集不适用时兜底）: `mode:=manual`，用 leader 臂遥操摆姿势，按 Enter 采样。
 - 求解判据: **PARK/HORAUD 平移差 < 1cm** 才可信；不一致就补样本（更多旋转多样性）。
 
-产出: `outputs/calibration/handeye_<camera>.yaml`（含结果、每样本质量、换算与静态 TF 片段）。
+产出: `outputs/calibration/handeye_<camera>.yaml`。关键字段:
+
+| 字段 | 含义 |
+|---|---|
+| `parent_frame` | 相机位姿的父系: eye_in_hand → `gripper_frame_link`; eye_to_hand → `world` |
+| `optical_frame.t/rpy_deg` | **相机在父系中的位姿**（不是它的逆）; envs 导出的输入 |
+| `camera_link.xyz/rpy_deg` | 换算到 camera_link 的位姿（静态 TF 用） |
+| `consistent` | PARK/HORAUD 平移差 <1cm 的质量判据 |
+| `candidates` | 4 种输入方向约定的诊断解; 权威解固定为 `g2b×t2c 原始`, 板刚性 std 越小越可信 |
+
+> **方向约定（最容易错）**: `cv2.calibrateHandEye` 返回的 `cam2gripper / cam2base`
+> 已经是"相机在父系中的位姿", **不要再取逆**。eye_in_hand 的父系是 TCP
+> `gripper_frame_link`, 不是 MJCF 的 `gripper` body（二者差一个固定关节）。
 
 > 精度预期（如实）: SO-101 舵机重复性 ~1-2°，手眼结果有硬下限（原项目标注为实验性）。
 > 把它当"起点"而非"真值"；对照 RViz 中 TF 与图像投影再微调。
+
+### 5.1 视野对照验收（compare_views）
+
+标定 + 导出后，用 leader 同时驱动 **真机 follower + envs 仿真**，在 RViz 四窗格并排看视野：
+
+```bash
+# 前置: follower 上电、双相机已接、leader 在 /dev/ttyACM0; 工作区清空
+ros2 launch so101_camera_calibration compare_views.launch.py \
+  camera_calib:=outputs/calibration/envs_camera_calib.yaml [env:=lift] [mujoco:=true]
+```
+
+- 拖动 leader: 真机 follower 与仿真同步运动（JTC 跟随 `/arm_controller/joint_trajectory`）。
+- RViz 窗格: `/compare/sim/{fixed,wrist}` 与 `/real/{fixed,wrist}/image_raw`。
+- 验收标准（**同一 leader 位姿**下）:
+  - fixed: 机器人/桌面在画面中的位置、大小、俯视角一致（本机安装在左前，俯视）;
+  - wrist: 夹爪与桌面的相对朝向一致，不能出现上下颠倒/镜像;
+  - 拖动过程中 sim 与 real 的关节方向一致（方向反了先查 leader `invert`，不是相机标定）。
+- **不一致时不要手调相机**: 按顺序检查 ① 手眼变换方向（不能取逆）② MuJoCo 四元数右乘
+  ③ wrist 的 `gripper_frame_link→gripper` 换算; 用已有样本重新求解/导出即可，无需重采。
 
 ## 6. 第四步：结果应用
 
@@ -127,7 +158,13 @@ env = gym.make("SO101Lift-v1", camera=True,
 ### 6.2 部署侧——ROS 静态 TF
 
 标定 YAML 里的 `static_tf_snippet` 直接粘进 launch，或用 `camera_link` 字段写 URDF。
-之后 RViz 中相机 TF 与图像投影一致，感知节点可查 `base→camera_optical` TF。
+
+- `eye_to_hand`(fixed): snippet 父系是 `world`，静态 TF 成立（相机不随臂动）。
+- `eye_in_hand`(wrist): snippet 父系是 `gripper_frame_link`（随臂动）。
+  静态 TF 的父系必须是这个运动链节点，**不要改成 world**——否则相机不会跟臂走。
+- `camera_link` 与 optical 的固定旋转差 `rpy=(-π/2,0,-π/2)` 已由 `optical_to_link` 换算。
+- 之后 RViz 中相机 TF 与图像投影一致，感知节点可查 `base→camera_optical` TF。
+  MuJoCo 训练侧不需要这段 TF，直接使用 6.1 的 `envs_camera_calib.yaml`。
 
 ## 7. 故障排查
 
@@ -139,4 +176,23 @@ env = gym.make("SO101Lift-v1", camera=True,
 | auto 采样大量被拒 | 板被遮挡/出视野——微调 poses_yaml 对应姿势; 参考每姿势日志 |
 | 标定结果每次差很多 | 相机松动——紧固后重标; Euler 角在 pitch≈90° 附近会万向锁（用 optical 系数值对比） |
 | `numpy._core`/`cv_bridge` 报错 | 本仓库相机链路已全部规避 cv_bridge——不要在节点里引 cv_bridge |
-| sim 相机位置/朝向与真机相反 | 手眼变换方向、MuJoCo 四元数转换或 wrist 父帧换算有误——见 6.1 与 pitfalls; 用现有样本重新求解/导出即可, 不必重采 |
+| sim fixed 在右后、真机在左前 | 手眼结果被多取逆了——`optical_frame` 必须是"相机在父系"的位姿; 用现有样本重求解即可 |
+| sim wrist 朝上/镜像 | ① `R_mj = R_opt @ CONV` 是否右乘 ② 是否做了 `gripper_frame_link→gripper` 换算 ③ 重跑 `export_envs_camera_calib.py` |
+| compare_views 中 sim/real 不同步 | 先查 leader `port`/`invert` 与 follower 底座; 相机标定只影响"视野内容", 不会导致关节不跟随 |
+
+## 8. 本机实测结果（2026-11-06）
+
+供后续对照/回归参考（换机、换相机安装后必须重标，不能沿用）:
+
+| 项 | 数值 |
+|---|---|
+| fixed 内参 | fx=440.66, fy=441.15, cx=316.54, cy=243.63（640×480） |
+| wrist 内参 | fx=683.10, fy=684.12, cx=327.29, cy=255.93（640×480） |
+| eye_to_hand (fixed) | t=(0.3057, 0.1459, 0.7088)m, rpy=(-174.27, -4.02, 88.84)° |
+| eye_in_hand (wrist) | t=(-0.0303, 0.0723, -0.0871)m, rpy=(-27.24, -3.01, -168.81)° |
+| 手眼质量 | 20 样本/路, 重投影 0.09–0.41px, PARK/HORAUD 一致 |
+| envs 最终值 | fixed `(0.3057,0.1459,0.7088)` fovy 57.1°; wrist `(0.0224,0.0720,-0.0110)` fovy 38.7° |
+
+对应本机生成物 `outputs/calibration/envs_camera_calib.yaml`（gitignore，不入库）。
+完整验收记录见 `workflow/reports/setup_camera_calibration.md`；坐标系事故详见
+`workflow/pitfalls/setup_camera_calibration.md`。
