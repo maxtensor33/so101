@@ -70,7 +70,7 @@ def test_action_space():
 
 @pytest.mark.parametrize("env_id", CAMERA_IDS)
 def test_camera_obs_is_dict_space(env_id):
-    """带相机 id: obs 为 Dict{state, rgb{fixed, wrist}}，480x640 uint8。"""
+    """带相机 id: obs 为 Dict{state, rgb{fixed, wrist}}，128x128 uint8。"""
     env = gym.make(env_id)
     try:
         obs, _ = env.reset(seed=0)
@@ -78,7 +78,7 @@ def test_camera_obs_is_dict_space(env_id):
         assert set(obs.keys()) == {"state", "rgb"}
         assert set(obs["rgb"].keys()) == {"fixed", "wrist"}
         for img in obs["rgb"].values():
-            assert img.shape == (480, 640, 3)
+            assert img.shape == (128, 128, 3)
             assert img.dtype == np.uint8
         assert env.observation_space.contains(obs)
         obs, _, _, _, _ = env.step(env.action_space.sample())

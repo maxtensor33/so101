@@ -10,4 +10,6 @@
 | torch/pinocchio 环境 | 已改 uv 直装（torch 2.11+cu130 find-links、pin 3.4.0）——旧的"torch 走系统 site-packages / numpy<2 / system-site-packages"说法**已过时** |
 | lerobot 与 envs 的 mujoco 版本冲突 | gym-aloha（lerobot[all] 带入）把 mujoco 压到 <3.9 破坏 envs 抓取物理——pyproject 已 override-dependencies 锁 mujoco>=3.9，**勿删** |
 
+| DAgger student 图像尺寸必须 = env 渲染尺寸 | `StudentPolicy.in_hw` / hparams `render_size` 与 env `RENDER_SIZE` 不一致会静默失配（卷积不报错但视野语义错）。推理侧尺寸以 checkpoint `meta.json hparams.in_hw` 为准（缺省 (128, 128)）；实机 640x480 cv2 帧由 `frame_to_policy_input` 中心裁方→resize 到 in_hw，勿在节点侧另写预处理 |
+
 完整深度复盘（含"重来一次"改进清单）：`workflow/learn/rl.md`。

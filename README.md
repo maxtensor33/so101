@@ -89,7 +89,7 @@ bash scripts/clean_ros.sh
 
 - 机械臂：[SO-ARM100](https://github.com/TheRobotStudio/SO-ARM100) · [mujoco-robotics-lab](https://github.com/ozkannceylan/mujoco-robotics-lab) · [squint](https://github.com/aalmuzairee/squint)
 - ROS 集成参考：[lerobot-ros-moveit](https://github.com/Neoxra/lerobot-ros-moveit)（hardware 方向参考）
-- 训练/学习库：[stable-baselines3](https://github.com/DLR-RM/stable-baselines3) · [skrl](https://github.com/skrl-dev/skrl) · [lerobot](https://github.com/huggingface/lerobot)
+- 训练/学习库：[stable-baselines3](https://github.com/DLR-RM/stable-baselines3) · [skrl](https://github.com/skrl-dev/skrl) · [lerobot](https://github.com/huggingface/lerobot) . [s2v-dagger](https://github.com/tongzhoumu/s2v-dagger)
 - ROS 生态：[ros2_control](https://control.ros.org/) · [MoveIt2](https://moveit.picknik.ai/) · [Gazebo Harmonic](https://gazebosim.org/) · [MoveIt Task Constructor](https://github.com/moveit/moveit_task_constructor)
 - 仿真/数学：[MuJoCo](https://mujoco.readthedocs.io/) · [Pinocchio](https://gepettowww.laas.fr/software/pinocchio/)
 - 相机、手眼标定：[so101-ros-physical-ai](https://github.com/dmlevi/so101-ros-physical-ai)

@@ -30,8 +30,8 @@ ROBOT_JOINTS = [
 # rest pose = squint SO101 "start" keyframe (相机朝前, 夹爪微开)
 REST_QPOS = np.array([0.0, 0.0, 0.0, np.pi / 2, -np.pi / 2, 60 * np.pi / 180])
 
-# 缺省渲染分辨率 (H, W): 640x480（与实机一致）
-RENDER_SIZE = (480, 640)
+# 缺省渲染分辨率 (H, W): 128x128（机器性能约束）
+RENDER_SIZE = (128, 128)
 N_SUBSTEPS = 50
 # squint pd_joint_target_delta_pos: 每控制步 ctrl 增量上限（rad）
 DELTA_MAX = np.array([0.1, 0.1, 0.1, 0.1, 0.1, 0.2])
@@ -56,7 +56,7 @@ class SO101BaseEnv(gymnasium.Env):
         assert render_mode in (None, "rgb_array", "human")
         assert action_mode in ("position", "delta"), f"action_mode 非法: {action_mode}"
         self.camera = bool(camera)
-        # 渲染分辨率 (H, W): 缺省 RENDER_SIZE (480, 640)
+        # 渲染分辨率 (H, W): 缺省 RENDER_SIZE (128, 128)
         self._render_hw = tuple(render_size) if render_size else RENDER_SIZE
         self.render_mode = render_mode
         self.cfg = cfg if cfg is not None else RandomizationConfig()

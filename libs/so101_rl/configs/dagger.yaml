@@ -1,0 +1,18 @@
+# DAgger 默认超参（libs/so101_rl/dagger.py:DEFAULT_HP 的 yaml 覆盖层;
+# 优先级: 内置默认 < 本文件 < CLI overrides, 沿 algos.py 惯例）
+camera_keys: [fixed]        # 相机通道（可扩 wrist / 双相机; 顺序即网络输入顺序）
+collect_size: 1600          # 每轮 vec 采集步数（expert 标注轮大小）
+num_updates: 200            # 每轮 BC 梯度更新次数上限（bc_loss 早停可提前结束）
+minibatch: 256
+lr: 0.0003
+bc_loss_th: 0.001           # bc_loss < 阈值 -> 提前转下一轮采集（训练时长核心 trick）
+learning_starts: 1600       # 累计过渡数达到后才开训
+buffer_size: 100000         # 过渡容量; 轮数 = buffer_size // collect_size（≈62 轮）。
+                            # 128x128 单相机 uint8 ≈ 0.047MB/过渡 -> 100000 ≈ 4.7GB RAM；
+                            # 双相机或更大容量用 CLI --overrides buffer_size=N 自行权衡
+total_rounds: 50
+seed: 0
+render_size: [128, 128]     # 必须 = env RENDER_SIZE（apply_camera_calib 只覆写 cam_pos/
+                            # quat/fovy, 与分辨率无关, 标定保持默认开启）
+n_envs: 4                   # gym.make_vec sync 并行数
+progress: true              # tqdm 轮级进度条（CLI --no-progress 关闭; 测试传 progress=false 静默）

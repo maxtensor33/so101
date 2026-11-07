@@ -84,6 +84,32 @@ uv run python scripts/rl_train.py --backend sb3 --algo sac --env SO101Lift-v1 \
 ros2 launch so101_rl_infer rl_infer.launch.py env:=reach checkpoint:=outputs/rl/sb3-sac-reach-v1/latest [camera:=true] [rviz:=true] [mujoco:=true] [reset_on_enter:=true]
 ```
 
+## rl_dagger（image-based DAgger: state RL expert 蒸馏 vision student; workflow/plan/rl_dagger.md）
+
+```bash
+# 训练（expert 走既有 rl checkpoint 链; env 缺省由 expert meta 推导相机版 id;
+#   图像 128x128 = env 原生（机器性能约束）+ 标定默认开启（apply_camera_calib 只覆写
+#   cam_pos/quat/fovy, 与分辨率解耦）; buffer 100000 过渡 ≈ 4.7GB 单相机;
+#   bc_loss < 阈值早停, checkpoint = model.pt + meta.json, backend=dagger;
+#   轮级 tqdm 进度条实时显示 steps/bc_loss/updates, --no-progress 关闭改逐行日志）
+uv run python scripts/rl_dagger_train.py --expert-ckpt outputs/rl/sb3-sac-reach-v1/latest \
+  [--camera-keys fixed] [--rounds 50] [--n-envs 4] [--render-size 128x128] \
+  [--no-camera-calib] [--no-dr] [--no-progress] [--overrides lr=1e-4 buffer_size=20000]
+
+# 评估（student 确定性推理, 统计 success 率/平均回报/步数）
+uv run python scripts/rl_dagger_eval.py --ckpt outputs/rl/dagger-reach/latest --episodes 10
+
+# 仿真推理可视化（自持 Camera env + student policy; checkpoint meta 重建 env）
+ros2 launch so101_rl_dagger_infer rl_dagger_infer.launch.py \
+  checkpoint:=outputs/rl/dagger-reach/latest [rviz:=true] [mujoco:=true] [reset_on_enter:=true]
+
+# 实机部署开发（vision-only: 只需相机帧; 状态机 run|homing|confirm_wait;
+#   estop 发布 Empty 到 /rl_dagger_develop/estop 即冻结; confirm_step:=true 逐单步;
+#   设备映射改 config/cameras.yaml; 相机为内置 cv2 节点 fixed/wrist）
+ros2 launch so101_rl_dagger_develop rl_dagger_develop.launch.py \
+  checkpoint:=outputs/rl/dagger-reach/latest [rate:=10.0] [confirm_step:=true] [max_delta:=...]
+```
+
 ## il_sim（lerobot 协议适配采集/遥操/训练/推理; workflow/plan/il_sim.md）
 
 ```bash

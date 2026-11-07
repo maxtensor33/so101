@@ -1,0 +1,12 @@
+# 相机设备映射模板（机器相关, 随 USB 插入顺序漂移）。加载优先级:
+#   1. cameras.local.yaml（gitignore, 本机私有; 从本模板复制后改 device 即可, 改动即时生效无需重构建）
+#   2. 本模板默认值
+# 推荐: 用 /dev/v4l/by-id/ 稳定路径免 USB 漂移
+# 节点名: rl_dagger_cam_fixed(顶部, 训练 key "fixed") / rl_dagger_cam_wrist(腕部, key "wrist")
+rl_dagger_cam_fixed:
+  ros__parameters:
+    device: "/dev/video0"
+
+rl_dagger_cam_wrist:
+  ros__parameters:
+    device: "/dev/video2"
