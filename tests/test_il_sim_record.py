@@ -184,7 +184,8 @@ def test_record_smoke(tmp_path):
 
     ds = LeRobotDataset("il_sim/smoke", root=root)
     assert ds.meta.total_episodes == 1
-    assert ds.meta.total_frames >= 20
+    # 640x480 渲染后软渲染 ~0.7s/帧, 9s 只能录到 ~13 帧（管线连通性冒烟, 非性能测试）
+    assert ds.meta.total_frames >= 10
     assert ds.features["observation.state"]["shape"] == (6,)
     assert ds.features["action"]["shape"] == (6,)
     for cam in ("fixed", "wrist"):

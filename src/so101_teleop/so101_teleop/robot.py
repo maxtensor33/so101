@@ -14,6 +14,7 @@ import gymnasium as gym
 import numpy as np
 
 import so101_envs  # noqa: F401  gym 注册副作用
+from so101_envs.base_env import RENDER_SIZE
 from lerobot.robots.robot import Robot
 
 from .configs import SimSO101RobotConfig
@@ -38,7 +39,7 @@ class SimSO101Robot(Robot):
         super().__init__(config)
         self.config = config
         self._env = None
-        self._cameras = {name: _SimCamera(name, (128, 128, 3)) for name in config.camera_keys}
+        self._cameras = {name: _SimCamera(name, (*RENDER_SIZE, 3)) for name in config.camera_keys}
 
     # ---------- lerobot protocol ----------
 
